@@ -44,6 +44,16 @@ jobs:
           name: GXFiles-ipa
           path: GXFiles.ipa
 
+      # та же версия выпускается заново — старый релиз и тег заменяются
+      - name: Replace existing release
+        if: steps.ver.outputs.release == 'true' && !startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          gh release delete "$TAG" --cleanup-tag -y --repo "$GITHUB_REPOSITORY" || true
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$TAG" >/dev/null 2>&1 || true
+
       - name: Release
         if: steps.ver.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
