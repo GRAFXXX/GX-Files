@@ -28,3 +28,8 @@ Framed images are written to `assets/screenshots/`.
 
 ## Ground rules
 Be kind. Keep the project a file manager and developer tool — no features aimed at cheating in online games or bypassing app protections.
+
+## Releasing (maintainer)
+1. Bump `CFBundleShortVersionString` / `CFBundleVersion` in `Info.plist` and add a section to `CHANGELOG.md`.
+2. Commit to `main` with `[release]` in the commit message — or push a `v*` tag.
+3. GitHub Actions builds the IPA, creates the release `v<version>` and updates `source/apps.json` for Feather / SideStore.

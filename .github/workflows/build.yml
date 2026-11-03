@@ -13,11 +13,25 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
+      release: ${{ steps.ver.outputs.release }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Pillow (icons)
         run: python3 -m pip install --break-system-packages pillow || python3 -m pip install pillow
+
+      # релиз: тег v* или коммит в main со словом [release] (тег создаётся сам из версии в Info.plist)
+      - name: Version
+        id: ver
+        run: |
+          V=$(plutil -extract CFBundleShortVersionString raw Info.plist)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"; echo "release=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/heads/main && "$COMMIT_MSG" == *"[release]"* ]]; then echo "tag=v$V" >> "$GITHUB_OUTPUT"; echo "release=true" >> "$GITHUB_OUTPUT"
+          else echo "tag=v$V" >> "$GITHUB_OUTPUT"; echo "release=false" >> "$GITHUB_OUTPUT"; fi
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
 
       - name: Check translations
         run: python3 tools/i18n/build.py --stats
@@ -31,15 +45,18 @@ jobs:
           path: GXFiles.ipa
 
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: steps.ver.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: GX Files ${{ steps.ver.outputs.tag }}
           files: GXFiles.ipa
           generate_release_notes: true
 
   # после релиза — обновить источник для Feather / SideStore / AltStore
   source:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: needs.build.outputs.release == 'true'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -50,10 +67,12 @@ jobs:
         with:
           name: GXFiles-ipa
       - name: Update source/apps.json
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
         run: |
-          python3 tools/update_source.py "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" GXFiles.ipa
+          python3 tools/update_source.py "$GITHUB_REPOSITORY" "$TAG" GXFiles.ipa
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add source/apps.json
-          git commit -m "source: $GITHUB_REF_NAME" || echo "no changes"
+          git commit -m "source: $TAG" || echo "no changes"
           git push origin main
