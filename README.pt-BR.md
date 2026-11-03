@@ -66,7 +66,9 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 
 ## Capturas de tela
 
-Em breve.
+<p align="center"><img src="assets/features/all.png" alt="GX Files"></p>
+
+Capturas reais — em breve.
 
 ## Compilar
 

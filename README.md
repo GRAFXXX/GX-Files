@@ -66,8 +66,9 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 
 ## Screenshots
 
-<!-- Screenshots go here: assets/screenshots/*.png (made with tools/screenshots/frame.py) -->
-Coming soon.
+<p align="center"><img src="assets/features/all.png" alt="GX Files"></p>
+
+Real screenshots — coming soon.
 
 ## Build from source
 

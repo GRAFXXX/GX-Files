@@ -66,7 +66,9 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 
 ## Скриншоти
 
-Незабаром.
+<p align="center"><img src="assets/features/all.png" alt="GX Files"></p>
+
+Справжні скриншоти — незабаром.
 
 ## Збирання
 
