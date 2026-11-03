@@ -1,0 +1,7 @@
+build/
+*.ipa
+# файлы Apple SDK генерируются при сборке (tools/sdk/make_sdk.py)
+tcc/res/sdk/
+__pycache__/
+.DS_Store
+tcc/check/h.c

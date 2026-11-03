@@ -1,0 +1,4 @@
+TinyCC e23dabed154a8495f3ac1ff3cc9d04fa1c207893 (Fri Oct 16 02:33:12 2026 +0000)
+
+[GX Files] Изменения: tccmacho.c — блоки #ifdef GX_IOS (платформа iOS, заглушка LC_CODE_SIGNATURE).
+config.h и tccdefs_.h сгенерированы для сборки в GX Files.

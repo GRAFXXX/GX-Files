@@ -1,0 +1,36 @@
+{
+  "name": "GX Files",
+  "identifier": "com.grafx24.gxfiles.source",
+  "sourceURL": "https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json",
+  "iconURL": "https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/assets/icon/dark.png",
+  "website": "https://github.com/GRAFXXX/GX-Files",
+  "tintColor": "#6B4BFF",
+  "apps": [
+    {
+      "name": "GX Files",
+      "bundleIdentifier": "com.grafx24.gxfiles",
+      "developerName": "GRAFXXX",
+      "subtitle": "File manager, archive & binary editor",
+      "localizedDescription": "File manager for iPhone: archives, APK/IPA, plist, SQLite, hex, Mach-O/ELF editor with an ARM64 disassembler and an on-device C → dylib compiler. Works as a regular app and inside LiveContainer.",
+      "iconURL": "https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/assets/icon/dark.png",
+      "tintColor": "#6B4BFF",
+      "category": "utilities",
+      "version": "4.0",
+      "versionDate": "2026-11-03",
+      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/latest/download/GXFiles.ipa",
+      "size": 0,
+      "versions": [
+        {
+          "version": "4.0",
+          "buildVersion": "19",
+          "date": "2026-11-03",
+          "size": 0,
+          "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/latest/download/GXFiles.ipa",
+          "minOSVersion": "15.0",
+          "localizedDescription": "GX Files 4.0"
+        }
+      ]
+    }
+  ],
+  "news": []
+}

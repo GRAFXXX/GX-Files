@@ -1,0 +1,1206 @@
+# Español. Formato: id|traducción
+1|Analizando paquete…
+2|sin código nativo (solo Java/Kotlin)
+3|Versión
+4|mín. %d · objetivo %d
+5|Tamaño
+6|%@ · descomprimido %@ · archivos %llu
+7|Activity principal
+8|Contenido del paquete (%lu)
+9|Paquete
+10|Motor
+11|Java/Kotlin (sin motor de juego)
+12|desconocido
+13|Arquitecturas (ABI)
+14|Código DEX
+15|%d archivos · %@
+16|Bibliotecas nativas (%d)
+17|Toca para ver la lista
+18|Permisos (%d)
+19|Código
+20|Manifiesto descifrado
+21|Editar sin descomprimir
+22|Archivos dentro del APK: editar, reemplazar, añadir, eliminar
+23|Buscar y reemplazar dentro
+24|Texto o hex en todos los archivos del paquete
+25|Firmar APK
+26|Ahora: v1 %@ · v2 %@
+27|sí
+28|no
+29|Extraer APK del paquete
+30|base.apk y archivos split — al lado
+31|Guardar icono
+32|PNG junto al archivo
+33|Compartir
+34|Enviar archivo
+35|Acciones
+36|Bibliotecas
+37|Permisos
+38|Error
+39|No se pudo leer el manifiesto
+40|Firmando…
+41|APK firmado (v1 + v2)
+42|Descomprimiendo…
+43|Listo: «%@»
+44|Icono guardado
+45|iOS mín.
+46|%@ · descomprimido %@ · archivos %lu
+47|Ejecutable
+48|Atención
+49|No se encontró Payload/*.app/Info.plist — esto no parece un IPA
+50|Instalar en LiveContainer
+51|Compartir → LiveContainer (se abrirá la instalación)
+52|Descomprimir .app al lado
+53|Carpeta Payload con el bundle
+54|Herramientas de la app
+55|Nombre, bundle ID, icono, restricciones de dispositivo, extensiones, inyección de dylib
+56|Info.plist, recursos, cualquier archivo dentro del IPA
+57|Texto o hex en todos los archivos del IPA
+58|Ver todas las claves
+59|Errores al descomprimir
+60|Descomprimido en «%@»
+61|Apps
+62|Nombre o bundle ID
+63|GX Files no se está ejecutando en LiveContainer — la lista está vacía.
+64|Apps: %lu. Toca una app para ver acciones.
+65| · compartido
+66|Abrir
+67|Abrir bundle (.app)
+68|Datos: %@
+69|Documents de la app
+70|Información del binario
+71|Copiar bundle ID
+72|Cancelar
+73|no se pudo abrir el archivo comprimido
+74|error de lectura
+75|no se puede crear %@
+76|error al descomprimir
+77|error de escritura
+78|entrada no encontrada
+79|no se puede crear el archivo
+80|no se puede abrir
+81|%@: no se puede crear\n
+82|Cancelado\n
+83|error
+84|%@: escritura\n
+85|%@: sin acceso
+86|Cancelado
+87|escritura
+88|no se puede crear el archivo comprimido
+89|Buscar nombres en todo el archivo comprimido
+90|Leyendo archivo comprimido…
+91|Buscar y reemplazar texto en el archivo comprimido
+92|Información del APK
+93|Seleccionar
+94|Extraer todo al lado
+95|Extraer esta carpeta
+96|Añadir al archivo comprimido
+97|Archivos desde «Archivos»
+98|Desde el portapapeles de GX Files
+99|Nuevo archivo
+100|Nueva carpeta
+101|APK modificado — firma eliminada
+102|Los cambios se guardan en el archivo comprimido al instante
+103|Firmar
+104|No se pudo abrir: %@
+105|Entradas: %lu · descomprimido %@%@
+106| · comprimido %@
+107|\nLos archivos abiertos se pueden editar — al cerrar el editor, los cambios se escriben directamente en el archivo comprimido, sin descomprimir. Pulsación larga — reemplazar, renombrar, eliminar.
+108|\nEste formato es de solo lectura (se pueden editar zip, apk, ipa, jar, etc.).
+109|Carpeta
+110| (XML binario, solo lectura)
+111|¿Eliminar del archivo comprimido?
+112|Entradas: %lu
+113|Eliminar
+114|Eliminando del archivo comprimido…
+115| (extraído)
+116|Extrayendo…
+117|Extraído en «%@»
+118|Renombrar carpeta en el archivo comprimido
+119|Renombrar entrada
+120|Listo
+121|Ya existe una entrada así
+122|Renombrando…
+123|Reemplazando…
+124|Añadiendo al archivo comprimido…
+125|El portapapeles está vacío: copia archivos en el navegador de GX Files
+126|Nuevo archivo en el archivo comprimido
+127|Crear
+128|Creando…
+129|Nueva carpeta en el archivo comprimido
+130|Firma v1 + v2 con la clave de GX Files (RSA-2048). Android instalará un APK así, pero encima de una versión con otra firma — solo tras desinstalar la anterior.
+131|No se pudo firmar
+132|Firmado: %@
+133|Firmar este archivo
+134|Firmar en una copia (_signed.apk)
+135|Abrir / editar
+136|Abrir
+137|En el editor de texto
+138|En el editor hex
+139|Abrir con…
+140|Reemplazar con archivo…
+141|Extraer junto al archivo comprimido
+142|Renombrar
+143|Eliminar del archivo comprimido
+144|Copiar ruta
+145|Descomprimido con errores
+147|/*\n * %@%@ — código recuperado por GX Files a partir del código máquina ARM64.\n * Es pseudocódigo APROXIMADO: muestra lo que hace cada función,\n * pero no se puede volver a compilar tal cual — los nombres de variables, los tipos y parte\n * de las construcciones se perdieron al compilar. Úsalo como base para reescribir.\n */\n\n
+148|, clase %@
+149|/* ===== Clases Objective-C (cabeceras) ===== */\n#if 0\n
+150|/* ===== Funciones C / C++ ===== */\n\n
+151|// %@ — cabeceras Objective-C (recuperadas de los metadatos)\n// Clases y categorías: %d\n\n#import <Foundation/Foundation.h>\n#import <UIKit/UIKit.h>\n\n
+152|no necesita firma (ELF)
+153|sin firma
+154|dañada
+155|firmado con certificado
+156|El texto no se puede escribir en la codificación %@ (hay caracteres no compatibles)
+157|No cabe: %lu bytes, pero solo hay espacio para %u
+158|Cadena «%@» → «%@»
+159|Longitud de NSString → %llu
+160|Firma: %s
+161| Refirmado ad hoc (%d porción(es)).
+162|Fallo de escritura
+163|Cadena
+164|Escribir
+165|Dirección %@ · desplazamiento %@ · %@ · %@%@\nLa cadena se reemplaza en su sitio: el nuevo texto debe caber en los mismos bytes (el resto se rellena con ceros). En UTF-8 una letra cirílica ocupa 2 bytes, una latina — 1.%@
+166|\nEs un NSString — la longitud en la estructura se actualizará automáticamente.
+167|Bytes: %lu de %u%@
+168| · libres %lu
+169| — no cabe, acorta el texto
+170|Hay caracteres que no existen en %@
+171|No escrito
+172|Buscando referencias…
+173|puntero en datos (%@)
+174|Código: lugar donde se carga la dirección (ADRP+ADD/LDR, ADR, saltos). Datos: tabla de punteros (por ejemplo, una lista de elementos de menú ImGui). Toca para abrir.
+175|No se encontraron referencias
+176|La cadena puede leerse mediante un desplazamiento, una tabla o desde Swift — búscala como texto
+177|Referencias a la tabla en %@
+178|Cadenas
+179|Buscar texto (cualquier idioma)
+180|Todas
+181|Cirílicas
+182|Sin cadenas del sistema
+183|Buscando cadenas…
+184|Cadenas (%lu)
+185|%@ · %@ · %u B · %@%@%@
+186| · modificada
+187|Editar
+188|Dónde se usa
+189|Copiar texto
+190|Copiar desplazamiento
+191|Restaurar texto original
+192|Sin dirección
+193|La cadena está fuera de los segmentos cargables
+194|Dónde se usa (NSString)
+195|Reemplazar en todas las cadenas
+196|El reemplazo se hace en su sitio en cada cadena encontrada. Las cadenas donde el nuevo texto no quepa se omitirán.
+197|Buscar
+198|Reemplazar por
+199|Reemplazar
+200|Cadenas reemplazadas: %d
+201|\nNo cupieron (%lu):\n%@
+202|Mostrar más (+500 instrucciones)
+203|Dirección %@ · desplazamiento %@
+204|Ir a → %@
+205|Editar cadena «%@»
+206|Dónde más se usa esta dirección
+207|Cambiar número (ahora %g)
+208|Nuevo valor
+209|FMOV solo admite fracciones «simples»: 0.5, 1, 1.5, 2, 3, 10, 0.25… Para cualquier float usa una plantilla de función.
+210|CMP: entero 0…4095 (o múltiplo de 4096)
+211|MOV: entero que quepa en 16 bits (con posible desplazamiento)
+212|No es posible
+213|Este valor no se puede codificar en esta instrucción. Prueba la plantilla «Devolver número» para la función.
+214|Editar instrucción (ensamblador)…
+215|Reemplazar con NOP (no hacer nada)
+216|Escribir palabras (hex)…
+217|Instrucciones (palabras hex)
+218|Como en la columna gris, separadas por espacios. Ejemplo: 52800020 D65F03C0 = mov w0,#1; ret
+219|No es una palabra hex: %@
+220|%@: %d palabra(s)
+221|Fuera de la función
+222|La escritura afectará a la siguiente función. ¿Escribir de todos modos?
+223|Saltar desde aquí → B a la dirección…
+224|Salto incondicional
+225|Dirección de destino (hex)
+226|Dirección no válida o demasiado lejos (±128 MB)
+227|Revertir cambio
+228|Copiar dirección
+229|Copiar desplazamiento en el archivo
+230|Ensamblador ARM64
+231|Instrucciones separadas por «;». Ejemplos:\nmov w0, #1; ret\nnop\nb 0x1234   (dirección) o b .+8\nfmov s0, #2.5\nldr x0, [x1, #8]\ncmp w8, #100
+232|Ensamblar y escribir
+233|Error del ensamblador
+234|%d instrucciones afectarán a la siguiente función. ¿Escribir de todos modos?
+235|Plantilla para toda la función
+236|Devolver true (1)
+237|Devolver false (0)
+238|Devolver número (int)…
+239|Devolver número
+240|La función devolverá este valor de inmediato (w0/x0)
+241|Devolver float…
+242|Devolver float
+243|La función devolverá este valor de inmediato (s0)
+244|Devolver double…
+245|Devolver double
+246|No hacer nada (ret inmediato)
+247|Tu propio código ensamblador…
+248|Dónde se llama esta función
+249|Llamadas a la función
+250|Revertir cambios en la función
+251|Copiar nombre
+252|No cabe
+253|La función es demasiado corta para esta plantilla.
+254|%@ → devolver %@
+255|La función ahora devuelve %@. No olvides guardar.
+256|Importaciones
+257|Funciones
+258|Nombre de la importación
+259|Nombre de función o dirección
+260|Cargando nombres…
+261|Toca para encontrar desde dónde se llama la importación.
+262|Toca — pseudocódigo C. Botón ⓘ — ensamblador con parches y plantillas. Pulsación larga — más acciones.
+263|Símbolos eliminados (stripped). Encuentra el lugar adecuado mediante Cadenas → «Dónde se usa».
+264|%@ · %llu B%@
+265| · modificada
+266|Pseudocódigo
+267|Ensamblador y parches
+268|Dónde se llama
+269|Números
+270|byte
+271|Valor, por ejemplo 2.5 o 100
+272|Buscar también en el código (mov / fmov / cmp)
+273|Buscando…
+274|Encontrados: %lu%@
+275| (se muestran los primeros 3000)
+276|Datos — variables y tablas. Código — números directamente en las instrucciones (por ejemplo, límites en cmp). Toca para cambiar.
+277|código
+278|FMOV: solo fracciones simples (0.25, 0.5, 1, 1.5, 2, 2.5, 3…31)
+279|Mitad superior de un float: 100, 200, 1000, 0.5… (sin «cola» de mantisa)
+280|MOV: valor de 16 bits (con posible desplazamiento)
+281|Nuevo valor en el código
+282|Este valor no se codifica en esta instrucción. Abre la función (botón ⓘ) y usa la plantilla «Devolver número».
+283|Código %@: %g → %g
+284|Desplazamiento %@
+285|Número %@: %@ → %@
+286|Cambios
+287|Revertir todo
+288|¿Revertir todos los cambios?
+289|Revertir
+290|Desliza a la izquierda para revertir un cambio. Mientras no pulses «Guardar», el archivo en disco no cambia.
+291|Aún no hay cambios
+292|%@ · %lu B: %@ → %@
+293|Copiar todo
+294|Copiado
+295|Compartir / guardar como archivo
+296|Buscar en el texto
+297|Guardar como archivo y editar
+298|Abrir ensamblador (para parches)
+299|No guardado
+300|Guardado: GX Compiler/Восстановленный код/%@
+301|Recuperando pseudocódigo…
+302|Métodos (%d)
+303|Toca — pseudocódigo del método. Botón ⓘ — ensamblador (con plantillas «devolver true/número» y parches).
+304|Recuperar el código C de la clase (.m, editable)
+305|Cabecera .h (como código fuente)
+306| · modificado
+307|sin implementación
+308|Solo arm64
+309|Clases
+310|Clase o método
+311|Leyendo clases…
+312|Generando cabeceras…
+313|Clases (%lu)
+314|No hay clases Objective-C: la biblioteca es C/C++ puro o Swift. Mira «Funciones» — ahí hay pseudocódigo para cualquier función.
+315|%@ · métodos %d · ivars %d
+316|categoría
+317|clase
+318|El pseudocódigo se genera para arm64 (iPhone y Android arm64-v8a).
+319|Recuperando código C…
+320|No se pudo crear el archivo
+321|Detenido (se guardó una parte)
+322|Código C recuperado
+323|%@ · %@\nCarpeta: GX Compiler/Восстановленный код\n\nEs código aproximado: muestra la lógica, pero no se puede volver a compilar tal cual — edítalo y reescríbelo.
+324|Abrir y editar
+325|Compartir…
+326|Mostrar en la carpeta
+327|, reducida al %.0f%%
+328|, calidad %.0f%%
+329|Reemplazar con foto de la galería
+330|Reemplazar con imagen de Archivos
+331|Guardar imagen…
+332|Restaurar original
+333|%s · %@ · espacio: %@ (desplazamiento %@)%@\nSe puede reemplazar por una imagen del mismo tamaño o menor en bytes — GX Files la comprimirá si hace falta.%@
+334|no se abre
+335| · REEMPLAZADA
+336|\nNo olvides «Guardar» en el editor.
+337|No se pudo cargar la foto
+338|El archivo no se abre como imagen
+339|Tamaño de la imagen
+340|Original %.0f×%.0f, nueva %.0f×%.0f. La app suele estar pensada para el tamaño original.
+341|Ajustar a %.0f×%.0f
+342|Mantener mi tamaño
+343|Ajustando imagen…
+344|Incluso reducida al 10%% la imagen es mayor que el espacio del original (%@). Usa una imagen más simple o más pequeña.
+345|Imagen %@: %s → %@
+346|\n\nEl original era WebP, y el iPhone no puede guardar WebP — se escribió PNG. Si la app lee la imagen con su propio decodificador WebP, puede que no se muestre.
+347|Imagen reemplazada
+348|%@ · ocupado %@ de %@.\nPulsa «Guardar» en el editor para escribir el archivo.%@
+349|Original restaurado
+350|La imagen no se modificó
+351|Imágenes
+352|Buscando imágenes…
+353|Imágenes (%lu)
+354|No se encontraron PNG/JPEG/GIF/WebP incrustados
+355|Fuente
+356|Reemplazar con fuente de Archivos (.ttf/.otf)
+357|Guardar fuente como archivo…
+358|%@ · espacio %@ · desplazamiento %@%@\nSe puede reemplazar por cualquier TTF/OTF que no supere este espacio. El cirílico aparecerá solo si la nueva fuente lo incluye y el programa carga esos glifos.\n\n
+359| · REEMPLAZADA — no olvides «Guardar»
+360|La fuente no se abre para la vista previa\n
+361|Menu Settings 0123456789\nMenú Ajustes Hola\n\n
+362|No es una fuente
+363|Se necesita un archivo TrueType (.ttf) u OpenType (.otf). Las colecciones .ttc y WOFF no sirven.
+364|La nueva fuente ocupa %@, pero solo hay espacio para %@. Usa una fuente más pequeña (o una versión recortada sin idiomas extra).
+365|Fuente %@ → %@ (%@)
+366|Fuente reemplazada. Pulsa «Guardar» en el editor
+367|Diseño del menú
+368|Recolorear todos los colores
+369|Desplazar tono…
+370|Un color de acento para todos los vivos…
+371|Más claro un 15%
+372|Más oscuro un 15%
+373|Invertir (tema oscuro ↔ claro)
+374|Fondo más transparente (−15% de alfa)
+375|Opaco (alfa = 100%)
+376|Restaurar todos los colores
+377|Buscando colores y fuentes…
+378|Color %@: (%.2f %.2f %.2f %.2f) → (%.2f %.2f %.2f %.2f)
+379|Qué más se puede cambiar
+380|Colores (%zu)
+381|Fuentes (%zu)
+382|Los colores son cuádruplas float (R, G, B, alfa) que el código carga enteras: así guarda el compilador ImVec4/los colores de estilo. «código ×N» — cuántos lugares los leen, «tabla» — un array de colores en los datos. Un color puede usarse en varios sitios del menú. Los colores formados por números sueltos están en «Números» (float).
+383|TTF/OTF incrustadas. La fuente por defecto de ImGui (ProggyClean) se guarda comprimida y no se ve aquí — solo se reemplaza recompilando.
+384|La disposición de ventanas, los botones y elementos nuevos los define el código, no los datos: en un archivo compilado no se pueden reorganizar. Para eso hace falta el código fuente — se puede compilar en el compilador integrado C → dylib.
+385|Parece un menú: %@
+386|Tipo de menú no detectado
+387|Se puede cambiar: textos y títulos, colores del tema, redondeos/márgenes/transparencia (float en «Números»), fuentes e imágenes.
+388|Se pueden cambiar textos, colores, números, fuentes e imágenes si están en el archivo.
+389|Textos y etiquetas
+390|Tamaños, redondeos, márgenes
+391|Imágenes e iconos
+392|Títulos de ventanas, botones, sugerencias — edición en su sitio
+393|Números float: por ejemplo WindowRounding 12.0 → 4.0
+394|PNG/JPEG/GIF/WebP — reemplazar por los tuyos
+395|No se encontraron colores
+396|Búsqueda de colores — solo arm64
+397|código ×%d
+398|tabla
+399|No hay fuentes incrustadas
+400| · reemplazada
+401|Color %@
+402|Introducir números R G B A…
+403|Introducir HEX (#RRGGBBAA)…
+404|Dónde se usa el color
+405|Color
+406|Cuatro números de 0 a 1 separados por espacios: R G B A
+407|Se necesitan exactamente 4 números
+408|Color HEX
+409|#RRGGBB o #RRGGBBAA
+410|Ejemplo: #7A1FCC o #7A1FCCF0
+411|Colores cambiados: %d. No olvides «Guardar»
+412|Nada que cambiar
+413|No hay colores
+414|Desplazamiento de tono
+415|Grados de −180 a 180. Por ejemplo 120: los azules se vuelven verdes, 180 — el color opuesto. Los grises no cambian.
+416|Aplicar
+417|Nuevo acento (para todos los de color)
+418|Colores restaurados
+419|Guardar
+420|El binario está cifrado
+421|Es un archivo de la App Store con cifrado FairPlay (cryptid ≠ 0): el código y parte de las cadenas parecen basura. Necesitas una versión descifrada (decrypted IPA).
+422|Hay cambios sin guardar
+423|Cambios: %lu
+424|Salir sin guardar
+425|Cambios guardados: %lu.%@
+426|No hay cambios
+427|Cadenas — textos, edición en su sitio. Clases — cabeceras Objective-C. Funciones — pseudocódigo C y ensamblador ARM64 con parches. «Recuperar código C» guarda todo el pseudocódigo en un archivo editable. «Imágenes» — PNG/JPEG/GIF/WebP incrustados: ver y reemplazar. «Diseño del menú» — colores del tema (ImGui, etc.), fuentes, recolorear todo el menú de una vez.
+428|Tras editar un Mach-O la firma deja de ser válida — la refirma ad hoc lo arregla (los entitlements se conservan). Si LiveContainer no abre la app, vuelve a firmarla en LiveContainer. El original se guarda al lado como .orig.
+429|El original se guarda al lado como .orig.
+430|%@ · firma: %@%@%@
+431| · CIFRADO
+432|\nFormato no reconocido — hay disponibles cadenas y números de todo el archivo
+433|Porción (arquitectura)
+434|Cadenas y textos
+435|Clases Objective-C (.h)
+436|Funciones: pseudocódigo y ensamblador
+437|Recuperar código C de todo el archivo
+438|Imágenes dentro del archivo
+439|Diseño del menú: colores, fuentes (ImGui, etc.)
+440|Números y constantes
+441|Ir a la dirección
+442|solo Mach-O
+443|solo arm64
+444|archivo .c
+445|Refirmar al guardar
+446|%lu camb.
+447|Información ELF
+448|Información Mach-O (comandos, bibliotecas)
+449|Abrir en el editor hex
+450|Guardar todas las cabeceras .h al lado
+451|Porción
+452|Los cambios se hacen en la porción elegida. Las ediciones sin guardar se quedarán en el archivo.
+453|Solo Mach-O
+454|Las clases Objective-C solo existen en binarios de iOS/macOS. Para .so usa «Funciones» — ahí hay pseudocódigo.
+455|El desensamblador funciona con arm64 (iPhone y Android arm64-v8a).
+456|Guarda primero
+457|La información se lee del disco.
+458|El editor hex trabaja con el archivo en disco, y tienes cambios sin guardar.
+459|No se pudo escribir
+460|Guardado: %@
+461|Ir
+462|Dirección (por ejemplo 0x1a2b3c) o desplazamiento en el archivo con «+» (por ejemplo +0x4000). En .so las direcciones = desplazamientos de IDA/Ghidra.
+463|Se necesita una dirección hex
+464|Desplazamiento fuera de los segmentos
+465|No encontrado
+466|La dirección no está en ninguna sección
+467|Desplazamiento %@\n%@
+468|No hay datos en el archivo (bss)
+469|Filtro en esta carpeta
+470|Ruta copiada
+471|Importar desde «Archivos»
+472|Desde el portapapeles
+473|Descargar desde enlace
+474|Enlace simbólico
+475|Nombre
+476|Fecha
+477|Tipo
+478|Ordenar
+479|Archivos ocultos
+480|Iconos grandes
+481|Quitar de favoritos
+482|A favoritos
+483|Buscar y reemplazar texto en toda la carpeta
+484|Buscar archivos por nombre
+485|Buscar duplicados
+486|Análisis de espacio
+487|Transferencia Wi‑Fi de esta carpeta
+488|Ir a la ruta…
+489|Copiar ruta de la carpeta
+490|Propiedades de la carpeta
+491|Comprimir
+492|Renombrar en lote…
+493|Comparar (2 archivos)
+494|Marca exactamente dos archivos
+495|Buscar y reemplazar en las carpetas/archivos comprimidos marcados
+496|Marca una carpeta o un archivo comprimido
+497|Copiar al otro panel
+498|Mover al otro panel
+499|Sin acceso
+500|Elementos: %lu
+501|Mover
+502|Pegar
+503|Pegar como enlaces simbólicos
+504|Vaciar portapapeles
+505|Otro panel
+506|No hay ninguna carpeta abierta en el segundo panel. Cambia (botón 1/2 abajo) y abre la carpeta que necesites.
+507|¿Mover?
+508|¿Copiar?
+509|%lu elementos → %@
+510|Copiar
+511|Moviendo…
+512|Copiando…
+513|«%@»: no se puede en sí misma\n
+514|Firma v1 + v2 con la clave de GX Files
+515|En una copia _signed.apk
+516|Construyendo APK…
+517|Construyendo ZIP…
+518|Listo: %@%@
+519| (alineado y firmado)
+520|No se pudo abrir la carpeta: %@
+521|La carpeta está vacía
+522|Abrir en LiveContainer
+523|Bundle «%@»
+524|Cortar
+525|Duplicar
+526|Comprimir en ZIP
+527|Extraer aquí
+528|Buscar y reemplazar en la carpeta
+529|Construir desde la carpeta
+530|APK (alinear y firmar)
+531|ZIP / IPA (sin carpeta raíz)
+532|Comparar con «%@»
+533|Elegir para comparar
+534|Ahora mantén pulsado el segundo archivo → «Comparar con…»
+535|Guardar en «Archivos»…
+536|Quitado de favoritos
+537|Añadido a favoritos
+538|Propiedades
+539|Herramientas
+540|Copiar
+541|Enviar
+542|%@: %lu. Abre la carpeta de destino y pulsa «%@»
+543|Cortado
+544|«%@»: no se puede meter una carpeta en sí misma\n
+545|Errores
+546|Archivo comprimido
+547|Nombre del archivo comprimido
+548|Comprimiendo…
+549|No se pudo comprimir
+550|Creado «%@»
+551|«%@» se eliminará sin posibilidad de recuperación.
+552|Elementos: %lu. La eliminación es irreversible.
+553|¿Eliminar?
+554|Eliminando…
+555|El nombre no puede contener «/»
+556|Ya existe un elemento con ese nombre
+557|No se pudo renombrar
+558|nuevo.txt
+559|No se pudo crear
+560|A dónde debe apuntar el enlace (ruta completa)
+561|/ruta/al/destino
+562|Siguiente
+563|Nombre del enlace
+564|Error
+565|Imagen del portapapeles.png
+566|Imagen guardada
+567|Texto del portapapeles.txt
+568|Texto guardado
+569|No hay texto ni imagen en el portapapeles
+570|El archivo se guardará en esta carpeta
+571|Descargar
+572|Enlace no válido
+573|Descargando…
+574|No se pudo descargar
+575|Descargado: %@
+576|%@ de %@
+577|Ir a la ruta
+578|Por ejemplo /var/mobile/Containers/Shared/AppGroup
+579|Importando…
+580|Buscar
+581|Nombre de archivo (o texto dentro)
+582|Por nombre
+583|En el contenido
+584|Dónde: %@
+585|%@ · encontrados %lu · revisados %llu
+586|Buscando…
+587|Espacio: %@
+588|Total: %@%@
+589| · contando (%ld)…
+590|contando…
+591|Abrir en el navegador
+592|La app no tiene los archivos del compilador (tcc/)
+593|No se pudo iniciar el compilador
+594|no se encontró la biblioteca %@\n
+595|Errores de compilación
+596|El compilador no creó ningún archivo
+597|El resultado es un Mach-O no válido
+598|No se pudo escribir la dylib
+599|✓ %@ — %@, funciones: %zu, firmado ad hoc\n
+600|#include <gxkit.h>\n\n__attribute__((constructor))\nstatic void init(void) {\n    gx_log(\"hola\");\n}\n
+601|Pulsa 🔨 para compilar %@\nCompilador: TinyCC %s (C99/C11, sin Objective-C — usa gxkit.h)\n
+602|Hola: alerta al cargar
+603|Hook de método Objective-C
+604|Hook de función C (como fishhook)
+605|Sustituir el resultado de un método (YES)
+606|Biblioteca con funciones
+607|Plantillas
+608|Bibliotecas para enlazar…
+609|Nuevo archivo…
+610|Carpeta de código fuente
+611|Referencia de gxkit.h
+612|Licencia de TinyCC (LGPL)
+613|¿Reemplazar el código con una plantilla?
+614|Se reemplazará el texto actual del editor.
+615|Nombre del archivo .c en la carpeta GX Compiler
+616|Nuevo archivo: %@\n
+617|Las marcadas se enlazan a la dylib (libSystem — siempre). Toca para activar/desactivar.
+618|gxkit.h — ayudas para tweaks en C:\n\nGX_CLS(\"UIView\") — clase\nGX_SEL(\"setAlpha:\") — selector\nGX_MSG0(tipo, objeto, \"selector\")\nGX_MSG1(tipo, objeto, \"sel:\", tipo1, arg1) … hasta GX_MSG5\n  ejemplo: GX_MSG1(void, view, \"setAlpha:\", CGFloat, 0.5);\n\ngx_str(\"texto\") — NSString, gx_cstr(nsstr) — char*\ngx_log(\"formato %d\", x) — al registro del sistema (NSLog)\ngx_alert(\"título\", \"texto\") — alerta (en el hilo principal)\ngx_main(fn, ctx), gx_main_after(seg, fn, ctx) — ejecutar en el hilo principal\ngx_top_vc() — pantalla superior de la app\n\ngx_hook_method(\"Clase\", \"selector:\", 0, (IMP)mia, (IMP*)&original) — hook de método (1 — método de clase +)\ngx_rebind(\"funcion\", mia, (void**)&original) — hook de función C mediante importaciones\ngx_image_base(\"UnityFramework\") — dirección de carga de la biblioteca en memoria\n\nLa .dylib terminada aparece junto al .c. Para inyectarla en una app: Herramientas de la app → «Inyectar dylib».
+619|El compilador integrado es TinyCC (https://github.com/TinyCC/tinycc), licencia GNU LGPL 2.1. El código fuente y los cambios de GX Files están en la carpeta tcc/ del proyecto.\n\n
+620|Compilando…\n
+621|Compilando…
+622|%@%@ (%.0f ms)
+623|%@Listo en %.0f ms → %@
+624|dylib lista
+625|%@\nFirmada ad hoc. Para inyectarla en una app: Herramientas de la app → «Inyectar dylib».
+626|Abrir en el editor de dylib
+627|Cancelando…
+628|Carpeta compartida
+629|Lo que «Archivos» muestra como LiveContainer
+630|Contenedor oculto
+631|Contenedor completo: Documents, Library, tmp, SystemData
+632|Iconos, inicio, bundles y datos de cada app
+633|Datos de apps
+634|Contenedores de apps invitadas
+635|App Group (oculto)
+636|Contenedor compartido del grupo SideStore/AltStore
+637|Datos compartidos (App Group)
+638|Tweaks
+639|Carpeta global de tweaks
+640|LiveContainer no encontrado
+641|Instala GX Files dentro de LiveContainer
+642|Sistema
+643|Datos de GX Files
+644|Carpeta de inicio
+645|Contenedor propio de esta app
+646|Bundle LiveContainer.app
+647|Bundle de la app
+648|Solo lectura
+649|Raíz /
+650|Solo lo que permite el sandbox
+651|Transferencia por Wi‑Fi
+652|Descarga y sube archivos desde un ordenador mediante el navegador
+653|Compilador C → dylib
+654|Tu código → dylib arm64 directamente en el iPhone (TinyCC)
+655|Buscar y reemplazar texto
+656|En todos los archivos y dentro de APK/IPA/ZIP — sin abrirlos
+657|En todo el contenedor
+658|Qué ocupa espacio
+659|Archivo de internet — a la carpeta compartida
+660|Clave de firma de APK
+661|El certificado con el que GX Files firma los APK
+662|Ajustes
+663|Apariencia, archivos ocultos, caché
+664|Principal
+665|Texto
+666|Código / marcado
+667|Cadenas de localización
+668|Imagen
+669|Vídeo
+670|Audio
+671|Archivo binario
+672|Mach-O (binario de iOS)
+673|ELF (biblioteca de Android/Linux)
+674|Paquete Android
+675|App de iOS (IPA)
+676|Base de datos SQLite
+677|Perfil de aprovisionamiento
+678|Catálogo de recursos (Assets.car)
+679|Archivo
+680|no se puede abrir la base de datos
+681|Error: %@
+682|Consola SQL — botón arriba a la derecha. Los cambios se escriben al instante.
+683|Cargar 200 más…
+684|Fila %ld
+685|Error: %s\n
+686|(%d filas%@)\n\n
+687|, se muestran 1000
+688|OK, filas modificadas: %d\n\n
+689|Consulta vacía
+690|Exportar todo
+691|No hay imágenes en el catálogo
+692|No se pudo abrir Assets.car (CoreUI no disponible)
+693|No es una imagen de mapa de bits
+694| (imágenes)
+695|Se guardaron %lu imágenes en «%@»
+696|ejecutable
+697|biblioteca dinámica
+698|archivo objeto
+699|tipo %u
+700|plataforma %u
+701|  (recortado)\n
+702|Arquitectura: %@\nTipo: %@\nComandos de carga: %u\nIndicadores: 0x%x%@%@\n
+703|Plataforma: %@, mín. %@, SDK %@\n
+704|iOS mín.: %@, SDK %@\n
+705|Cifrado FairPlay: %@\n
+706|SÍ (cryptid=1, cifrado por la App Store)
+707|no (cryptid=0)
+708|Firma de código: presente\n
+709|Punto de entrada: LC_MAIN\n
+710|\nBibliotecas vinculadas (%lu):\n  %@\n
+711|El archivo es demasiado pequeño
+712|%@\nTamaño: %@\n\n
+713|Binario universal (fat), porciones: %u\n
+714|\n━━ Porción %u (desplazamiento 0x%llx, %@) ━━\n
+715|No es un Mach-O
+716|(ninguna)
+717|No es un ELF
+718|ELF big-endian — el análisis detallado no está disponible\n
+719|máquina %u
+720|Clase: %@\nArquitectura: %@\nTipo: %@\n
+721|biblioteca compartida (.so)
+722|ejecutable
+723|ARM de 64 bits — la misma familia de CPU que el iPhone.\n
+724|ARM de 32 bits: el iPhone no puede ejecutar este código.\n
+725|Segmentos LOAD: %lu, alineación máx.: 0x%llx%@\n
+726| (compatible con páginas de 16 KB)
+727| (páginas de 4 KB)
+728|\nDependencias (%lu):\n  %@\n
+729|Elemento no encontrado
+730|Ruta
+731|Enlace → %@
+732|Apunta a
+733|Contando…
+734|%@ (%lld bytes)
+735|Creado
+736|Modificado
+737|Permisos
+738|Propietario
+739|Acceso
+740|lectura %@ · escritura %@
+741|sí
+742|App
+743|Sumas de verificación
+744|Toca para calcular MD5 / SHA-1 / SHA-256
+745|Cambiar permisos (chmod)
+746|Por ejemplo 755 o 644
+747|%@ · archivos %llu, carpetas %llu
+748|Toca una fila para copiar el valor.
+749|Permisos de acceso
+750|Valor octal
+751|Duplicados
+752|Dejar uno de cada
+753|Buscando duplicados…
+754|No hay duplicados
+755|%lu copias · %@ cada una
+756|Se pueden liberar %@\n\n%@
+757|¿Eliminar las copias sobrantes?
+758|En cada grupo quedará el primer archivo. Se liberarán %@.
+759|Eliminados: %lu
+760|Cerrar
+761|Buscar y reemplazar
+762|Ir a la línea…
+763|Formatear JSON
+764|Minimizar JSON
+765|Vista
+766|Fuente más grande
+767|Fuente más pequeña
+768|Sin ajuste de línea
+769|Con ajuste de línea
+770|Codificación
+771|Abrir con… (imagen, plist, hex…)
+772|Vista hex
+773|Estadísticas
+774|Copiar todo
+775|No se pudo abrir:\n%@
+776|%@ (binario)
+777|Archivo binario abierto como texto (Latin-1, byte = carácter). Cambia cadenas por otras de la misma longitud, o el archivo puede romperse.
+778|Ir a la línea
+779|Número de línea
+780|JSON no válido
+781|Líneas: %lu\nPalabras: %lu\nCaracteres: %lu\nCodificación: %@%@
+782|No se pudo guardar
+783|Guardado
+784|El texto no se puede escribir en la codificación elegida
+785|No guardar
+786|No se pudo abrir el archivo
+787|Porcentaje desde el inicio del archivo (0–100)
+788|Buscar siguiente
+789|Búsqueda en todo el archivo (UTF-8), desde la página siguiente
+790|No hay más coincidencias
+791|Editar bytes en 0x%llx
+792|Introduce bytes hex (los espacios se ignoran). La longitud del archivo no cambia.
+793|Número impar de dígitos hex
+794|Dígitos hex no válidos
+795|Sin permiso de escritura
+796|Ir al desplazamiento
+797|Hex (0x1A2B) o decimal
+798|Introduce qué buscar
+799|Cadena hex no válida (ejemplo: 7f 45 4c 46)
+800|Cadena hex de reemplazo no válida
+801|Error en la expresión regular: %@
+802|Qué buscar
+803|Reemplazar por (vacío — eliminar)
+804|Máscara de archivos: *.xml; *.smali (vacío — todos)
+805|En nombres de archivos y carpetas
+806|En el archivo comprimido:
+807|En la carpeta:
+808|Distinguir mayúsculas
+809|Palabra completa
+810|Entrar en archivos comprimidos (apk, ipa, zip)
+811|Archivos binarios (coincidencia exacta)
+812|Reemplazar en los marcados
+813|Para nombres usa el modo «Texto» o «Regex»
+814|Buscando… revisados %llu, encontrado en %lu (coincidencias %llu)
+815|Listo: %llu coincidencias en %lu archivos (revisados %llu). Desmarca los archivos que no deban cambiarse.
+816|No se encontró nada (revisados %llu)
+817|Reemplazo
+818|Primero busca y marca archivos
+819|«%@» → «%@»\nSe renombrarán %lu elementos (las carpetas — con todo su contenido). Los archivos comprimidos se modifican sin descomprimir.
+820|¿Renombrar?
+821|«%@» → «%@»\n%lu coincidencias en %lu archivos. Los archivos cambiarán al instante, los comprimidos — sin descomprimir.
+822|¿Reemplazar?
+823|%@: nombre no válido\n
+824|%@: «%@» ya existe\n
+825|%@: los nombres coincidirían tras renombrar — cancelado\n
+826|Escribiendo %@…
+827|Renombrados: %lu%@%@
+828|\n\nErrores:\n
+829|Se reemplazaron %lu coincidencias en %lu archivos.
+830|\n\nAPK modificados (%lu) — se eliminó su firma. ¿Firmarlos ahora con la clave de GX Files?
+831|\n\nErrores:\n%@
+832|Ahora no
+833|Firmado
+834|%@%@ · %lu coinc.
+835|✓ reemplazado · 
+836|línea %lu
+837|…y %lu más
+838|Abrir archivo
+839|Reemplazar solo aquí
+840|Guardado en el IPA
+841|No se encontró Payload/*.app
+842|Nombre
+843|iOS mínimo
+844|Abrir todo el Info.plist
+845|Todas las claves — en el editor
+846|Cambiar icono…
+847|Imagen desde «Archivos» o desde el portapapeles de GX Files
+848|Quitar restricciones de dispositivo
+849|UISupportedDevices, UIRequiredDeviceCapabilities → solo arm64, desactivar la comprobación iPad/iPhone
+850|Compartir archivos: activado
+851|Activar acceso a archivos
+852|La carpeta de la app aparecerá en «Archivos» (UIFileSharingEnabled)
+853|Eliminar extensiones y Watch
+854|PlugIns, Extensions, Watch — menos tamaño, menos problemas al instalar
+855|Eliminar esquemas de URL y sus consultas
+856|Inyectar dylib / tweak…
+857|Copiar a Frameworks y añadir LC_LOAD_DYLIB (@rpath)
+858|Bibliotecas y comandos de carga
+859|Lista; desliza a la izquierda para eliminar
+860|Entitlements de la firma del ejecutable
+861|Información Mach-O
+862|Hacer una copia del IPA
+863|Antes de cambios arriesgados
+864|Abrir contenido
+865|Editar archivos dentro
+866|La inyección funciona en apps sin cifrado de la App Store. Los tweaks que necesitan CydiaSubstrate/ElleKit también lo necesitan en Frameworks. LiveContainer puede cargar tweaks por sí mismo (carpeta Tweaks) — así no hace falta tocar el binario. LiveContainer vuelve a firmar la app al instalarla.
+867|Guardando Info.plist…
+868|Nombre de la app
+869|Versión mínima de iOS
+870|Formato: 1.2.3 (45)
+871|Quitando restricciones…
+872|Activando acceso a archivos…
+873|Guardando…
+874|¿Eliminar extensiones?
+875|Se eliminarán las carpetas PlugIns, Extensions y Watch dentro de la app. Los widgets, teclados y el reloj dejarán de funcionar.
+876|Eliminando extensiones…
+877|El Info.plist no tiene CFBundleExecutable
+878|Leyendo binario…
+879|No se encontró el ejecutable
+880|No hay entitlements en la firma (la app no está firmada o se firmó sin ellos)
+881| copia.ipa
+882|Copiando…
+883|Copia: %@
+884|Nuevo icono
+885|Elegir en «Archivos»
+886|Del portapapeles: %@
+887|Imagen del portapapeles de iOS
+888|No se pudo leer la imagen
+889|Cambiando icono…
+890|Inyectar dylib
+891|Elige una .dylib (o un binario .framework)
+892|Desde el portapapeles de GX Files (%lu)
+893|Sin CFBundleExecutable
+894|Inyectando…
+895|%@: no se puede leer
+896|No se pudo inyectar
+897|Escribiendo…
+898|Inyectado: %@\nAhora vuelve a instalar la app (LiveContainer la refirmará).
+899|Eliminando comando de carga…
+900|Desliza a la izquierda para eliminar un comando de carga (el archivo de la biblioteca se queda). No elimines bibliotecas del sistema — la app no arrancará.
+901|¿Eliminar el comando de carga?
+902|«%@» no existe o el enlace está roto
+903|No se pudo extraer el plist del perfil
+904|Editor de texto
+905|Visor de texto grande
+906|Como textura (.btx / .dds / SHTX)
+907|Editor hex
+908|Como plist / JSON / .strings
+909|No funcionó
+910|El archivo no se puede leer como plist o JSON
+911|Como base de datos SQLite
+912|Como archivo comprimido
+913|Como APK (Android)
+914|Compilar a dylib (C → arm64)
+915|Editor de binario (cadenas, funciones, números)
+916|Información ELF (.so)
+917|%lu elementos
+918|Los datos no se pueden escribir como JSON
+919|Un archivo .strings debe ser un diccionario
+920|El valor «%@» no es una cadena — el formato .strings no lo admite
+921|No se pudo serializar
+922|Error de análisis
+923|La raíz debe ser un diccionario o un array
+924|No se pudo leer el archivo
+925|La raíz no es un diccionario ni un array
+926|Buscar en claves y valores
+927|.strings (texto)
+928|Formato: %@
+929|Mostrar como texto
+930|Editar como texto
+931|Guardar como XML
+932|Guardar como Binary
+933|Copiar como texto
+934|Elemento %@
+935|Dentro de los datos — un plist anidado
+936|Abrir plist anidado (solo lectura)
+937|Editar como base64
+938|Número
+939|Fecha en formato ISO 8601 (2026-01-31T12:00:00Z)
+940|Formato de fecha no válido
+941|base64 no válido
+942|Nueva clave
+943|Clave
+944|Esa clave ya existe
+945|Tipo de valor
+946|Añadir elemento
+947|Copiar valor
+948|Copiar clave
+949|Renombrar clave
+950|Nuevo nombre de clave
+951|%@ copia
+952|Favoritos
+953|Archivos recientes
+954|Contenedor: %@
+955|Desliza a la izquierda para quitar.
+956|Mostrar archivos ocultos
+957|Miniaturas de fotos y vídeos
+958|Datos
+959|Acerca de
+960|Borrar la caché de iconos y archivos temporales
+961|Borrar recientes
+962|detectado
+963|no detectado
+964|Caché borrada
+966|No se pudo crear el socket
+967|El puerto está ocupado
+968|Transferencia Wi‑Fi
+969|Mientras esta pantalla esté abierta, el iPhone no se bloqueará. El ordenador y el iPhone deben estar en la misma red Wi‑Fi. Si iOS pregunta por el acceso a la red local — permítelo.
+970|Abre la dirección en un navegador del ordenador: puedes descargar y subir archivos, crear carpetas y eliminar.
+971|Servidor
+972|Servidor apagado
+973|sin red
+974|Toca para copiar
+975|Dirección copiada
+976|No se pudo iniciar
+977|archivo vacío
+978|no reconocido
+979|Decodificando…
+980|No se pudo mostrar: %@\nPuedes abrirlo en el editor hex o guardar los datos descomprimidos desde el menú «…».
+981|Guardar como PNG al lado
+982|Compartir PNG
+983|Reemplazar con imagen (PNG/JPG…)
+984|Guardar datos descomprimidos
+985|Fondo de cuadros sí/no
+986|No hay imagen
+987|No se pudo escribir el PNG (¿carpeta de solo lectura?)
+988|Sin comprimir
+989|El archivo no está en un contenedor FC AA 55 A7 — los datos ya están «en bruto».
+990|No se pudo escribir el archivo
+991|La nueva imagen %d×%d se escribirá en «%@» (el original se guardará al lado como .orig).
+992|\n\nAtención: el tamaño difiere del original — el juego puede esperar el anterior.
+993|¿Reemplazar la textura?
+994|No se puede reemplazar
+995|Origen no reconocido: %s
+996|No se pudieron obtener los píxeles de la imagen
+997|El DDS se escribe como RGBA sin comprimir (32 bits) — así lo lee cualquier cargador DDS.
+998|Los colores se ajustaron a la paleta original de 256 colores.
+999|Guardado como SHTXFf (32 bits).
+1000|Textura reemplazada (%@). %@
+1001|Renombrar (%lu)
+1002|Plantilla
+1003|Buscar en el nombre (opcional)
+1004|Empezar la numeración en
+1005|Tal cual
+1006|minúsculas
+1007|MAYÚSCULAS
+1008|Plantilla: {name} — nombre sin extensión, {ext} — extensión con punto, {n} — número, {n:3} — número con ceros (001), {date} — fecha de modificación (AAAA-MM-DD), {parent} — nombre de la carpeta.
+1009|Expresión regular
+1010|Error en la expresión regular
+1011|Nombre vacío o «/» en el nombre
+1012|El nombre «%@» resulta varias veces
+1013|Vista previa
+1014|Renombrados %lu, hay errores
+1015|Renombrados: %lu
+1016|Comparación
+1017|Comparando…
+1018|Los archivos son idénticos
+1019|Panel %ld
+1020|no se pudo reemplazar el archivo comprimido: %s
+1021|No se pudo crear la clave RSA
+1022|No se pudo obtener la clave pública
+1023|No se pudo crear el certificado
+1024|Clave de GX Files (RSA-2048, CN=GX Files)\nSHA-256 del certificado: %@
+1025|no se pudo reemplazar el archivo
+1026|no se pudo leer
+1027|No se pudo extraer
+1028|Guardando en el archivo comprimido…
+1029|Guardado en %@: %lu
+1030|Este archivo comprimido no se puede modificar: el formato no es zip o la carpeta no admite escritura.
+1031|No se pudo modificar el archivo comprimido
+1032|0x%x (tipo %u)
+1033|APK ZIP64 no es compatible con la firma v2
+1034|zip incorrecto
+1035|error de firma RSA
+1036|certificado incorrecto
+1037|cancelado
+1038|error de firma v1
+1039|se esperaba [registro...]
+1040|dirección vacía
+1041|la base de la dirección debe ser un registro x o sp
+1042|el índice debe ser un registro x/w
+1043|desplazamiento de índice no válido: %s
+1044|lsl requiere #número
+1045|desplazamiento no válido: %s
+1046|! no se permite con registro índice
+1047|post-indexación no válida
+1048|sobra texto tras ]: %s
+1049|desplazamiento no válido: %s
+1050|operando incomprensible: %s
+1051|la dirección de salto no es múltiplo de 4
+1052|salto demasiado lejano
+1053|%s con registro FP — usa ldr/str
+1054|%s: se necesita un registro
+1055|%s usa un registro w
+1056|no existe esa instrucción
+1057|instrucción desconocida %s
+1058|se esperaba una dirección en [...]
+1059|literal no admitido para este registro
+1060|ldur/stur no existe con registro índice
+1061|índice: lsl, uxtw, sxtw o sxtx
+1062|el tipo de extensión no encaja con el registro índice
+1063|el desplazamiento del índice debe ser 0 o %d
+1064|ldur/stur sin pre/post-indexación
+1065|desplazamiento -256…255
+1066|desplazamiento fuera de rango
+1067|nop sin operandos
+1068|se necesita una dirección: 0x… o .+N
+1069|%s dirección
+1070|b.<condición> dirección
+1071|%s reg, dirección
+1072|%s reg, #bit, dirección
+1073|número de bit fuera de rango
+1074|%s xN, dirección
+1075|adrp: demasiado lejos
+1076|adr: ±1 MB
+1077|mov destino, origen
+1078|mov: el destino es un registro
+1079|tamaños de registro distintos
+1080|mov: número o registro
+1081|el número no cabe en 32 bits
+1082|el número no se puede cargar con una instrucción — usa movz + movk
+1083|desplazamiento: lsl #0/16/32/48
+1084|%s reg, operando
+1085|%s rd, rn, operando
+1086|desplazamiento: lsl #12
+1087|número 0…4095 (o múltiplo de 4096 hasta 0xFFF000)
+1088|aquí no se permite xzr
+1089|%s: el tercer operando es un registro o un número
+1090|el cuarto operando es un desplazamiento
+1091|desplazamiento: lsl/lsr/asr #N
+1092|desplazamiento de extensión 0…4
+1093|los registros no encajan
+1094|%s no admite número
+1095|el número no se puede codificar como máscara lógica
+1096|desplazamiento: lsl/lsr/asr/ror
+1097|desplazamiento 0…%d
+1098|%s: el destino es un registro w
+1099|sxtw: el destino es un registro x
+1100|%s rd, rn, rm, condición
+1101|%s rd, condición
+1102|%s rd, rn, condición
+1103|los registros del par deben ser del mismo tipo
+1104|mismos tipos de registro
+1105|ldp/stp: s, d o q
+1106|registros del mismo tamaño
+1107|desplazamiento múltiplo de %d en el rango %d…%d
+1108|%s reg, [dirección]
+1109|fmov destino, origen
+1110|fmov: s o d
+1111|fmov solo admite fracciones simples (0.5, 1, 1.5, 2, 2.5, 3…31)
+1112|mismos s/d
+1113|fmov sN, wM o dN, xM
+1114|fmov wN, sM o xN, dM
+1115|operandos de fmov no adecuados
+1116|%s sd, sn, sm (o d)
+1117|%s destino, origen
+1118|fcvt: tipos distintos
+1119|mismos tipos
+1120|comparación solo con #0.0
+1121|fcsel sd, sn, sm, condición
+1122|instrucción desconocida «%s»
+1123|demasiadas instrucciones
+1124|texto vacío
+1125|todo el archivo
+1126|objeto
+1127|ejecutable ELF
+1128|archivo
+1129|comandos de carga dañados
+1130|no hay __LINKEDIT para la firma
+1131|__LINKEDIT fuera del archivo
+1132|firma fuera del archivo
+1133|poco espacio para la firma
+1134|cabecera fat dañada
+1135|porción fuera del archivo
+1136|DDS FourCC %.4s (no compatible)
+1137|DDS %u bits sin comprimir
+1138|DDS: formato de píxel desconocido
+1139|SHTX: tamaño no válido
+1140|SHTXFf 32 bits%s
+1141|SHTXFS 8 bits, paleta%s
+1142|SHTX 4 bits, 16 colores%s
+1143|imagen dentro (desplazamiento %zu)%s
+1144|dentro de GXT (textura de PS Vita, swizzle) — aún no compatible
+1145|contenido desconocido (primeros bytes %02X %02X %02X %02X)%s
+1146| tras descomprimir
+1147|este tipo de .btx aún no se puede reconstruir
+1148|no es Mach-O
+1149|no hay espacio en la cabecera para un comando nuevo (hacen falta %zu bytes, libres %zu)
+1150|el espacio tras los comandos está ocupado
+1151|no es un ejecutable Mach-O
+1152|la porción %d está dañada
+1153|la porción está dañada
+1154|// dirección de la clase 0x%llx\n@interface %s
+1155|// categoría 0x%llx\n@interface %s
+1156|goto *%s;   // tabla de saltos / llamada final
+1157|// %s\n// Pseudocódigo (aproximado): recuperado del código máquina ARM64\n@implementation %.*s\n%s\n{\n
+1158|// %s\n// Pseudocódigo (aproximado): recuperado del código máquina ARM64\nid %s(id self, SEL _cmd
+1159|// %s\n// Pseudocódigo (aproximado): recuperado del código máquina ARM64\n%s(a1, a2, ...)\n{\n
+1160|no se puede abrir el archivo
+1161|demasiado pequeño para un zip
+1162|no es un archivo zip
+1163|directorio zip dañado
+1164|no se puede leer el directorio zip
+1165|cabecera local incorrecta
+1166|la entrada sobrepasa el archivo
+1167|la entrada está cifrada
+1168|método de compresión %u no compatible
+1169|la entrada es demasiado grande
+1170|error de lectura del origen
+1171|el archivo es demasiado grande
+1172|no se puede crear un archivo temporal
+1173|no se puede abrir %s
+1174|error de lectura %s
+1175|error de escritura (¿sin espacio?)
+1177|Arrastra archivos aquí para subirlos
+1178|Subir
+1179|Vacío
+1180|Nombre de la carpeta
+1181|Error al subir
+1182|KB
+1183|MB
+1184|GB
+1185|TB
+1187|B
+1192|Idioma / Language
+1193|La traducción se hizo automáticamente y puede ser imprecisa. Se aceptan correcciones en GitHub: archivos i18n/<código>.tsv.
+1194|Como en el sistema
+1195|Idioma del iPhone si es compatible; si no, inglés
+1196|Idioma
+1197|No se pudo vincular la carpeta
+1198|Mis archivos
+1199|Visible en «Archivos» → «En mi iPhone» → GX Files
+1200|Carpetas vinculadas
+1201|Carpeta no disponible — desliza a la izquierda para quitarla
+1202|Vincular una carpeta…
+1203|Cualquier carpeta de «Archivos»: iCloud Drive, «En mi iPhone», memoria USB, otras apps
+1204|Instalación normal: están disponibles tu carpeta y las carpetas vinculadas desde «Archivos». Las demás apps están protegidas por el sandbox de iOS.
+1205|Carpeta «%@» vinculada
+1206|Desvincular
+1207|Modo
+1208|App normal
+1209|Carpetas vinculadas: %d
+1210|Vincular una carpeta
+1211|Entra en la carpeta que necesites y pulsa «Abrir». Si el botón no responde, prueba el segundo método.
+1212|Método 1 (estándar)
+1213|Método 2 (compatible)
