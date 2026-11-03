@@ -17,8 +17,21 @@ for rel, src in meta['headers']:
     p = os.path.join(SDK, src)
     if not os.path.isfile(p): print('нет в SDK:', src); continue
     lines = open(p, encoding='latin-1').read().split('\n')
-    for at, add in sorted(meta['insert'].get(rel, []), key=lambda x: -x[0]):
-        lines[at:at] = add
+    ops = meta['insert'].get(rel, [])
+    if ops:
+        # место вставки ищем по соседним строкам, а не по номеру — в другой версии SDK строки сдвигаются
+        pos, cur = [], 0
+        for op in ops:
+            k = next((i for i in range(max(cur, 1 if op['prev'] is not None else 0), len(lines) + 1)
+                      if (op['prev'] is None or lines[i - 1] == op['prev'])
+                      and (op['next'] is None or (i < len(lines) and lines[i] == op['next']))), None)
+            if k is None: pos = None; break
+            pos.append(k); cur = k + 1
+        if pos is None:
+            print('правка не подошла к этой версии SDK, файл без изменений:', rel)
+        else:
+            for k, op in sorted(zip(pos, ops), key=lambda x: -x[0]):
+                lines[k:k] = op['add']
     dst = os.path.join(OUT, 'include', rel)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     open(dst, 'w', encoding='latin-1').write('\n'.join(lines)); n += 1
@@ -44,14 +57,38 @@ def lists(text, key):
     for m in re.finditer(r'\b' + key + r':\s*\[(.*?)\]', text, re.S):
         out += [s.strip().strip("'\"") for s in m.group(1).split(',') if s.strip()]
     return out
-os.makedirs(os.path.join(OUT, 'lib'), exist_ok=True)
-for name, rel in libs.items():
-    t = open(os.path.realpath(os.path.join(SDK, rel))).read()
+
+def parse_tbd(t):
+    """install-name и экспортируемые символы; понимает YAML (tbd v2–v4) и JSON (tbd v5)"""
+    syms = set()
+    if t.lstrip().startswith('{'):
+        j = json.loads(t)
+        libs = [j.get('main_library', {})] + j.get('libraries', [])
+        inst = libs[0]['install_names'][0]['name']
+        for lib in libs:
+            for ex in lib.get('exported_symbols', []) + lib.get('reexported_symbols', []):
+                for part in ('text', 'data'):
+                    sec = ex.get(part, {})
+                    for k in ('global', 'weak', 'thread_local'): syms |= set(sec.get(k, []))
+                    for c in sec.get('objc_class', []): syms |= {'_OBJC_CLASS_$_' + c, '_OBJC_METACLASS_$_' + c}
+                    for c in sec.get('objc_eh_type', []): syms.add('_OBJC_EHTYPE_$_' + c)
+                    for v in sec.get('objc_ivar', []): syms.add('_OBJC_IVAR_$_' + v)
+        return inst, syms
     inst = re.search(r"install-name:\s*'?([^'\n]+)'?", t).group(1).strip()
     syms = set(lists(t, 'symbols')) | set(lists(t, 'weak-symbols')) | set(lists(t, 'thread-local-symbols'))
     for c in lists(t, 'objc-classes'): syms |= {'_OBJC_CLASS_$_' + c, '_OBJC_METACLASS_$_' + c}
     for c in lists(t, 'objc-eh-types'): syms.add('_OBJC_EHTYPE_$_' + c)
     for v in lists(t, 'objc-ivars'): syms.add('_OBJC_IVAR_$_' + v)
+    return inst, syms
+
+os.makedirs(os.path.join(OUT, 'lib'), exist_ok=True)
+for name, rel in libs.items():
+    src = os.path.realpath(os.path.join(SDK, rel))
+    if not os.path.isfile(src): print('нет в SDK:', rel); continue
+    try:
+        inst, syms = parse_tbd(open(src).read())
+    except Exception as e:
+        print('не разобрать', rel, e); continue
     syms = sorted(s for s in syms if re.fullmatch(r'[A-Za-z0-9_$.]+', s))
     with open(os.path.join(OUT, 'lib', name), 'w') as f:
         f.write("--- !tapi-tbd\ntbd-version: 4\ntargets: [ arm64-ios ]\n")

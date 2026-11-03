@@ -20,7 +20,7 @@ mkdir -p build && find build -mindepth 1 -maxdepth 1 ! -name tcc_cache -exec rm 
 
 # Заголовки и .tbd Apple для встроенного компилятора генерируются из SDK (в репозитории их нет)
 if [ ! -d tcc/res/sdk/include ]; then
-  echo "Генерирую tcc/res/sdk из $SDK…"
+  echo "Генерирую tcc/res/sdk из ${SDK}…"
   python3 tools/sdk/make_sdk.py "$SDK"
 fi
 

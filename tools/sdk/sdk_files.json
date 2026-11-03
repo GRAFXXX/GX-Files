@@ -2679,60 +2679,68 @@
 ],
 "insert": {
 "CoreGraphics/CGPDFArray.h": [
-[
-102,
-[
+{
+"prev": "",
+"next": "typedef bool (^CGPDFArrayApplierBlock)(size_t index,",
+"add": [
 "#ifdef __BLOCKS__ /* GX Files: Ð±Ð»Ð¾ÐºÐ¸ â ÑÐ¾Ð»ÑÐºÐ¾ Ð´Ð»Ñ clang, TinyCC Ð¸Ñ Ð½Ðµ Ð¿Ð¾Ð½Ð¸Ð¼Ð°ÐµÑ */"
 ]
-],
-[
-114,
-[
+},
+{
+"prev": "    CG_AVAILABLE_STARTING(10.14, 12.0);",
+"next": "",
+"add": [
 "#endif /* __BLOCKS__ */"
 ]
-]
+}
 ],
 "CoreGraphics/CGPDFDictionary.h": [
-[
-115,
-[
+{
+"prev": "",
+"next": "typedef bool (^CGPDFDictionaryApplierBlock)(const char * key,",
+"add": [
 "#ifdef __BLOCKS__ /* GX Files: Ð±Ð»Ð¾ÐºÐ¸ â ÑÐ¾Ð»ÑÐºÐ¾ Ð´Ð»Ñ clang, TinyCC Ð¸Ñ Ð½Ðµ Ð¿Ð¾Ð½Ð¸Ð¼Ð°ÐµÑ */"
 ]
-],
-[
-127,
-[
+},
+{
+"prev": "    CG_AVAILABLE_STARTING(10.14, 12.0);",
+"next": "",
+"add": [
 "#endif /* __BLOCKS__ */"
 ]
-]
+}
 ],
 "CoreGraphics/CGPath.h": [
-[
-391,
-[
+{
+"prev": "",
+"next": "typedef void (^CGPathApplyBlock)(const CGPathElement * element);",
+"add": [
 "#ifdef __BLOCKS__ /* GX Files: Ð±Ð»Ð¾ÐºÐ¸ â ÑÐ¾Ð»ÑÐºÐ¾ Ð´Ð»Ñ clang, TinyCC Ð¸Ñ Ð½Ðµ Ð¿Ð¾Ð½Ð¸Ð¼Ð°ÐµÑ */"
 ]
-],
-[
-395,
-[
+},
+{
+"prev": "    CG_AVAILABLE_STARTING(10.13, 11.0);",
+"next": "",
+"add": [
 "#endif /* __BLOCKS__ */"
 ]
-]
+}
 ],
 "objc/runtime.h": [
-[
-367,
-[
+{
+"prev": "#define OBJC_DYNAMIC_CLASSES ((const void *)-1)",
+"next": "OBJC_EXPORT void",
+"add": [
 "#ifdef __BLOCKS__ /* GX Files: Ð±Ð»Ð¾ÐºÐ¸ â ÑÐ¾Ð»ÑÐºÐ¾ Ð´Ð»Ñ clang, TinyCC Ð¸Ñ Ð½Ðµ Ð¿Ð¾Ð½Ð¸Ð¼Ð°ÐµÑ */"
 ]
-],
-[
-376,
-[
+},
+{
+"prev": "    OBJC_REFINED_FOR_SWIFT;",
+"next": "",
+"add": [
 "#endif /* __BLOCKS__ */"
 ]
-]
+}
 ]
 },
 "links": [
