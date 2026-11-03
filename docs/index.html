@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GX Files — file manager & binary editor for iPhone</title>
+<meta name="description" content="GX Files is a free, open-source file manager for iPhone: ZIP/APK/IPA editing, plist, SQLite, hex, Mach-O/ELF editor with an ARM64 disassembler and an on-device C → dylib compiler. Works with Feather, SideStore, AltStore, TrollStore and LiveContainer.">
+<meta name="keywords" content="iPhone file manager, iOS file manager, Filza alternative, LiveContainer, Feather, SideStore, AltStore, TrollStore, IPA editor, APK editor, Mach-O editor, ARM64 disassembler, dylib compiler, TinyCC">
+<link rel="canonical" href="https://grafxxx.github.io/GX-Files/">
+<link rel="icon" href="img/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GX Files — file manager & binary editor for iPhone">
+<meta property="og:description" content="Archives, APK/IPA, plist, SQLite, hex, Mach-O/ELF editor and an on-device C → dylib compiler. Free and open source.">
+<meta property="og:image" content="https://grafxxx.github.io/GX-Files/img/social.png">
+<meta property="og:url" content="https://grafxxx.github.io/GX-Files/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GX Files","operatingSystem":"iOS 15+","applicationCategory":"UtilitiesApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://www.gnu.org/licenses/gpl-3.0.html","downloadUrl":"https://github.com/GRAFXXX/GX-Files/releases/latest","codeRepository":"https://github.com/GRAFXXX/GX-Files"}
+</script>
+<style>
+  :root { --bg:#0c0a14; --card:#16131f; --fg:#f2efff; --mut:#a89fc9; --acc:#7c5cff; --acc2:#b05cff; --line:#2a2440; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif; }
+  .glow { position:fixed; inset:0; pointer-events:none; background:
+      radial-gradient(600px 400px at 15% 10%, rgba(110,60,255,.35), transparent 70%),
+      radial-gradient(500px 400px at 90% 80%, rgba(176,92,255,.18), transparent 70%); }
+  main { position:relative; max-width:1040px; margin:0 auto; padding:0 16px 64px; }
+  header { display:flex; flex-wrap:wrap; align-items:center; gap:28px; padding:64px 0 40px; }
+  header img { width:128px; height:128px; border-radius:28px; box-shadow:0 18px 40px rgba(0,0,0,.5); }
+  h1 { margin:0; font-size:clamp(40px,7vw,64px); line-height:1.05; letter-spacing:-.02em; }
+  .tag { margin:10px 0 0; color:var(--mut); font-size:clamp(17px,2.4vw,21px); }
+  .btns { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+  a.btn { display:inline-block; padding:12px 20px; border-radius:12px; text-decoration:none; font-weight:600; color:#fff;
+          background:linear-gradient(180deg,var(--acc),var(--acc2)); }
+  a.btn.ghost { background:transparent; border:1px solid var(--line); color:var(--fg); }
+  h2 { font-size:26px; margin:48px 0 14px; letter-spacing:-.01em; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+  .cards img { width:100%; border-radius:16px; border:1px solid var(--line); display:block; }
+  .src { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; overflow-x:auto; }
+  code { font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; color:#d9d0ff; word-break:break-all; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border-radius:14px; overflow:hidden; border:1px solid var(--line); }
+  td, th { text-align:left; padding:12px 14px; border-top:1px solid var(--line); vertical-align:top; }
+  th { border-top:0; color:var(--mut); font-weight:600; font-size:14px; }
+  ul { padding-left:20px; } li { margin:4px 0; }
+  .muted { color:var(--mut); }
+  footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--line); color:var(--mut); font-size:14px; }
+  footer a, p a, li a { color:#c7b8ff; }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<main>
+  <header>
+    <img src="img/logo.png" alt="GX Files icon">
+    <div>
+      <h1>GX Files</h1>
+      <p class="tag">File manager &amp; binary editor for iPhone. Free and open source.</p>
+      <div class="btns">
+        <a class="btn" href="https://github.com/GRAFXXX/GX-Files/releases/latest">Download IPA</a>
+        <a class="btn ghost" href="https://github.com/GRAFXXX/GX-Files">Source on GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="cards">
+    <img src="img/f1.png" alt="Files: dual panels, search, find &amp; replace, Wi‑Fi transfer">
+    <img src="img/f2.png" alt="Archives &amp; apps: ZIP/APK/IPA editing, APK signing, IPA tools">
+    <img src="img/f3.png" alt="Binary editor: strings, Objective-C headers, ARM64 disassembler, pseudocode">
+    <img src="img/f4.png" alt="Compiler on iPhone: TinyCC, C to arm64 dylib">
+  </div>
+
+  <h2>Install</h2>
+  <p>Add this source to <b>Feather</b>, <b>SideStore</b> or <b>AltStore</b> — updates arrive automatically:</p>
+  <div class="src"><code>https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json</code></div>
+  <p class="muted">Or download <code>GXFiles.ipa</code> from <a href="https://github.com/GRAFXXX/GX-Files/releases/latest">Releases</a> and install it any way you like, including TrollStore and LiveContainer.</p>
+
+  <table>
+    <tr><th>Installed via</th><th>What you can access</th></tr>
+    <tr><td>Feather / SideStore / AltStore</td><td>“My files” (also in Files → On My iPhone → GX Files), linked folders, files shared into the app</td></tr>
+    <tr><td>LiveContainer</td><td>All of the above + LiveContainer’s shared folder, guest app data, tweaks</td></tr>
+    <tr><td>TrollStore / jailbreak</td><td>The whole file system</td></tr>
+  </table>
+
+  <h2>Features</h2>
+  <ul>
+    <li><b>Files</b> — dual panels, favorites, search by name and content, duplicates, storage analysis, find &amp; replace across folders (even inside ZIP/APK/IPA), Wi‑Fi transfer.</li>
+    <li><b>Formats</b> — edit ZIP/APK/IPA/JAR in place; tar, 7z, rar; text and hex editors; plist, JSON, .strings; SQLite console; APK v1 + v2 signing; IPA name, icon and Info.plist.</li>
+    <li><b>Binary editor</b> — Mach-O and ELF strings, Objective-C headers, ARM64 disassembler and assembler, approximate C pseudocode, embedded images and fonts, ad-hoc re-signing.</li>
+    <li><b>Compiler on iPhone</b> — built-in TinyCC with iOS SDK headers: write C, get an arm64 dylib.</li>
+    <li><b>8 languages</b> — English, Русский, Українська, Беларуская, Deutsch, Français, Español, Português.</li>
+  </ul>
+
+  <h2>Responsible use</h2>
+  <p class="muted">The binary editor and compiler are for studying, debugging and modifying your own apps and apps you have the right to modify. Please don’t use GX Files to violate licenses, bypass protections, or cheat in online games.</p>
+
+  <footer>
+    GX Files · <a href="https://github.com/GRAFXXX/GX-Files/blob/main/LICENSE">GPL-3.0</a> ·
+    <a href="https://github.com/GRAFXXX/GX-Files/issues">Report a bug</a> ·
+    <a href="https://github.com/GRAFXXX/GX-Files/blob/main/README.ru.md">Русский</a>
+  </footer>
+</main>
+</body>
+</html>
