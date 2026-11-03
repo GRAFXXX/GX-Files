@@ -12,6 +12,36 @@ OUT = os.path.join(ROOT, 'tcc', 'res', 'sdk')
 meta = json.load(open(os.path.join(ROOT, 'tools', 'sdk', 'sdk_files.json'), encoding='utf-8'))
 
 # 1. заголовки (+ защита блоков ^ через #ifdef __BLOCKS__ — TinyCC их не понимает)
+def guard_blocks(lines):
+    """Оборачивает объявления с блоками (^) в #ifdef __BLOCKS__ — запасной путь для незнакомой версии SDK."""
+    spans, start, buf, in_c, btypes = [], None, '', False, set()
+    for i, ln in enumerate(lines):
+        st = ln.strip()
+        if in_c:
+            if '*/' in st: in_c = False
+            continue
+        if start is None:
+            if not st or st.startswith('#') or st.startswith('//'): continue
+            if st.startswith('/*'):
+                if '*/' not in st: in_c = True
+                continue
+            start, buf = i, ''
+        code = re.sub(r'/\*.*?\*/|//.*', '', ln)
+        buf += ' ' + code
+        if st.startswith('#'):                     # препроцессор посреди объявления — не трогаем
+            start = None; continue
+        if code.rstrip().endswith(';') or code.rstrip().endswith('}'):
+            uses = any(re.search(r'\b' + re.escape(t) + r'\b', buf) for t in btypes)
+            if ('(^' in buf or '^)' in buf or uses) and buf.count('{') == buf.count('}'):
+                spans.append((start, i))
+                m = re.search(r'typedef\b.*?\(\s*\^\s*(\w+)\s*\)', buf)   # typedef void (^Name)(…) — тип блока
+                if m: btypes.add(m.group(1))
+            start = None
+    for a, b in reversed(spans):
+        lines[b + 1:b + 1] = ['#endif /* __BLOCKS__ */']
+        lines[a:a] = ['#ifdef __BLOCKS__ /* GX Files: blocks are clang-only, TinyCC does not support them */']
+    return len(spans)
+
 n = 0
 for rel, src in meta['headers']:
     p = os.path.join(SDK, src)
@@ -28,10 +58,13 @@ for rel, src in meta['headers']:
             if k is None: pos = None; break
             pos.append(k); cur = k + 1
         if pos is None:
-            print('правка не подошла к этой версии SDK, файл без изменений:', rel)
+            k = guard_blocks(lines)
+            print('другая версия SDK: %s — защищено объявлений с блоками: %d' % (rel, k))
         else:
             for k, op in sorted(zip(pos, ops), key=lambda x: -x[0]):
                 lines[k:k] = op['add']
+    elif rel.endswith('.h') and any(('(^' in l or '^)' in l) for l in lines):
+        guard_blocks(lines)                     # блоки в других заголовках (в новых SDK их может быть больше)
     dst = os.path.join(OUT, 'include', rel)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     open(dst, 'w', encoding='latin-1').write('\n'.join(lines)); n += 1

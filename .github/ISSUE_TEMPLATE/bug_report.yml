@@ -1,0 +1,27 @@
+name: Bug report
+description: Something doesn't work or crashes
+labels: [bug]
+body:
+  - type: input
+    id: ios
+    attributes: { label: iOS version, placeholder: "iOS 26.1" }
+    validations: { required: true }
+  - type: dropdown
+    id: install
+    attributes:
+      label: "How is GX Files installed?"
+      options: [Feather, SideStore, AltStore, LiveContainer, TrollStore, Other]
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes: { label: GX Files version, description: Settings → About, placeholder: "4.0" }
+  - type: textarea
+    id: steps
+    attributes: { label: What happened and how to repeat it }
+    validations: { required: true }
+  - type: textarea
+    id: log
+    attributes:
+      label: Crash log (if it crashed)
+      description: Settings → Privacy & Security → Analytics & Improvements → Analytics Data → GXFiles-…
+      render: text
