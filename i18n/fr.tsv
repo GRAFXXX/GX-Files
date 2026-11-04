@@ -1204,3 +1204,156 @@
 1211|Entrez dans le dossier voulu et touchez « Ouvrir ». Si le bouton ne réagit pas, essayez la deuxième méthode.
 1212|Méthode 1 (standard)
 1213|Méthode 2 (compatible)
+1214|Disques réseau (WebDAV)
+1215|PC, NAS, Nextcloud, Yandex Disk — télécharger et envoyer
+1216|Identifiant ou mot de passe incorrect
+1217|Accès refusé : vérifiez l'identifiant et le mot de passe
+1218|Introuvable sur le serveur
+1219|Le serveur ne prend pas en charge cette action
+1220|Le serveur n'a plus de place
+1221|Erreur du serveur : HTTP %ld
+1222|Le serveur ne répond pas comme WebDAV — vérifiez l'adresse
+1223|Envoyer depuis Fichiers…
+1224|Envoyer depuis le presse-papiers GX Files
+1225|Actualiser
+1226|Téléchargement de « %@ »…
+1227|Enregistré dans « Mes fichiers/WebDAV » : %@
+1228|Presse-papiers vide
+1229|Sélectionnez des fichiers dans GX Files, touchez « Copier », puis revenez ici.
+1230|Envoi vers le serveur…
+1231|Envoyé avec des erreurs
+1232|Fichiers non envoyés : %d
+1233|Fichiers envoyés : %lu
+1234|Télécharger dans « Mes fichiers »
+1235|Copier le lien
+1236|Supprimer « %@ » du serveur ?
+1237|Le fichier sera supprimé sur le serveur et ne pourra pas être restauré.
+1238|Suppression impossible
+1239|Disques réseau
+1240|WebDAV : PC, NAS, Nextcloud, ownCloud, Yandex Disk (https://webdav.yandex.ru) et autres. Le mot de passe est stocké dans le trousseau de l'iPhone.
+1241|Ajouter un serveur
+1242|Adresse invalide
+1243|Nouveau serveur WebDAV
+1244|Adresse du type https://serveur/remote.php/dav/files/nom/ ou http://192.168.1.10:8080/
+1245|Nom (par ex. Mon PC)
+1246|Identifiant (peut être vide)
+1247|Mot de passe
+1248|Ajouter
+1249|Émulateur
+1250|Ignorer les appels externes
+1251|Arguments x0–x7…
+1252|Effacer les arguments
+1253|Copier les registres
+1254|Comment ça marche
+1255|Émulateur ARM64
+1256|La fonction s'exécute instruction par instruction dans un bac à sable : le fichier n'est pas modifié et rien n'est réellement lancé. Définis les arguments (x0–x7 : entiers et pointeurs, d0–d7 : nombres à virgule), touche « Pas » ou « Jusqu'à la fin » et regarde les registres changer. L'émulateur n'exécute pas les appels vers d'autres bibliothèques (printf, objc_msgSend, etc.) : il s'arrête ou les ignore en renvoyant 0. Il convient donc surtout aux petites fonctions de calcul et de vérification.
+1257|Réinitialiser
+1258|Pas
+1259|Jusqu'à la fin
+1260|Impossible de préparer l'émulateur pour cette fonction.
+1261| octets
+1262|Exécution terminée — touche « Réinitialiser »
+1263|Exécution…
+1264|Arrêté après %llu pas (peut-être une boucle infinie)
+1265|Appel externe
+1266|L'émulateur ne peut pas exécuter la fonction d'une autre bibliothèque. Tu peux ignorer l'appel et fournir le résultat (x0).
+1267|Ignorer l'appel
+1268|Arguments
+1269|Séparés par des virgules : x0, x1, … x7. Nombres : 42, -5, 0x1F. Vide = 0.
+1270|Valeur non comprise : %@
+1271|État
+1272|Registres x (entiers et pointeurs)
+1273|Registres d (nombres à virgule)
+1274|Accès mémoire
+1275|x0–x7 sont les arguments de la fonction, le résultat est renvoyé dans x0. Touche un registre pour changer sa valeur. En jaune : ce qui a changé au dernier pas.
+1276|Les arguments à virgule sont d0–d7 (float : s0–s7), le résultat est d0/s0.
+1277|Instruction suivante · pc = 0x%llx
+1278|Terminé : la fonction a renvoyé un résultat
+1279|Arrêté
+1280|En attente d'une décision : appel externe
+1281|Pause
+1282|Prêt à démarrer
+1283|Pas : %llu
+1284|Résultat x0 = %lld (0x%llx)
+1285|d0 = %g · s0 = %g · pas : %llu
+1286|(retour de la fonction)
+1287|Rien pour l'instant
+1288|Nombre à virgule, par ex. 3.14
+1289|Nombre : 42, -5 ou 0x1F
+1290|Valeur non comprise
+1291|Exécuter dans l'émulateur
+1292|%s à une adresse inaccessible 0x%llx
+1293|Écriture
+1294|Lecture
+1295|L'émulateur ne prend pas en charge l'instruction : %s
+1296|La fonction a renvoyé un résultat
+1297|Appel à %s ignoré (x0 = 0)
+1298|Appel à la fonction externe %s — arrêté
+1299|L'adresse 0x%llx est hors du code de la fonction — arrêté
+1300|Appel système (svc) — arrêté
+1301|Point d'arrêt (brk) — généralement une vérification d'erreur
+1302|Appel ignoré, x0 = 0x%llx
+1303|Tes dépôts et les dépôts publics : télécharger, modifier, committer
+1304|Le jeton est invalide ou expiré. Reconnecte-toi.
+1305|Limite de requêtes GitHub dépassée. Sans jeton, c'est 60 par heure ; connecte-toi avec un jeton pour passer à 5000.
+1306|Pas d'accès. Vérifie que le jeton a l'autorisation « Contents: Read and write » pour ce dépôt.\n\n%@
+1307|Introuvable. Un dépôt privé nécessite un jeton qui y a accès.
+1308|Conflit : le fichier a déjà changé sur GitHub. Actualise la liste et réessaie.
+1309|Branche : %@…
+1310|Télécharger tout le dépôt (ZIP)
+1311|Ouvrir sur le site
+1312|Envoyer les modifications (%lu)
+1313|Les fichiers modifiés dans ce dossier, en une seule fois
+1314| · téléchargé
+1315| · modifié par toi
+1316| · nouvelle version disponible
+1317|Envoyer les modifications (commit)
+1318|Retélécharger (remplacer ta copie)
+1319|Afficher dans « Mes fichiers »
+1320|Supprimer sur GitHub…
+1321|Enregistré dans « Mes fichiers/GitHub »
+1322|Téléchargement de l'archive du dépôt…
+1323|Connexion requise
+1324|Pour envoyer des modifications, connecte-toi avec un jeton sur l'écran principal GitHub.
+1325|Attention : le fichier a changé sur GitHub après ton téléchargement. L'envoi remplacera ces modifications par ta version.
+1326|Message de commit
+1327|Ce qui a changé
+1328|Envoyer
+1329|Envoi vers GitHub…
+1330|Envoyé avec des erreurs
+1331|Fichiers envoyés : %lu
+1332|Envoi %lu sur %lu : %@
+1333|impossible de lire le fichier
+1334|plus de 50 Mo — GitHub ne l'accepte pas via l'API
+1335|Supprimer « %@ » sur GitHub ?
+1336|Un commit de suppression sera créé. Le fichier reste dans l'historique du dépôt.
+1337|Suppression…
+1338|Tu peux indiquer des dossiers : src/main.c
+1339|Fichiers : %lu. Chaque fichier devient un commit distinct avec ce message.
+1340|Branche
+1341|Compte
+1342|Mes dépôts
+1343|Sans connexion, tu peux parcourir et télécharger les dépôts publics (jusqu'à 60 requêtes par heure). Pour voir les dépôts privés et envoyer des modifications, connecte-toi avec un jeton d'accès.
+1344|Les fichiers sont téléchargés dans « Mes fichiers/GitHub ». Ouvre un fichier, modifie-le dans GX Files, et un bouton « Envoyer les modifications » apparaît dans le dossier du dépôt.
+1345|Erreur de connexion
+1346|Se connecter avec un jeton…
+1347|Se déconnecter
+1348|Comment obtenir un jeton
+1349|Ouvrir un dépôt…
+1350|N'importe quel dépôt public : propriétaire/nom ou lien
+1351|Aucun dépôt
+1352|Se déconnecter de GitHub ?
+1353|Le jeton sera supprimé de cet appareil. Les fichiers téléchargés restent.
+1354|Jeton d'accès GitHub
+1355|1. Ouvre github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.\n2. Dans « Repository access », choisis les dépôts voulus.\n3. Dans « Permissions → Repository permissions », mets « Contents: Read and write ».\n4. Crée le jeton, copie-le et colle-le dans GX Files.\n\nLe jeton est stocké uniquement dans le trousseau de cet iPhone et envoyé uniquement à api.github.com.
+1356|Ouvrir la page des jetons
+1357|Connexion à GitHub
+1358|Colle un jeton d'accès (github_pat_… ou ghp_…).
+1359|Se connecter
+1360|Vérification du jeton…
+1361|Connexion impossible
+1362|Connecté en tant que %@
+1363|Ouvrir un dépôt
+1364|Par exemple : GRAFXXX/GX-Files ou un lien github.com/…
+1365|Utilise le format propriétaire/nom.
+1366|Impossible d'ouvrir

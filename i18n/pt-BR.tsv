@@ -1204,3 +1204,156 @@
 1211|Entre na pasta desejada e toque em “Abrir”. Se o botão não responder, tente o segundo método.
 1212|Método 1 (padrão)
 1213|Método 2 (compatível)
+1214|Unidades de rede (WebDAV)
+1215|PC, NAS, Nextcloud, Yandex Disk — baixar e enviar
+1216|Login ou senha incorretos
+1217|Sem acesso: verifique o login e a senha
+1218|Não encontrado no servidor
+1219|O servidor não suporta esta ação
+1220|O servidor ficou sem espaço
+1221|Erro do servidor: HTTP %ld
+1222|O servidor não respondeu como WebDAV — verifique o endereço
+1223|Enviar do app Arquivos…
+1224|Enviar da área de transferência do GX Files
+1225|Atualizar
+1226|Baixando “%@”…
+1227|Salvo em “Meus arquivos/WebDAV”: %@
+1228|Área de transferência vazia
+1229|Marque arquivos no GX Files, toque em “Copiar” e volte aqui.
+1230|Enviando para o servidor…
+1231|Enviado com erros
+1232|Arquivos não enviados: %d
+1233|Arquivos enviados: %lu
+1234|Baixar para “Meus arquivos”
+1235|Copiar link
+1236|Excluir “%@” do servidor?
+1237|O arquivo será excluído no servidor e não poderá ser recuperado.
+1238|Não foi possível excluir
+1239|Unidades de rede
+1240|WebDAV: PC, NAS, Nextcloud, ownCloud, Yandex Disk (https://webdav.yandex.ru) e outros. A senha fica guardada nas Chaves do iPhone.
+1241|Adicionar servidor
+1242|Endereço inválido
+1243|Novo servidor WebDAV
+1244|Endereço como https://servidor/remote.php/dav/files/nome/ ou http://192.168.1.10:8080/
+1245|Nome (ex.: Meu PC)
+1246|Login (pode ficar vazio)
+1247|Senha
+1248|Adicionar
+1249|Emulador
+1250|Pular chamadas externas
+1251|Argumentos x0–x7…
+1252|Limpar argumentos
+1253|Copiar registradores
+1254|Como funciona
+1255|Emulador ARM64
+1256|A função é executada instrução por instrução em uma sandbox: o arquivo não é alterado e nada roda de verdade. Defina os argumentos (x0–x7 são inteiros e ponteiros, d0–d7 são decimais), toque em “Passo” ou “Até o fim” e veja os registradores mudarem. O emulador não executa chamadas a outras bibliotecas (printf, objc_msgSend etc.): ele para ou as pula, retornando 0. Por isso funciona melhor com funções pequenas de cálculos e verificações.
+1257|Redefinir
+1258|Passo
+1259|Até o fim
+1260|Não foi possível preparar o emulador para esta função.
+1261| bytes
+1262|Execução concluída — toque em “Redefinir”
+1263|Executando…
+1264|Parado após %llu passos (talvez um loop infinito)
+1265|Chamada externa
+1266|O emulador não pode executar a função de outra biblioteca. Você pode pular a chamada e informar o resultado (x0).
+1267|Pular chamada
+1268|Argumentos
+1269|Separados por vírgula: x0, x1, … x7. Números: 42, -5, 0x1F. Vazio = 0.
+1270|Valor não entendido: %@
+1271|Estado
+1272|Registradores x (inteiros e ponteiros)
+1273|Registradores d (números decimais)
+1274|Acessos à memória
+1275|x0–x7 são os argumentos da função; o resultado é retornado em x0. Toque em um registrador para mudar o valor. Em amarelo, o que mudou no último passo.
+1276|Argumentos decimais são d0–d7 (float: s0–s7); o resultado é d0/s0.
+1277|Próxima instrução · pc = 0x%llx
+1278|Pronto: a função retornou um resultado
+1279|Parado
+1280|Aguardando decisão: chamada externa
+1281|Pausa
+1282|Pronto para executar
+1283|Passos: %llu
+1284|Resultado x0 = %lld (0x%llx)
+1285|d0 = %g · s0 = %g · passos: %llu
+1286|(retorno da função)
+1287|Nada ainda
+1288|Número decimal, ex.: 3.14
+1289|Número: 42, -5 ou 0x1F
+1290|Valor não entendido
+1291|Executar no emulador
+1292|%s em endereço inacessível 0x%llx
+1293|Escrita
+1294|Leitura
+1295|O emulador não suporta a instrução: %s
+1296|A função retornou um resultado
+1297|Chamada a %s pulada (x0 = 0)
+1298|Chamada à função externa %s — parado
+1299|O endereço 0x%llx está fora do código da função — parado
+1300|Chamada de sistema (svc) — parado
+1301|Ponto de parada (brk) — geralmente uma verificação de erro
+1302|Chamada pulada, x0 = 0x%llx
+1303|Seus repositórios e os públicos: baixar, editar, fazer commit
+1304|O token é inválido ou expirou. Entre novamente.
+1305|Limite de solicitações do GitHub excedido. Sem token são 60 por hora; entre com um token para subir para 5000.
+1306|Sem acesso. Verifique se o token tem a permissão “Contents: Read and write” para este repositório.\n\n%@
+1307|Não encontrado. Um repositório privado precisa de um token com acesso a ele.
+1308|Conflito: o arquivo no GitHub já mudou. Atualize a lista e tente de novo.
+1309|Branch: %@…
+1310|Baixar o repositório inteiro (ZIP)
+1311|Abrir no site
+1312|Enviar alterações (%lu)
+1313|Os arquivos que você alterou nesta pasta, de uma vez
+1314| · baixado
+1315| · alterado por você
+1316| · há uma versão nova
+1317|Enviar alterações (commit)
+1318|Baixar de novo (substituir sua cópia)
+1319|Mostrar em “Meus arquivos”
+1320|Excluir no GitHub…
+1321|Salvo em “Meus arquivos/GitHub”
+1322|Baixando o arquivo do repositório…
+1323|É preciso entrar
+1324|Para enviar alterações, entre com um token na tela principal do GitHub.
+1325|Atenção: o arquivo mudou no GitHub depois que você o baixou. O envio vai substituir essas alterações pela sua versão.
+1326|Mensagem do commit
+1327|O que mudou
+1328|Enviar
+1329|Enviando para o GitHub…
+1330|Enviado com erros
+1331|Arquivos enviados: %lu
+1332|Enviando %lu de %lu: %@
+1333|não foi possível ler o arquivo
+1334|maior que 50 MB — o GitHub não aceita pela API
+1335|Excluir “%@” no GitHub?
+1336|Será criado um commit de exclusão. O arquivo continua no histórico do repositório.
+1337|Excluindo…
+1338|Você pode indicar pastas: src/main.c
+1339|Arquivos: %lu. Cada arquivo vira um commit separado com esta mensagem.
+1340|Branch
+1341|Conta
+1342|Meus repositórios
+1343|Sem entrar, você pode ver e baixar repositórios públicos (até 60 solicitações por hora). Para ver os privados e enviar alterações, entre com um token de acesso.
+1344|Os arquivos são baixados em “Meus arquivos/GitHub”. Abra um arquivo, edite no GX Files e o botão “Enviar alterações” aparece na pasta do repositório.
+1345|Erro ao entrar
+1346|Entrar com token…
+1347|Sair
+1348|Como obter um token
+1349|Abrir repositório…
+1350|Qualquer público: dono/nome ou link
+1351|Nenhum repositório
+1352|Sair do GitHub?
+1353|O token será removido deste dispositivo. Os arquivos baixados continuam.
+1354|Token de acesso do GitHub
+1355|1. Abra github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.\n2. Em “Repository access”, escolha os repositórios.\n3. Em “Permissions → Repository permissions”, marque “Contents: Read and write”.\n4. Crie o token, copie e cole no GX Files.\n\nO token fica guardado só nas Chaves deste iPhone e é enviado só para api.github.com.
+1356|Abrir a página de tokens
+1357|Entrar no GitHub
+1358|Cole um token de acesso (github_pat_… ou ghp_…).
+1359|Entrar
+1360|Verificando o token…
+1361|Não foi possível entrar
+1362|Conectado como %@
+1363|Abrir repositório
+1364|Por exemplo: GRAFXXX/GX-Files ou um link github.com/…
+1365|Use o formato dono/nome.
+1366|Não foi possível abrir

@@ -214,6 +214,11 @@ NSString *_Nullable GXCompileDylib(NSString *src, NSString *out, NSArray<NSStrin
 - (instancetype)initWithPath:(NSString *)path;
 @end
 
+@interface GXGitHubVC : UITableViewController
+@end
+@interface GXDAVAccountsVC : UITableViewController   // сетевые диски WebDAV
+@end
+
 @interface GXServerVC : UITableViewController
 - (instancetype)initWithRoot:(NSString *)root;
 @end

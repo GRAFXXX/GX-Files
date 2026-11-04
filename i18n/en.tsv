@@ -1204,3 +1204,156 @@
 1211|Go inside the folder you need and tap “Open”. If the button doesn't respond, try the second method.
 1212|Method 1 (standard)
 1213|Method 2 (compatible)
+1214|Network drives (WebDAV)
+1215|PC, NAS, Nextcloud, Yandex Disk — download and upload
+1216|Wrong login or password
+1217|Access denied: check login and password
+1218|Not found on the server
+1219|The server doesn't support this action
+1220|The server is out of space
+1221|Server error: HTTP %ld
+1222|The server didn't answer like WebDAV — check the address
+1223|Upload from Files…
+1224|Upload from GX Files clipboard
+1225|Refresh
+1226|Downloading “%@”…
+1227|Saved to “My files/WebDAV”: %@
+1228|Clipboard is empty
+1229|Select files in GX Files and tap “Copy”, then come back here.
+1230|Uploading to the server…
+1231|Uploaded with errors
+1232|Files not uploaded: %d
+1233|Files uploaded: %lu
+1234|Download to “My files”
+1235|Copy link
+1236|Delete “%@” from the server?
+1237|The file will be deleted on the server and can't be restored.
+1238|Could not delete
+1239|Network drives
+1240|WebDAV: PC, NAS, Nextcloud, ownCloud, Yandex Disk (https://webdav.yandex.ru) and others. The password is stored in the iPhone Keychain.
+1241|Add server
+1242|Invalid address
+1243|New WebDAV server
+1244|Address like https://server/remote.php/dav/files/name/ or http://192.168.1.10:8080/
+1245|Name (e.g. My PC)
+1246|Login (may be empty)
+1247|Password
+1248|Add
+1249|Emulator
+1250|Skip external calls
+1251|Arguments x0–x7…
+1252|Clear arguments
+1253|Copy registers
+1254|How it works
+1255|ARM64 emulator
+1256|The function runs instruction by instruction in a sandbox: the file is not changed and nothing really runs. Set the arguments (x0–x7 are integers and pointers, d0–d7 are floating-point), tap “Step” or “Run to end” and watch the registers change. The emulator does not execute calls into other libraries (printf, objc_msgSend, etc.): it stops or skips them, returning 0. So it works best for small functions with calculations and checks.
+1257|Reset
+1258|Step
+1259|Run to end
+1260|Could not prepare the emulator for this function.
+1261| bytes
+1262|Execution finished — tap “Reset”
+1263|Running…
+1264|Stopped after %llu steps (possibly an infinite loop)
+1265|External call
+1266|The emulator cannot run another library's function. You can skip the call and supply the result (x0).
+1267|Skip call
+1268|Arguments
+1269|Comma-separated: x0, x1, … x7. Numbers: 42, -5, 0x1F. Empty means 0.
+1270|Could not parse value: %@
+1271|State
+1272|x registers (integers and pointers)
+1273|d registers (floating-point)
+1274|Memory accesses
+1275|x0–x7 are the function arguments, the result is returned in x0. Tap a register to change its value. Yellow marks what changed on the last step.
+1276|Floating-point arguments are d0–d7 (float: s0–s7), the result is d0/s0.
+1277|Next instruction · pc = 0x%llx
+1278|Done: the function returned
+1279|Stopped
+1280|Waiting for a decision: external call
+1281|Paused
+1282|Ready to run
+1283|Steps: %llu
+1284|Result x0 = %lld (0x%llx)
+1285|d0 = %g · s0 = %g · steps: %llu
+1286|(return from function)
+1287|Nothing yet
+1288|Floating-point number, e.g. 3.14
+1289|Number: 42, -5 or 0x1F
+1290|Could not parse value
+1291|Run in emulator
+1292|%s at an inaccessible address 0x%llx
+1293|Write
+1294|Read
+1295|The emulator does not support the instruction: %s
+1296|The function returned
+1297|Call to %s skipped (x0 = 0)
+1298|Call to external function %s — stopped
+1299|Address 0x%llx is outside the function's code — stopped
+1300|System call (svc) — stopped
+1301|Breakpoint (brk) — usually an error check
+1302|Call skipped, x0 = 0x%llx
+1303|Your own and public repositories: download, edit, commit
+1304|The token is invalid or expired. Sign in again.
+1305|GitHub request limit exceeded. Without a token it's 60 per hour; sign in with a token to raise it to 5000.
+1306|No access. Make sure the token has the “Contents: Read and write” permission for this repository.\n\n%@
+1307|Not found. A private repository needs a token with access to it.
+1308|Conflict: the file on GitHub has already changed. Refresh the list and try again.
+1309|Branch: %@…
+1310|Download the whole repository (ZIP)
+1311|Open on the website
+1312|Commit changes (%lu)
+1313|Files you changed in this folder — in one go
+1314| · downloaded
+1315| · changed by you
+1316| · newer version available
+1317|Commit changes
+1318|Download again (replace your copy)
+1319|Show in “My Files”
+1320|Delete on GitHub…
+1321|Saved to “My Files/GitHub”
+1322|Downloading the repository archive…
+1323|Sign-in required
+1324|To push changes, sign in with a token on the main GitHub screen.
+1325|Warning: the file changed on GitHub after you downloaded it. Pushing will replace those changes with your version.
+1326|Commit message
+1327|What changed
+1328|Push
+1329|Pushing to GitHub…
+1330|Pushed with errors
+1331|Files pushed: %lu
+1332|Pushing %lu of %lu: %@
+1333|could not read the file
+1334|larger than 50 MB — GitHub won't accept it via the API
+1335|Delete “%@” on GitHub?
+1336|A commit that deletes it will be created. The file stays in the repository history.
+1337|Deleting…
+1338|You can include folders: src/main.c
+1339|Files: %lu. Each file becomes a separate commit with this message.
+1340|Branch
+1341|Account
+1342|My repositories
+1343|Without signing in you can browse and download public repositories (up to 60 requests per hour). To see private ones and push changes, sign in with an access token.
+1344|Files are downloaded to “My Files/GitHub”. Open a file, edit it in GX Files, and a “Commit changes” button appears in the repository folder.
+1345|Sign-in error
+1346|Sign in with a token…
+1347|Sign out
+1348|How to get a token
+1349|Open repository…
+1350|Any public one: owner/name or a link
+1351|No repositories
+1352|Sign out of GitHub?
+1353|The token will be removed from this device. Downloaded files stay.
+1354|GitHub access token
+1355|1. Open github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.\n2. Under “Repository access”, choose the repositories you need.\n3. Under “Permissions → Repository permissions”, set “Contents: Read and write”.\n4. Create the token, copy it and paste it into GX Files.\n\nThe token is stored only in this iPhone's Keychain and is sent only to api.github.com.
+1356|Open the tokens page
+1357|Sign in to GitHub
+1358|Paste an access token (github_pat_… or ghp_…).
+1359|Sign in
+1360|Checking the token…
+1361|Could not sign in
+1362|Signed in as %@
+1363|Open repository
+1364|For example: GRAFXXX/GX-Files or a github.com/… link
+1365|Use the owner/name format.
+1366|Could not open

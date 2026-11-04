@@ -45,6 +45,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Localizar e substituir texto ou hex em uma pasta inteira — até dentro de ZIP/APK/IPA sem descompactar
 - Transferência por Wi‑Fi pelo navegador do computador
 - “Abrir no GX Files” pelo Compartilhar; apk, dylib, so, dex e btx abrem no GX Files a partir do app Arquivos
+- Unidades de rede via WebDAV — computador, NAS, Nextcloud; cliente do GitHub: ver, baixar, editar e fazer commit pelo celular
 
 **Formatos**
 - ZIP, APK, IPA, JAR: edição direto no arquivo compactado; leitura de tar, 7z, rar e outros
@@ -57,6 +58,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Strings: busca e edição no lugar, referências a partir do código
 - Classes Objective-C → cabeçalhos .h
 - Desmontador ARM64, pseudocódigo C aproximado, assembler integrado
+- Emulador ARM64: execute uma função passo a passo em uma sandbox e acompanhe os registradores
 - Números e constantes, imagens e fontes embutidas, cores da interface
 - Reassinatura ad hoc após editar
 

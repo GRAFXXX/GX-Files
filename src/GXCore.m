@@ -389,6 +389,8 @@ NSArray<NSDictionary *> *GXRootSections(void) {
 
     NSMutableArray *tools = section(GXL(@"Инструменты"));
     action(tools, GXL(@"Передача по Wi‑Fi"), GXL(@"Скачивайте и загружайте файлы с компьютера через браузер"), @"wifi", @"wifi", UIColor.systemBlueColor);
+    action(tools, GXL(@"GitHub"), GXL(@"Свои и публичные репозитории: скачать, изменить, отправить коммит"), @"github", @"chevron.left.forwardslash.chevron.right", UIColor.labelColor);
+    action(tools, GXL(@"Сетевые диски (WebDAV)"), GXL(@"Компьютер, NAS, Nextcloud, Яндекс Диск — скачать и загрузить"), @"webdav", @"externaldrive.connected.to.line.below.fill", UIColor.systemCyanColor);
     action(tools, GXL(@"Компилятор C → dylib"), GXL(@"Свой код → arm64 dylib прямо на iPhone (TinyCC)"), @"compiler", @"hammer.fill", UIColor.systemTealColor);
     action(tools, GXL(@"Найти и заменить текст"), GXL(@"Во всех файлах и внутри APK/IPA/ZIP — без открытия"), @"findreplace", @"text.magnifyingglass", UIColor.systemOrangeColor);
     action(tools, GXL(@"Поиск файлов по имени"), GXL(@"По всему контейнеру"), @"search", @"magnifyingglass", UIColor.systemOrangeColor);

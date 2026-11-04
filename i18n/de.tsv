@@ -1204,3 +1204,156 @@
 1211|Öffne den gewünschten Ordner und tippe auf „Öffnen“. Reagiert die Taste nicht, versuche die zweite Methode.
 1212|Methode 1 (Standard)
 1213|Methode 2 (kompatibel)
+1214|Netzlaufwerke (WebDAV)
+1215|PC, NAS, Nextcloud, Yandex Disk — herunter- und hochladen
+1216|Falscher Benutzername oder falsches Passwort
+1217|Kein Zugriff: Benutzername und Passwort prüfen
+1218|Auf dem Server nicht gefunden
+1219|Der Server unterstützt diese Aktion nicht
+1220|Auf dem Server ist kein Platz mehr
+1221|Serverfehler: HTTP %ld
+1222|Der Server antwortet nicht wie WebDAV — Adresse prüfen
+1223|Aus „Dateien“ hochladen…
+1224|Aus der GX Files-Zwischenablage hochladen
+1225|Aktualisieren
+1226|Lade „%@“ herunter…
+1227|Gespeichert in „Meine Dateien/WebDAV“: %@
+1228|Zwischenablage leer
+1229|Markiere Dateien in GX Files, tippe auf „Kopieren“ und komm dann hierher zurück.
+1230|Lade auf den Server hoch…
+1231|Mit Fehlern hochgeladen
+1232|Nicht hochgeladene Dateien: %d
+1233|Hochgeladene Dateien: %lu
+1234|In „Meine Dateien“ laden
+1235|Link kopieren
+1236|„%@“ vom Server löschen?
+1237|Die Datei wird auf dem Server gelöscht und kann nicht wiederhergestellt werden.
+1238|Löschen fehlgeschlagen
+1239|Netzlaufwerke
+1240|WebDAV: PC, NAS, Nextcloud, ownCloud, Yandex Disk (https://webdav.yandex.ru) und andere. Das Passwort wird im iPhone-Schlüsselbund gespeichert.
+1241|Server hinzufügen
+1242|Ungültige Adresse
+1243|Neuer WebDAV-Server
+1244|Adresse wie https://server/remote.php/dav/files/name/ oder http://192.168.1.10:8080/
+1245|Name (z. B. Mein PC)
+1246|Benutzername (darf leer sein)
+1247|Passwort
+1248|Hinzufügen
+1249|Emulator
+1250|Externe Aufrufe überspringen
+1251|Argumente x0–x7…
+1252|Argumente löschen
+1253|Register kopieren
+1254|So funktioniert es
+1255|ARM64-Emulator
+1256|Die Funktion wird Befehl für Befehl in einer Sandbox ausgeführt: Die Datei wird nicht verändert und nichts läuft wirklich. Lege die Argumente fest (x0–x7 sind Ganzzahlen und Zeiger, d0–d7 Gleitkommazahlen), tippe auf „Schritt“ oder „Bis zum Ende“ und beobachte, wie sich die Register ändern. Aufrufe anderer Bibliotheken (printf, objc_msgSend usw.) führt der Emulator nicht aus: Er hält an oder überspringt sie und gibt 0 zurück. Am besten eignet er sich daher für kleine Funktionen mit Berechnungen und Prüfungen.
+1257|Zurücksetzen
+1258|Schritt
+1259|Bis zum Ende
+1260|Der Emulator konnte für diese Funktion nicht vorbereitet werden.
+1261| Bytes
+1262|Ausführung beendet – tippe auf „Zurücksetzen“
+1263|Wird ausgeführt…
+1264|Nach %llu Schritten angehalten (möglicherweise eine Endlosschleife)
+1265|Externer Aufruf
+1266|Der Emulator kann keine fremde Funktion ausführen. Du kannst den Aufruf überspringen und das Ergebnis (x0) vorgeben.
+1267|Aufruf überspringen
+1268|Argumente
+1269|Durch Kommas getrennt: x0, x1, … x7. Zahlen: 42, -5, 0x1F. Leer bedeutet 0.
+1270|Wert nicht verstanden: %@
+1271|Status
+1272|x-Register (Ganzzahlen und Zeiger)
+1273|d-Register (Gleitkommazahlen)
+1274|Speicherzugriffe
+1275|x0–x7 sind die Funktionsargumente, das Ergebnis wird in x0 zurückgegeben. Tippe auf ein Register, um den Wert zu ändern. Gelb markiert, was sich im letzten Schritt geändert hat.
+1276|Gleitkomma-Argumente sind d0–d7 (float: s0–s7), das Ergebnis ist d0/s0.
+1277|Nächster Befehl · pc = 0x%llx
+1278|Fertig: Die Funktion hat ein Ergebnis zurückgegeben
+1279|Angehalten
+1280|Wartet auf Entscheidung: externer Aufruf
+1281|Pause
+1282|Bereit zum Start
+1283|Schritte: %llu
+1284|Ergebnis x0 = %lld (0x%llx)
+1285|d0 = %g · s0 = %g · Schritte: %llu
+1286|(Rückkehr aus der Funktion)
+1287|Noch nichts
+1288|Gleitkommazahl, z. B. 3.14
+1289|Zahl: 42, -5 oder 0x1F
+1290|Wert nicht verstanden
+1291|Im Emulator ausführen
+1292|%s an unzugänglicher Adresse 0x%llx
+1293|Schreiben
+1294|Lesen
+1295|Der Emulator unterstützt den Befehl nicht: %s
+1296|Die Funktion hat ein Ergebnis zurückgegeben
+1297|Aufruf von %s übersprungen (x0 = 0)
+1298|Aufruf der externen Funktion %s – angehalten
+1299|Adresse 0x%llx liegt außerhalb des Funktionscodes – angehalten
+1300|Systemaufruf (svc) – angehalten
+1301|Haltepunkt (brk) – meist eine Fehlerprüfung
+1302|Aufruf übersprungen, x0 = 0x%llx
+1303|Eigene und öffentliche Repositorys: herunterladen, bearbeiten, committen
+1304|Das Token ist ungültig oder abgelaufen. Melde dich erneut an.
+1305|GitHub-Anfragelimit überschritten. Ohne Token sind es 60 pro Stunde; melde dich mit einem Token an, um es auf 5000 zu erhöhen.
+1306|Kein Zugriff. Prüfe, ob das Token die Berechtigung „Contents: Read and write“ für dieses Repository hat.\n\n%@
+1307|Nicht gefunden. Für ein privates Repository brauchst du ein Token mit Zugriff darauf.
+1308|Konflikt: Die Datei auf GitHub hat sich bereits geändert. Aktualisiere die Liste und versuche es erneut.
+1309|Branch: %@…
+1310|Ganzes Repository herunterladen (ZIP)
+1311|Auf der Website öffnen
+1312|Änderungen committen (%lu)
+1313|Dateien, die du in diesem Ordner geändert hast – in einem Schritt
+1314| · heruntergeladen
+1315| · von dir geändert
+1316| · neuere Version verfügbar
+1317|Änderungen committen
+1318|Erneut herunterladen (deine Kopie ersetzen)
+1319|In „Meine Dateien“ zeigen
+1320|Auf GitHub löschen…
+1321|In „Meine Dateien/GitHub“ gespeichert
+1322|Repository-Archiv wird heruntergeladen…
+1323|Anmeldung erforderlich
+1324|Um Änderungen zu senden, melde dich auf dem GitHub-Hauptbildschirm mit einem Token an.
+1325|Achtung: Die Datei hat sich auf GitHub geändert, nachdem du sie heruntergeladen hast. Das Senden ersetzt diese Änderungen durch deine Version.
+1326|Commit-Nachricht
+1327|Was geändert wurde
+1328|Senden
+1329|Sende an GitHub…
+1330|Mit Fehlern gesendet
+1331|Gesendete Dateien: %lu
+1332|Sende %lu von %lu: %@
+1333|Datei konnte nicht gelesen werden
+1334|größer als 50 MB – GitHub nimmt das über die API nicht an
+1335|„%@“ auf GitHub löschen?
+1336|Es wird ein Commit mit der Löschung erstellt. Die Datei bleibt in der Repository-Historie.
+1337|Wird gelöscht…
+1338|Du kannst Ordner angeben: src/main.c
+1339|Dateien: %lu. Jede Datei wird ein eigener Commit mit dieser Nachricht.
+1340|Branch
+1341|Konto
+1342|Meine Repositorys
+1343|Ohne Anmeldung kannst du öffentliche Repositorys ansehen und herunterladen (bis zu 60 Anfragen pro Stunde). Für private Repositorys und zum Senden von Änderungen melde dich mit einem Zugriffstoken an.
+1344|Dateien werden in „Meine Dateien/GitHub“ heruntergeladen. Öffne eine Datei, bearbeite sie in GX Files – dann erscheint im Repository-Ordner die Schaltfläche „Änderungen committen“.
+1345|Anmeldefehler
+1346|Mit Token anmelden…
+1347|Abmelden
+1348|So bekommst du ein Token
+1349|Repository öffnen…
+1350|Beliebiges öffentliches: Besitzer/Name oder Link
+1351|Keine Repositorys
+1352|Von GitHub abmelden?
+1353|Das Token wird von diesem Gerät entfernt. Heruntergeladene Dateien bleiben erhalten.
+1354|GitHub-Zugriffstoken
+1355|1. Öffne github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.\n2. Wähle unter „Repository access“ die gewünschten Repositorys.\n3. Setze unter „Permissions → Repository permissions“ „Contents: Read and write“.\n4. Erstelle das Token, kopiere es und füge es in GX Files ein.\n\nDas Token wird nur im Schlüsselbund dieses iPhones gespeichert und nur an api.github.com gesendet.
+1356|Token-Seite öffnen
+1357|Bei GitHub anmelden
+1358|Füge ein Zugriffstoken ein (github_pat_… oder ghp_…).
+1359|Anmelden
+1360|Token wird geprüft…
+1361|Anmeldung fehlgeschlagen
+1362|Angemeldet als %@
+1363|Repository öffnen
+1364|Zum Beispiel: GRAFXXX/GX-Files oder ein github.com/…-Link
+1365|Verwende das Format Besitzer/Name.
+1366|Konnte nicht geöffnet werden

@@ -8,6 +8,7 @@
 #include "core/gx_asm.h"
 #include "core/gx_img.h"
 #include "core/gx_design.h"
+#include "core/gx_emu.h"
 #import <CoreText/CoreText.h>
 #import <PhotosUI/PhotosUI.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
@@ -1006,6 +1007,272 @@ static void GXRunDecompile(UIViewController *vc, GXBinDoc *doc, int ci);
 
 #pragma mark - Функции
 
+
+#pragma mark - Эмулятор
+
+@interface GXEmuVC : UITableViewController
+- (instancetype)initWithDoc:(GXBinDoc *)doc addr:(uint64_t)addr name:(NSString *)name;
+@end
+
+@implementation GXEmuVC {
+    GXBinDoc *_doc; uint64_t _addr; NSString *_name;
+    gx_emu *_e;
+    uint64_t _prevX[34]; uint64_t _prevV[32];
+    NSMutableDictionary<NSNumber *, NSNumber *> *_initX;   // заданные аргументы (0..30 — x, 100+n — d-регистры как биты)
+    NSMutableArray<NSString *> *_log;
+    int _state; BOOL _skip, _busy;
+}
+- (instancetype)initWithDoc:(GXBinDoc *)doc addr:(uint64_t)addr name:(NSString *)name {
+    if ((self = [super initWithStyle:UITableViewStyleInsetGrouped])) {
+        _doc = doc; _addr = addr; _name = name.copy;
+        _initX = [NSMutableDictionary dictionary]; _log = [NSMutableArray array];
+        _skip = [NSUserDefaults.standardUserDefaults boolForKey:@"gxEmuSkipExt"];
+    }
+    return self;
+}
+- (void)dealloc { if (_e) gx_emu_free(_e); }
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = GXL(@"Эмулятор");
+    self.navigationItem.prompt = _name;
+    [self.tableView registerClass:UITableViewCell.class forCellReuseIdentifier:@"c"];
+    [self buildMenu];
+    [self reset];
+}
+- (void)viewWillAppear:(BOOL)a { [super viewWillAppear:a]; self.navigationController.toolbarHidden = NO; }
+- (void)viewWillDisappear:(BOOL)a { [super viewWillDisappear:a]; self.navigationController.toolbarHidden = YES; }
+- (void)buildMenu {
+    __weak typeof(self) ws = self;
+    UIAction *skip = [UIAction actionWithTitle:GXL(@"Пропускать внешние вызовы") image:[UIImage systemImageNamed:@"forward"] identifier:nil handler:^(UIAction *x) {
+        GXEmuVC *me = ws; if (!me) return;
+        me->_skip = !me->_skip; [NSUserDefaults.standardUserDefaults setBool:me->_skip forKey:@"gxEmuSkipExt"];
+        if (me->_e) me->_e->skip_ext = me->_skip;
+        [me buildMenu];
+    }];
+    skip.state = _skip ? UIMenuElementStateOn : UIMenuElementStateOff;
+    UIAction *args = [UIAction actionWithTitle:GXL(@"Аргументы x0–x7…") image:[UIImage systemImageNamed:@"keyboard"] identifier:nil handler:^(UIAction *x) { [ws askArgs]; }];
+    UIAction *clr = [UIAction actionWithTitle:GXL(@"Очистить аргументы") image:[UIImage systemImageNamed:@"xmark.circle"] identifier:nil handler:^(UIAction *x) { GXEmuVC *me = ws; [me->_initX removeAllObjects]; [me reset]; }];
+    UIAction *cp = [UIAction actionWithTitle:GXL(@"Копировать регистры") image:[UIImage systemImageNamed:@"doc.on.doc"] identifier:nil handler:^(UIAction *x) { UIPasteboard.generalPasteboard.string = [ws dump]; GXToast(ws.view, GXL(@"Скопировано")); }];
+    UIAction *help = [UIAction actionWithTitle:GXL(@"Как это работает") image:[UIImage systemImageNamed:@"questionmark.circle"] identifier:nil handler:^(UIAction *x) {
+        GXAlert(ws, GXL(@"Эмулятор ARM64"), GXL(@"Функция выполняется по инструкциям в песочнице: файл не меняется и ничего не запускается по-настоящему. Задай аргументы (x0–x7 — целые и указатели, d0–d7 — дробные), нажимай «Шаг» или «До конца» и смотри, как меняются регистры. Вызовы других библиотек (printf, objc_msgSend и т.п.) эмулятор не выполняет: он останавливается или пропускает их, возвращая 0. Поэтому лучше всего он подходит для небольших функций с расчётами и проверками."));
+    }];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] menu:[UIMenu menuWithChildren:@[args, clr, skip, cp, help]]];
+    UIBarButtonItem *fl = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    UIBarButtonItem *rs = [[UIBarButtonItem alloc] initWithTitle:GXL(@"Сброс") style:UIBarButtonItemStylePlain target:self action:@selector(reset)];
+    UIBarButtonItem *st = [[UIBarButtonItem alloc] initWithTitle:GXL(@"Шаг") style:UIBarButtonItemStylePlain target:self action:@selector(step)];
+    UIBarButtonItem *run = [[UIBarButtonItem alloc] initWithTitle:GXL(@"До конца") style:UIBarButtonItemStyleDone target:self action:@selector(runAll)];
+    self.toolbarItems = @[rs, fl, st, fl, run];
+}
+- (void)snapshot {
+    memcpy(_prevX, _e->x, sizeof(uint64_t) * 32); _prevX[32] = _e->pc; _prevX[33] = _e->nzcv;
+    for (int i = 0; i < 32; i++) _prevV[i] = _e->v[i].d[0];
+}
+- (void)reset {
+    if (_busy) return;
+    if (_e) gx_emu_free(_e);
+    _e = gx_emu_new(&_doc->bin, _addr);
+    if (!_e) { GXAlert(self, GXL(@"Ошибка"), GXL(@"Не удалось подготовить эмулятор для этой функции.")); return; }
+    _e->skip_ext = _skip;
+    [_initX enumerateKeysAndObjectsUsingBlock:^(NSNumber *k, NSNumber *v, BOOL *stop) {
+        int r = k.intValue; if (r < 100) self->_e->x[r] = v.unsignedLongLongValue; else self->_e->v[r - 100].d[0] = v.unsignedLongLongValue;
+    }];
+    _state = GX_EMU_OK; [_log removeAllObjects];
+    [self snapshot];
+    [self.tableView reloadData];
+}
+- (void)addMemLog {
+    for (int i = 0; i < _e->nmem; i++) {
+        gx_emu_mem m = _e->mem[i];
+        [_log insertObject:[NSString stringWithFormat:@"#%llu  %@ [0x%llx] %d%@ = 0x%llx", (unsigned long long)_e->steps, m.write ? @"W" : @"R", (unsigned long long)m.addr, m.size, GXL(@" байт"), (unsigned long long)m.val] atIndex:0];
+    }
+    while (_log.count > 200) [_log removeLastObject];
+}
+- (BOOL)finished { return _state == GX_EMU_RETURNED || _state == GX_EMU_STOPPED; }
+- (void)step {
+    if (_busy || !_e) return;
+    if ([self finished]) { GXToast(self.view, GXL(@"Выполнение завершено — нажми «Сброс»")); return; }
+    if (_state == GX_EMU_EXTCALL) { [self askReturn]; return; }
+    [self snapshot];
+    _state = gx_emu_step(_e);
+    [self addMemLog];
+    [self.tableView reloadData];
+}
+- (void)runAll {
+    if (_busy || !_e) return;
+    if ([self finished]) { GXToast(self.view, GXL(@"Выполнение завершено — нажми «Сброс»")); return; }
+    if (_state == GX_EMU_EXTCALL) { [self askReturn]; return; }
+    [self snapshot];
+    _busy = YES;
+    [GXHUD showIn:self.navigationController.view ?: self.view text:GXL(@"Выполняю…")];
+    gx_emu *e = _e;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        NSMutableArray *log = [NSMutableArray array];
+        int r = GX_EMU_OK;
+        for (uint64_t i = 0; i < 5000000; i++) {
+            r = gx_emu_step(e);
+            for (int k = 0; k < e->nmem; k++) if (log.count < 400) [log addObject:@[@(e->steps), @(e->mem[k].write), @(e->mem[k].addr), @(e->mem[k].size), @(e->mem[k].val)]]; else { [log removeObjectAtIndex:0]; [log addObject:@[@(e->steps), @(e->mem[k].write), @(e->mem[k].addr), @(e->mem[k].size), @(e->mem[k].val)]]; }
+            if (r != GX_EMU_OK) break;
+        }
+        if (r == GX_EMU_OK) { snprintf(e->reason, sizeof e->reason, GXT("Остановлено после %llu шагов (возможно, бесконечный цикл)"), (unsigned long long)e->steps); r = GX_EMU_STOPPED; }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [GXHUD hide];
+            self->_busy = NO; self->_state = r;
+            for (NSArray *m in log) [self->_log insertObject:[NSString stringWithFormat:@"#%@  %@ [0x%llx] %@%@ = 0x%llx", m[0], [m[1] boolValue] ? @"W" : @"R", [m[2] unsignedLongLongValue], m[3], GXL(@" байт"), [m[4] unsignedLongLongValue]] atIndex:0];
+            while (self->_log.count > 200) [self->_log removeLastObject];
+            [self.tableView reloadData];
+        });
+    });
+}
+- (void)askReturn {
+    UIAlertController *a = [UIAlertController alertControllerWithTitle:GXL(@"Внешний вызов") message:[NSString stringWithFormat:@"%s\n\n%@", _e->reason, GXL(@"Эмулятор не может выполнить чужую функцию. Можно пропустить вызов и подставить результат (x0).")] preferredStyle:UIAlertControllerStyleAlert];
+    [a addTextFieldWithConfigurationHandler:^(UITextField *t) { t.placeholder = @"x0 = 0"; t.keyboardType = UIKeyboardTypeNumbersAndPunctuation; }];
+    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
+    __weak typeof(self) ws = self;
+    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Пропустить вызов") style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) {
+        GXEmuVC *me = ws; if (!me || !me->_e) return;
+        uint64_t v = 0; [GXEmuVC parse:a.textFields[0].text into:&v dbl:NO];
+        [me snapshot];
+        gx_emu_return_from_call(me->_e, v);
+        me->_state = GX_EMU_OK;
+        [me.tableView reloadData];
+    }]];
+    [self presentViewController:a animated:YES completion:nil];
+}
++ (BOOL)parse:(NSString *)s into:(uint64_t *)out dbl:(BOOL)dbl {
+    s = [s stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];
+    if (!s.length) { *out = 0; return YES; }
+    const char *c = s.UTF8String; char *end = NULL;
+    if (dbl) { double d = strtod(c, &end); if (*end) return NO; memcpy(out, &d, 8); return YES; }
+    if (s.length > 2 && ([s hasPrefix:@"0x"] || [s hasPrefix:@"0X"])) { *out = strtoull(c + 2, &end, 16); return !*end; }
+    if ([s hasPrefix:@"-"]) { *out = (uint64_t)strtoll(c, &end, 10); return !*end; }
+    if ([s containsString:@"."]) { double d = strtod(c, &end); if (*end) return NO; *out = (uint64_t)(int64_t)d; return YES; }
+    *out = strtoull(c, &end, 10); return !*end;
+}
+- (void)askArgs {
+    UIAlertController *a = [UIAlertController alertControllerWithTitle:GXL(@"Аргументы") message:GXL(@"Через запятую: x0, x1, … x7. Числа: 42, -5, 0x1F. Пусто — 0.") preferredStyle:UIAlertControllerStyleAlert];
+    NSMutableArray *cur = [NSMutableArray array];
+    for (int i = 0; i < 8; i++) { NSNumber *v = _initX[@(i)]; [cur addObject:v ? [NSString stringWithFormat:@"%lld", v.longLongValue] : @"0"]; }
+    [a addTextFieldWithConfigurationHandler:^(UITextField *t) { t.text = [cur componentsJoinedByString:@", "]; t.keyboardType = UIKeyboardTypeNumbersAndPunctuation; }];
+    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
+    __weak typeof(self) ws = self;
+    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Готово") style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) {
+        GXEmuVC *me = ws; if (!me) return;
+        NSArray *parts = [a.textFields[0].text componentsSeparatedByString:@","];
+        for (NSUInteger i = 0; i < parts.count && i < 8; i++) {
+            uint64_t v; if (![GXEmuVC parse:parts[i] into:&v dbl:NO]) { GXAlert(me, GXL(@"Ошибка"), [NSString stringWithFormat:GXL(@"Не понял значение: %@"), parts[i]]); return; }
+            me->_initX[@(i)] = @(v);
+        }
+        [me reset];
+    }]];
+    [self presentViewController:a animated:YES completion:nil];
+}
+- (NSString *)dump {
+    NSMutableString *s = [NSMutableString string];
+    for (int i = 0; i < 31; i++) [s appendFormat:@"x%d = 0x%llx\n", i, (unsigned long long)_e->x[i]];
+    [s appendFormat:@"sp = 0x%llx\npc = 0x%llx\n", (unsigned long long)_e->x[31], (unsigned long long)_e->pc];
+    for (int i = 0; i < 8; i++) [s appendFormat:@"d%d = %g\n", i, _e->v[i].f[0]];
+    return s;
+}
+// секции: 0 — состояние, 1 — x, 2 — d, 3 — память
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv { return 4; }
+- (NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)s {
+    return @[GXL(@"Состояние"), GXL(@"Регистры x (целые и указатели)"), GXL(@"Регистры d (дробные числа)"), GXL(@"Обращения к памяти")][s];
+}
+- (NSString *)tableView:(UITableView *)tv titleForFooterInSection:(NSInteger)s {
+    if (s == 1) return GXL(@"x0–x7 — аргументы функции, результат возвращается в x0. Нажми на регистр, чтобы изменить значение. Жёлтым отмечено то, что изменилось на последнем шаге.");
+    if (s == 2) return GXL(@"Дробные аргументы — d0–d7 (float — s0–s7), результат — d0/s0.");
+    return nil;
+}
+- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s {
+    if (!_e) return 0;
+    return s == 0 ? 3 : s == 1 ? 34 : s == 2 ? 8 : (NSInteger)MAX(_log.count, 1);
+}
+- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)ip {
+    UITableViewCell *c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:nil];
+    UIFont *mono = [UIFont monospacedSystemFontOfSize:14 weight:UIFontWeightRegular];
+    c.textLabel.font = mono; c.detailTextLabel.font = mono;
+    c.selectionStyle = UITableViewCellSelectionStyleNone;
+    if (ip.section == 0) {
+        UITableViewCell *s = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:nil];
+        s.selectionStyle = UITableViewCellSelectionStyleNone;
+        s.textLabel.numberOfLines = 0; s.detailTextLabel.numberOfLines = 0;
+        s.detailTextLabel.textColor = UIColor.secondaryLabelColor;
+        if (ip.row == 0) {
+            int64_t off = gx_bin_a2o(&_doc->bin, _e->pc);
+            char dis[160] = "—";
+            if (off >= 0 && (size_t)off + 4 <= _doc.data.length) { const uint8_t *p = (const uint8_t *)_doc.data.bytes + off; gx_a64_dis((uint32_t)p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24, _e->pc, dis, sizeof dis, NULL); }
+            s.textLabel.font = mono; s.textLabel.text = [NSString stringWithUTF8String:dis] ?: @"?";
+            s.detailTextLabel.text = [NSString stringWithFormat:GXL(@"Следующая инструкция · pc = 0x%llx"), (unsigned long long)_e->pc];
+        } else if (ip.row == 1) {
+            NSString *st = _state == GX_EMU_RETURNED ? GXL(@"Готово: функция вернула результат") : _state == GX_EMU_STOPPED ? GXL(@"Остановлено") : _state == GX_EMU_EXTCALL ? GXL(@"Ждёт решения: внешний вызов") : _e->steps ? GXL(@"Пауза") : GXL(@"Готов к запуску");
+            s.textLabel.text = st;
+            s.detailTextLabel.text = _e->reason[0] ? [NSString stringWithUTF8String:_e->reason] : [NSString stringWithFormat:GXL(@"Шагов: %llu"), (unsigned long long)_e->steps];
+            s.textLabel.textColor = _state == GX_EMU_RETURNED ? UIColor.systemGreenColor : _state == GX_EMU_OK ? UIColor.labelColor : UIColor.systemOrangeColor;
+            if (_state == GX_EMU_EXTCALL) { s.selectionStyle = UITableViewCellSelectionStyleDefault; s.accessoryType = UITableViewCellAccessoryDisclosureIndicator; }
+        } else {
+            s.textLabel.text = [NSString stringWithFormat:GXL(@"Результат x0 = %lld (0x%llx)"), (long long)_e->x[0], (unsigned long long)_e->x[0]];
+            s.detailTextLabel.text = [NSString stringWithFormat:GXL(@"d0 = %g · s0 = %g · шагов: %llu"), _e->v[0].f[0], (double)_e->v[0].s[0], (unsigned long long)_e->steps];
+            s.textLabel.font = mono;
+        }
+        return s;
+    }
+    if (ip.section == 1) {
+        int r = (int)ip.row; uint64_t v, prev; NSString *name;
+        if (r < 29) { name = [NSString stringWithFormat:@"x%d", r]; v = _e->x[r]; prev = _prevX[r]; }
+        else if (r == 29) { name = @"fp"; v = _e->x[29]; prev = _prevX[29]; }
+        else if (r == 30) { name = @"lr"; v = _e->x[30]; prev = _prevX[30]; }
+        else if (r == 31) { name = @"sp"; v = _e->x[31]; prev = _prevX[31]; }
+        else if (r == 32) { name = @"pc"; v = _e->pc; prev = _prevX[32]; }
+        else { name = @"nzcv"; v = _e->nzcv; prev = _prevX[33]; }
+        c.textLabel.text = name;
+        if (r == 33) c.detailTextLabel.text = [NSString stringWithFormat:@"%c%c%c%c", v & 8 ? 'N' : '-', v & 4 ? 'Z' : '-', v & 2 ? 'C' : '-', v & 1 ? 'V' : '-'];
+        else if (r == 30 && v == GX_EMU_RET_MAGIC) c.detailTextLabel.text = GXL(@"(возврат из функции)");
+        else if (v < 0x100000 || ((int64_t)v > -0x100000 && (int64_t)v < 0)) c.detailTextLabel.text = [NSString stringWithFormat:@"%lld  · 0x%llx", (long long)v, (unsigned long long)v];
+        else c.detailTextLabel.text = [NSString stringWithFormat:@"0x%llx", (unsigned long long)v];
+        if (v != prev) c.backgroundColor = [UIColor.systemYellowColor colorWithAlphaComponent:0.25];
+        if (r < 32) c.selectionStyle = UITableViewCellSelectionStyleDefault;
+        return c;
+    }
+    if (ip.section == 2) {
+        int r = (int)ip.row;
+        c.textLabel.text = [NSString stringWithFormat:@"d%d", r];
+        c.detailTextLabel.text = [NSString stringWithFormat:@"%.10g  · s%d %.7g", _e->v[r].f[0], r, (double)_e->v[r].s[0]];
+        if (_e->v[r].d[0] != _prevV[r]) c.backgroundColor = [UIColor.systemYellowColor colorWithAlphaComponent:0.25];
+        c.selectionStyle = UITableViewCellSelectionStyleDefault;
+        return c;
+    }
+    c.textLabel.font = [UIFont monospacedSystemFontOfSize:12 weight:UIFontWeightRegular];
+    c.textLabel.adjustsFontSizeToFitWidth = YES;
+    c.textLabel.text = _log.count ? _log[ip.row] : GXL(@"Пока нет");
+    if (!_log.count) c.textLabel.textColor = UIColor.secondaryLabelColor;
+    return c;
+}
+- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)ip {
+    [tv deselectRowAtIndexPath:ip animated:YES];
+    if (_busy || !_e) return;
+    if (ip.section == 0 && ip.row == 1 && _state == GX_EMU_EXTCALL) { [self askReturn]; return; }
+    BOOL dbl = ip.section == 2;
+    if (!(ip.section == 1 && ip.row < 32) && !dbl) return;
+    int r = (int)ip.row;
+    NSString *name = dbl ? [NSString stringWithFormat:@"d%d", r] : r == 31 ? @"sp" : r == 30 ? @"lr" : r == 29 ? @"fp" : [NSString stringWithFormat:@"x%d", r];
+    UIAlertController *a = [UIAlertController alertControllerWithTitle:name message:dbl ? GXL(@"Дробное число, например 3.14") : GXL(@"Число: 42, -5 или 0x1F") preferredStyle:UIAlertControllerStyleAlert];
+    [a addTextFieldWithConfigurationHandler:^(UITextField *t) {
+        t.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
+        t.text = dbl ? [NSString stringWithFormat:@"%.17g", self->_e->v[r].f[0]] : [NSString stringWithFormat:@"0x%llx", (unsigned long long)self->_e->x[r]];
+    }];
+    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
+    __weak typeof(self) ws = self;
+    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Готово") style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) {
+        GXEmuVC *me = ws; if (!me || !me->_e) return;
+        uint64_t v; if (![GXEmuVC parse:a.textFields[0].text into:&v dbl:dbl]) { GXAlert(me, GXL(@"Ошибка"), GXL(@"Не понял значение")); return; }
+        if (dbl) { me->_e->v[r].d[0] = v; me->_e->v[r].d[1] = 0; } else me->_e->x[r] = v;
+        if (me->_e->steps == 0) me->_initX[@(dbl ? 100 + r : r)] = @(v);    // до запуска — запоминаем как аргумент для «Сброса»
+        [me.tableView reloadData];
+    }]];
+    [self presentViewController:a animated:YES completion:nil];
+}
+@end
+
 @interface GXBinFuncsVC : UITableViewController <UISearchResultsUpdating, UISearchBarDelegate>
 - (instancetype)initWithDoc:(GXBinDoc *)doc imports:(BOOL)imp;
 @end
@@ -1085,6 +1352,7 @@ static void GXRunDecompile(UIViewController *vc, GXBinDoc *doc, int ci);
             [UIAction actionWithTitle:GXL(@"Псевдокод") image:[UIImage systemImageNamed:@"doc.plaintext"] identifier:nil handler:^(UIAction *x) { GXShowPseudo(ws, doc, f.addr); }],
             [UIAction actionWithTitle:GXL(@"Ассемблер и патчи") image:[UIImage systemImageNamed:@"chevron.left.forwardslash.chevron.right"] identifier:nil handler:^(UIAction *x) { [ws.navigationController pushViewController:[[GXBinDisasmVC alloc] initWithDoc:doc addr:f.addr] animated:YES]; }],
             [UIAction actionWithTitle:GXL(@"Где вызывается") image:[UIImage systemImageNamed:@"arrow.triangle.branch"] identifier:nil handler:^(UIAction *x) { [ws.navigationController pushViewController:[[GXBinXrefsVC alloc] initWithDoc:doc lo:f.addr hi:f.addr + 1 title:f.name] animated:YES]; }],
+            [UIAction actionWithTitle:GXL(@"Выполнить в эмуляторе") image:[UIImage systemImageNamed:@"play.circle"] identifier:nil handler:^(UIAction *x) { [ws.navigationController pushViewController:[[GXEmuVC alloc] initWithDoc:doc addr:f.addr name:f.name] animated:YES]; }],
             [UIAction actionWithTitle:GXL(@"Копировать имя") image:[UIImage systemImageNamed:@"doc.on.doc"] identifier:nil handler:^(UIAction *x) { UIPasteboard.generalPasteboard.string = f.name; }],
         ]];
     }];

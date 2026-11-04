@@ -110,6 +110,8 @@
         NSString *act = r[@"action"];
         if (r[@"path"]) { [self.navigationController pushViewController:[[GXBrowserVC alloc] initWithPath:r[@"path"]] animated:YES]; return; }
         if ([act isEqualToString:@"apps"]) [self.navigationController pushViewController:[GXAppsVC new] animated:YES];
+        else if ([act isEqualToString:@"github"]) [self.navigationController pushViewController:[GXGitHubVC new] animated:YES];
+        else if ([act isEqualToString:@"webdav"]) [self.navigationController pushViewController:[GXDAVAccountsVC new] animated:YES];
         else if ([act isEqualToString:@"wifi"]) [self.navigationController pushViewController:[[GXServerVC alloc] initWithRoot:GXDocsDir()] animated:YES];
         else if ([act isEqualToString:@"search"]) [self search];
         else if ([act isEqualToString:@"addfolder"]) [self pickFolderFrom:[tv cellForRowAtIndexPath:ip]];
