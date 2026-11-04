@@ -15,11 +15,20 @@
       "iconURL": "https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/assets/icon/dark.png",
       "tintColor": "#6B4BFF",
       "category": "utilities",
-      "version": "4.1",
+      "version": "4.2",
       "versionDate": "2026-11-04",
-      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.1/GXFiles.ipa",
-      "size": 7962330,
+      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.2/GXFiles.ipa",
+      "size": 7981777,
       "versions": [
+        {
+          "version": "4.2",
+          "buildVersion": "21",
+          "date": "2026-11-04",
+          "size": 7981777,
+          "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.2/GXFiles.ipa",
+          "minOSVersion": "15.0",
+          "localizedDescription": "GX Files 4.2"
+        },
         {
           "version": "4.1",
           "buildVersion": "20",
