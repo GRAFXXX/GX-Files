@@ -1357,3 +1357,30 @@
 1364|For example: GRAFXXX/GX-Files or a github.com/… link
 1365|Use the owner/name format.
 1366|Could not open
+1367|Structures if/else/while
+1368|Security audit
+1369|Unsafe string functions
+1370|Command execution
+1371|Weak hashes
+1372|Weak ciphers
+1373|Insecure RNG
+1374|Connection security
+1375|strcpy, strcat, sprintf, gets, scanf don't check the buffer size — a classic source of overflows. Better: strlcpy, snprintf with an explicit size.
+1376|system, popen, exec* run shell commands. If external data reaches the arguments, that's command injection. Better: posix_spawn with a fixed argument list.
+1377|MD5 and SHA-1 are considered broken for tamper protection. For signing and integrity use SHA-256 or newer.
+1378|DES and RC4 are outdated. Use AES-GCM or ChaCha20-Poly1305.
+1379|rand/random are predictable and unfit for tokens, keys and passwords. For security use arc4random_buf or SecRandomCopyBytes.
+1380|Found settings that weaken connection security (HTTP allowed, certificate checking disabled). Make sure this isn't in the release build.
+1381|Checking the code…
+1382|Heuristic scan: it shows places worth checking, not proven vulnerabilities. No findings does not guarantee safety.
+1383|No issues found
+1384|call at %@ · in %@
+1385|found in the file's data
+1386|Security audit (SAST)
+1387|Format not recognized
+1388|The audit works with Mach-O and ELF.
+1389|ATS disabled — the app allows unencrypted HTTP
+1390|ATS exception: HTTP allowed for a specific domain
+1391|All TLS/SSL versions allowed, including outdated ones
+1392|TLS certificate validation disabled
+1393|Expired certificates allowed

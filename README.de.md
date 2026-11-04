@@ -59,6 +59,8 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Objective-C-Klassen → .h-Header
 - ARM64-Disassembler, ungefährer C-Pseudocode, integrierter Assembler
 - ARM64-Emulator: eine Funktion Schritt für Schritt in einer Sandbox ausführen und die Register beobachten
+- Pseudocode mit if/else/while-Strukturen, nicht nur goto
+- Sicherheitsaudit (SAST): meldet strcpy/sprintf/system, MD5/SHA-1, deaktivierte TLS-Prüfungen
 - Zahlen und Konstanten, eingebettete Bilder und Schriften, UI-Farben
 - Ad-hoc-Neusignierung nach Änderungen
 

@@ -59,6 +59,8 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Objective-C classes → .h headers
 - ARM64 disassembler, approximate C pseudocode, built-in assembler
 - ARM64 emulator: run a function step by step in a sandbox and watch the registers
+- Pseudocode structured into if/else/while, not just goto
+- Security audit (SAST): flags strcpy/sprintf/system, MD5/SHA-1, disabled TLS checks
 - Numbers and constants, embedded images and fonts, UI colors
 - Ad-hoc re-signing after edits
 

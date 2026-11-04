@@ -59,6 +59,8 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Classes Objective-C → cabeçalhos .h
 - Desmontador ARM64, pseudocódigo C aproximado, assembler integrado
 - Emulador ARM64: execute uma função passo a passo em uma sandbox e acompanhe os registradores
+- Pseudocódigo com estruturas if/else/while, não só goto
+- Auditoria de segurança (SAST): detecta strcpy/sprintf/system, MD5/SHA-1, verificações de TLS desativadas
 - Números e constantes, imagens e fontes embutidas, cores da interface
 - Reassinatura ad hoc após editar
 

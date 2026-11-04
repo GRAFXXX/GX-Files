@@ -1357,3 +1357,30 @@
 1364|Par exemple : GRAFXXX/GX-Files ou un lien github.com/…
 1365|Utilise le format propriétaire/nom.
 1366|Impossible d'ouvrir
+1367|Structures if/else/while
+1368|Audit de sécurité
+1369|Fonctions de chaînes dangereuses
+1370|Exécution de commandes
+1371|Hachages faibles
+1372|Chiffrements faibles
+1373|Générateur aléatoire non sûr
+1374|Sécurité des connexions
+1375|strcpy, strcat, sprintf, gets, scanf ne vérifient pas la taille du tampon — source classique de débordement. Mieux : strlcpy, snprintf avec une taille explicite.
+1376|system, popen, exec* exécutent des commandes shell. Si des données externes arrivent dans les arguments, c'est une injection de commandes. Mieux : posix_spawn avec une liste d'arguments fixe.
+1377|MD5 et SHA-1 sont considérés comme cassés pour la protection contre la falsification. Pour la signature et l'intégrité, utilise SHA-256 ou plus récent.
+1378|DES et RC4 sont obsolètes. Utilise AES-GCM ou ChaCha20-Poly1305.
+1379|rand/random sont prévisibles et inadaptés aux jetons, clés et mots de passe. Pour la sécurité, utilise arc4random_buf ou SecRandomCopyBytes.
+1380|Des réglages affaiblissant la sécurité des connexions ont été trouvés (HTTP autorisé, vérification du certificat désactivée). Vérifie que ce n'est pas dans la build de release.
+1381|Analyse du code…
+1382|Analyse heuristique : montre des endroits à vérifier, pas des vulnérabilités prouvées. L'absence de résultats ne garantit pas la sécurité.
+1383|Aucun problème trouvé
+1384|appel à %@ · dans %@
+1385|trouvé dans les données du fichier
+1386|Audit de sécurité (SAST)
+1387|Format non reconnu
+1388|L'audit fonctionne avec Mach-O et ELF.
+1389|ATS désactivé — l'app autorise le HTTP non chiffré
+1390|Exception ATS : HTTP autorisé pour un domaine précis
+1391|Toutes les versions TLS/SSL autorisées, y compris obsolètes
+1392|Vérification du certificat TLS désactivée
+1393|Certificats expirés autorisés

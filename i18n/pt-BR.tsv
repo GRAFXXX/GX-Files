@@ -1357,3 +1357,30 @@
 1364|Por exemplo: GRAFXXX/GX-Files ou um link github.com/…
 1365|Use o formato dono/nome.
 1366|Não foi possível abrir
+1367|Estruturas if/else/while
+1368|Auditoria de segurança
+1369|Funções de string inseguras
+1370|Execução de comandos
+1371|Hashes fracos
+1372|Cifras fracas
+1373|Gerador aleatório inseguro
+1374|Segurança das conexões
+1375|strcpy, strcat, sprintf, gets, scanf não verificam o tamanho do buffer — fonte clássica de estouro. Melhor: strlcpy, snprintf com tamanho explícito.
+1376|system, popen, exec* executam comandos de shell. Se dados externos chegam aos argumentos, é injeção de comandos. Melhor: posix_spawn com lista de argumentos fixa.
+1377|MD5 e SHA-1 são considerados quebrados para proteção contra adulteração. Para assinatura e integridade use SHA-256 ou mais novo.
+1378|DES e RC4 estão obsoletos. Use AES-GCM ou ChaCha20-Poly1305.
+1379|rand/random são previsíveis e impróprios para tokens, chaves e senhas. Para segurança use arc4random_buf ou SecRandomCopyBytes.
+1380|Foram encontradas configurações que enfraquecem a segurança das conexões (HTTP permitido, verificação de certificado desativada). Confirme que não está na build de release.
+1381|Verificando o código…
+1382|Busca heurística: mostra pontos que vale a pena verificar, não vulnerabilidades comprovadas. A ausência de achados não garante segurança.
+1383|Nenhum problema encontrado
+1384|chamada em %@ · em %@
+1385|encontrado nos dados do arquivo
+1386|Auditoria de segurança (SAST)
+1387|Formato não reconhecido
+1388|A auditoria funciona com Mach-O e ELF.
+1389|ATS desativado — o app permite HTTP sem criptografia
+1390|Exceção de ATS: HTTP permitido para um domínio específico
+1391|Todas as versões de TLS/SSL permitidas, inclusive obsoletas
+1392|Verificação do certificado TLS desativada
+1393|Certificados expirados permitidos

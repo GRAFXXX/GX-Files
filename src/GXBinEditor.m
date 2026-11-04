@@ -5,6 +5,8 @@
 #include "core/gx_a64.h"
 #include "core/gx_objc.h"
 #include "core/gx_pseudo.h"
+#include "core/gx_struct.h"
+#include "core/gx_audit.h"
 #include "core/gx_asm.h"
 #include "core/gx_img.h"
 #include "core/gx_design.h"
@@ -178,8 +180,13 @@ static const char *gxNamer(void *ctx, uint64_t a, char *buf, size_t n) {
         }
     } else name = [self nameForAddr:start exactOnly:YES] ?: [NSString stringWithFormat:@"sub_%llx", (unsigned long long)start];
     char *p = gx_pseudo(&bin, start, end, name.UTF8String ?: "?", objc, proto, retkind, siv, nsiv, _allIv, _nAllIv, gxNamer, (__bridge void *)self);
+    free(siv);
+    if (![GXDefaults() objectForKey:@"gxPseudoStruct"] || [GXDefaults() boolForKey:@"gxPseudoStruct"]) {
+        char *st = gx_pseudo_structure(p);   // goto/метки → if/else/while; при неоднозначности goto сохраняются
+        if (st) { free(p); p = st; }
+    }
     NSString *r = GXStr(p);
-    free(p); free(siv);
+    free(p);
     return r;
 }
 // Папка для восстановленного кода
@@ -1359,6 +1366,114 @@ static void GXRunDecompile(UIViewController *vc, GXBinDoc *doc, int ci);
 }
 @end
 
+#pragma mark - Аудит безопасности (SAST)
+
+@interface GXAuditVC : UITableViewController
+- (instancetype)initWithDoc:(GXBinDoc *)doc;
+@end
+
+@implementation GXAuditVC {
+    GXBinDoc *_doc;
+    NSMutableArray<NSNumber *> *_cats;                 // категории с находками, по убыванию важности
+    NSMutableDictionary<NSNumber *, NSMutableArray *> *_byCat;   // категория → массив находок (NSValue с gx_sast)
+    BOOL _done;
+}
+- (instancetype)initWithDoc:(GXBinDoc *)doc { if ((self = [super initWithStyle:UITableViewStyleInsetGrouped])) { _doc = doc; self.title = GXL(@"Аудит безопасности"); } return self; }
++ (NSString *)catTitle:(int)c {
+    switch (c) {
+        case GX_SAST_UNSAFE_STR:  return GXL(@"Небезопасные функции строк");
+        case GX_SAST_SYSTEM:      return GXL(@"Выполнение команд");
+        case GX_SAST_WEAKHASH:    return GXL(@"Слабые хеши");
+        case GX_SAST_WEAKCIPHER:  return GXL(@"Слабые шифры");
+        case GX_SAST_RANDOM:      return GXL(@"Небезопасный ГПСЧ");
+        case GX_SAST_ATS:         return GXL(@"Защита соединений");
+    }
+    return @"";
+}
++ (NSString *)catNote:(int)c {
+    switch (c) {
+        case GX_SAST_UNSAFE_STR:  return GXL(@"strcpy, strcat, sprintf, gets, scanf не проверяют размер буфера — классический источник переполнения. Лучше: strlcpy, snprintf, с явным размером.");
+        case GX_SAST_SYSTEM:      return GXL(@"system, popen, exec* запускают команды оболочки. Если в аргументы попадают внешние данные — внедрение команд. Лучше posix_spawn с фиксированным списком аргументов.");
+        case GX_SAST_WEAKHASH:    return GXL(@"MD5 и SHA-1 считаются сломанными для защиты от подделки. Для подписи и проверки целостности — SHA-256 и новее.");
+        case GX_SAST_WEAKCIPHER:  return GXL(@"DES и RC4 устарели. Используй AES-GCM или ChaCha20-Poly1305.");
+        case GX_SAST_RANDOM:      return GXL(@"rand/random предсказуемы и не годятся для токенов, ключей и паролей. Для безопасности — arc4random_buf или SecRandomCopyBytes.");
+        case GX_SAST_ATS:         return GXL(@"Найдены настройки, ослабляющие защиту сетевых соединений (разрешён HTTP, отключена проверка сертификата). Проверь, что это не в релизной сборке.");
+    }
+    return @"";
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    _cats = [NSMutableArray array]; _byCat = [NSMutableDictionary dictionary];
+    [GXHUD showIn:self.navigationController.view ?: self.view text:GXL(@"Проверяю код…")];
+    GXBinDoc *doc = _doc;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        gx_sast *a = NULL; int n = gx_audit(&doc->bin, &a);
+        NSMutableDictionary *by = [NSMutableDictionary dictionary];
+        for (int i = 0; i < n; i++) {
+            NSNumber *k = @(a[i].cat);
+            NSMutableArray *arr = by[k]; if (!arr) by[k] = arr = [NSMutableArray array];
+            [arr addObject:[NSValue valueWithBytes:&a[i] objCType:@encode(gx_sast)]];
+        }
+        free(a);
+        int order[] = {GX_SAST_SYSTEM, GX_SAST_UNSAFE_STR, GX_SAST_WEAKCIPHER, GX_SAST_WEAKHASH, GX_SAST_ATS, GX_SAST_RANDOM};
+        NSMutableArray *cats = [NSMutableArray array];
+        for (int i = 0; i < 6; i++) if (by[@(order[i])]) [cats addObject:@(order[i])];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [GXHUD hide];
+            self->_byCat = by; self->_cats = cats; self->_done = YES;
+            [self.tableView reloadData];
+        });
+    });
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv { return _done ? MAX((NSInteger)_cats.count, 1) : 0; }
+- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s { return _cats.count ? (NSInteger)[_byCat[_cats[s]] count] : 1; }
+- (NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)s {
+    if (!_cats.count) return nil;
+    int c = [_cats[s] intValue];
+    return [NSString stringWithFormat:@"%@ (%lu)", [GXAuditVC catTitle:c], (unsigned long)[_byCat[_cats[s]] count]];
+}
+- (NSString *)tableView:(UITableView *)tv titleForFooterInSection:(NSInteger)s {
+    if (!_cats.count) return s == 0 ? GXL(@"Эвристический поиск: показывает места, которые стоит проверить, а не доказанные уязвимости. Отсутствие находок не гарантирует безопасность.") : nil;
+    return [GXAuditVC catNote:[_cats[s] intValue]];
+}
+- (gx_sast)at:(NSIndexPath *)ip { gx_sast f; [(NSValue *)_byCat[_cats[ip.section]][ip.row] getValue:&f]; return f; }
+- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)ip {
+    UITableViewCell *c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:nil];
+    if (!_cats.count) {
+        c.textLabel.text = GXL(@"Проблем не найдено");
+        c.textLabel.textColor = UIColor.systemGreenColor;
+        c.imageView.image = [UIImage systemImageNamed:@"checkmark.shield"];
+        c.selectionStyle = UITableViewCellSelectionStyleNone;
+        return c;
+    }
+    gx_sast f = [self at:ip];
+    c.textLabel.text = [NSString stringWithUTF8String:f.name] ?: @"?";
+    c.textLabel.font = GXMono(15);
+    UIColor *sc = f.sev == 2 ? UIColor.systemRedColor : f.sev == 1 ? UIColor.systemOrangeColor : UIColor.systemYellowColor;
+    c.imageView.image = [UIImage systemImageNamed:f.sev == 2 ? @"exclamationmark.triangle.fill" : @"exclamationmark.circle"];
+    c.imageView.tintColor = sc;
+    if (f.site) {
+        NSString *fn = [_doc nameForAddr:f.func exactOnly:NO] ?: GXHex(f.func);
+        c.detailTextLabel.text = [NSString stringWithFormat:GXL(@"вызов по %@ · в %@"), GXHex(f.site), fn];
+        c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else {
+        c.detailTextLabel.text = GXL(@"найдено в данных файла");
+        c.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    c.detailTextLabel.font = GXMono(11);
+    c.detailTextLabel.textColor = UIColor.secondaryLabelColor;
+    return c;
+}
+- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)ip {
+    [tv deselectRowAtIndexPath:ip animated:YES];
+    if (!_cats.count) return;
+    gx_sast f = [self at:ip];
+    if (!f.site || !f.func) return;
+    if (_doc->bin.arm64) GXShowPseudo(self, _doc, f.func);
+    else [self.navigationController pushViewController:[[GXBinDisasmVC alloc] initWithDoc:_doc addr:f.func] animated:YES];
+}
+@end
+
 #pragma mark - Числа
 
 @interface GXBinNumbersVC : UITableViewController <UITextFieldDelegate>
@@ -1539,6 +1654,7 @@ static void GXRunDecompile(UIViewController *vc, GXBinDoc *doc, int ci);
 @interface GXBinTextVC : UIViewController
 - (instancetype)initWithTitle:(NSString *)t text:(NSString *)text code:(BOOL)code;
 @property (nonatomic, copy, nullable) void (^asmAction)(void);
+@property (nonatomic, copy, nullable) void (^structToggle)(void);   // переключить структурирование и перестроить
 @end
 
 @implementation GXBinTextVC {
@@ -1586,6 +1702,12 @@ static void GXColor(NSMutableAttributedString *s, NSString *pattern, UIColor *c,
     if (@available(iOS 16.0, *)) [acts insertObject:[UIAction actionWithTitle:GXL(@"Найти в тексте") image:[UIImage systemImageNamed:@"magnifyingglass"] identifier:nil handler:^(UIAction *x) { [ws.textView.findInteraction presentFindNavigatorShowingReplace:NO]; }] atIndex:0];
     [acts insertObject:[UIAction actionWithTitle:GXL(@"Сохранить как файл и редактировать") image:[UIImage systemImageNamed:@"square.and.pencil"] identifier:nil handler:^(UIAction *x) { [ws saveAndEdit]; }] atIndex:0];
     if (self.asmAction) [acts insertObject:[UIAction actionWithTitle:GXL(@"Открыть ассемблер (для патчей)") image:[UIImage systemImageNamed:@"chevron.left.forwardslash.chevron.right"] identifier:nil handler:^(UIAction *x) { if (ws.asmAction) ws.asmAction(); }] atIndex:0];
+    if (self.structToggle) {
+        BOOL on = ![GXDefaults() objectForKey:@"gxPseudoStruct"] || [GXDefaults() boolForKey:@"gxPseudoStruct"];
+        UIAction *tg = [UIAction actionWithTitle:GXL(@"Структуры if/else/while") image:[UIImage systemImageNamed:@"curlybraces"] identifier:nil handler:^(UIAction *x) { if (ws.structToggle) ws.structToggle(); }];
+        tg.state = on ? UIMenuElementStateOn : UIMenuElementStateOff;
+        [acts insertObject:tg atIndex:0];
+    }
     [items addObject:[[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] menu:[UIMenu menuWithChildren:acts]]];
     self.navigationItem.rightBarButtonItems = items;
 }
@@ -1620,6 +1742,13 @@ static void GXShowPseudo(UIViewController *from, GXBinDoc *doc, uint64_t addr) {
             GXBinTextVC *v = [[GXBinTextVC alloc] initWithTitle:nm text:t code:YES];
             __weak UINavigationController *nav = from.navigationController;
             v.asmAction = ^{ [nav pushViewController:[[GXBinDisasmVC alloc] initWithDoc:doc addr:addr] animated:YES]; };
+            v.structToggle = ^{
+                BOOL on = ![GXDefaults() objectForKey:@"gxPseudoStruct"] || [GXDefaults() boolForKey:@"gxPseudoStruct"];
+                [GXDefaults() setBool:!on forKey:@"gxPseudoStruct"];
+                __strong UINavigationController *n = nav;
+                [n popViewControllerAnimated:NO];
+                GXShowPseudo(n.topViewController ?: n.viewControllers.lastObject, doc, addr);
+            };
             [from.navigationController pushViewController:v animated:YES];
         });
     });
@@ -2408,7 +2537,7 @@ static BOOL GXHas(NSData *d, const char *s) { return memmem(d.bytes, d.length, s
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tv { return 3; }
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s {
     if (s == 0) return _doc.nslices > 1 ? 2 : 1;
-    if (s == 1) return 10;
+    if (s == 1) return 11;
     return 5;
 }
 - (NSString *)tableView:(UITableView *)tv titleForFooterInSection:(NSInteger)s {
@@ -2430,8 +2559,8 @@ static BOOL GXHas(NSData *d, const char *s) { return memmem(d.bytes, d.length, s
     }
     if (ip.section == 0) { c.textLabel.text = GXL(@"Срез (архитектура)"); c.detailTextLabel.text = _doc.sliceNames[_doc.slice]; c.accessoryType = UITableViewCellAccessoryDisclosureIndicator; return c; }
     if (ip.section == 1) {
-        NSArray *t = @[GXL(@"Строки и тексты"), GXL(@"Классы Objective-C (.h)"), GXL(@"Функции: псевдокод и ассемблер"), GXL(@"Восстановить C-код всего файла"), GXL(@"Картинки внутри файла"), GXL(@"Дизайн меню: цвета, шрифты (ImGui и др.)"), GXL(@"Числа и константы"), GXL(@"Импорты"), GXL(@"Перейти по адресу"), GXL(@"Изменения")];
-        NSArray *im = @[@"textformat", @"c.square", @"chevron.left.forwardslash.chevron.right", @"square.and.pencil", @"photo.on.rectangle", @"paintpalette", @"number", @"arrow.down.right.and.arrow.up.left", @"location", @"clock.arrow.circlepath"];
+        NSArray *t = @[GXL(@"Строки и тексты"), GXL(@"Классы Objective-C (.h)"), GXL(@"Функции: псевдокод и ассемблер"), GXL(@"Восстановить C-код всего файла"), GXL(@"Картинки внутри файла"), GXL(@"Дизайн меню: цвета, шрифты (ImGui и др.)"), GXL(@"Числа и константы"), GXL(@"Импорты"), GXL(@"Перейти по адресу"), GXL(@"Изменения"), GXL(@"Аудит безопасности (SAST)")];
+        NSArray *im = @[@"textformat", @"c.square", @"chevron.left.forwardslash.chevron.right", @"square.and.pencil", @"photo.on.rectangle", @"paintpalette", @"number", @"arrow.down.right.and.arrow.up.left", @"location", @"clock.arrow.circlepath", @"checkmark.shield"];
         c.textLabel.text = t[ip.row];
         c.imageView.image = [UIImage systemImageNamed:im[ip.row]];
         c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -2486,6 +2615,7 @@ static BOOL GXHas(NSData *d, const char *s) { return memmem(d.bytes, d.length, s
             case 7: [nav pushViewController:[[GXBinFuncsVC alloc] initWithDoc:_doc imports:YES] animated:YES]; break;
             case 8: [self gotoAddr]; break;
             case 9: [nav pushViewController:[[GXBinPatchesVC alloc] initWithDoc:_doc] animated:YES]; break;
+            case 10: if (b->fmt == 0) { GXAlert(self, GXL(@"Формат не распознан"), GXL(@"Аудит работает с Mach-O и ELF.")); break; } [nav pushViewController:[[GXAuditVC alloc] initWithDoc:_doc] animated:YES]; break;
         }
         return;
     }

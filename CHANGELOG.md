@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.2
+- Decompiler: pseudocode is now structured into if/else and while loops (dominator-based), with goto kept only for irregular control flow — much closer to readable C
+- Security audit (SAST) in the binary editor: finds unsafe string functions (strcpy, sprintf, gets, scanf), command execution (system/popen/exec*), weak hashes (MD5/SHA-1) and ciphers (DES/RC4), insecure RNG, and disabled transport security (ATS off, certificate checks disabled); tap a finding to jump to the function
+- Translations for the new screens in 8 languages
+
 ## 4.1
 - Network drives over WebDAV: computer, NAS, Nextcloud/ownCloud and other servers — browse, download, upload, create folders, rename, delete
 - GitHub client: your own and public repositories, branches, download files or the whole repo as ZIP, edit in GX Files and commit back, upload and delete files

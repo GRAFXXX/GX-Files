@@ -1357,3 +1357,30 @@
 1364|Zum Beispiel: GRAFXXX/GX-Files oder ein github.com/…-Link
 1365|Verwende das Format Besitzer/Name.
 1366|Konnte nicht geöffnet werden
+1367|if/else/while-Strukturen
+1368|Sicherheitsaudit
+1369|Unsichere String-Funktionen
+1370|Befehlsausführung
+1371|Schwache Hashes
+1372|Schwache Chiffren
+1373|Unsicherer Zufallsgenerator
+1374|Verbindungssicherheit
+1375|strcpy, strcat, sprintf, gets, scanf prüfen die Puffergröße nicht — eine klassische Überlaufquelle. Besser: strlcpy, snprintf mit expliziter Größe.
+1376|system, popen, exec* führen Shell-Befehle aus. Gelangen externe Daten in die Argumente, ist das Befehlsinjektion. Besser: posix_spawn mit fester Argumentliste.
+1377|MD5 und SHA-1 gelten als gebrochen für den Manipulationsschutz. Zum Signieren und für Integrität SHA-256 oder neuer verwenden.
+1378|DES und RC4 sind veraltet. Verwende AES-GCM oder ChaCha20-Poly1305.
+1379|rand/random sind vorhersehbar und für Tokens, Schlüssel und Passwörter ungeeignet. Für Sicherheit arc4random_buf oder SecRandomCopyBytes.
+1380|Es wurden Einstellungen gefunden, die die Verbindungssicherheit schwächen (HTTP erlaubt, Zertifikatsprüfung deaktiviert). Prüfe, ob das nicht im Release-Build ist.
+1381|Prüfe den Code…
+1382|Heuristische Suche: zeigt prüfenswerte Stellen, keine bewiesenen Schwachstellen. Keine Funde bedeuten keine Garantie für Sicherheit.
+1383|Keine Probleme gefunden
+1384|Aufruf bei %@ · in %@
+1385|in den Dateidaten gefunden
+1386|Sicherheitsaudit (SAST)
+1387|Format nicht erkannt
+1388|Das Audit funktioniert mit Mach-O und ELF.
+1389|ATS deaktiviert — die App erlaubt unverschlüsseltes HTTP
+1390|ATS-Ausnahme: HTTP für eine bestimmte Domain erlaubt
+1391|Alle TLS/SSL-Versionen erlaubt, auch veraltete
+1392|TLS-Zertifikatsprüfung deaktiviert
+1393|Abgelaufene Zertifikate erlaubt
