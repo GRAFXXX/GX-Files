@@ -280,17 +280,52 @@ NSString *GXAIBackupRoot(void) { return [NSHomeDirectory() stringByAppendingPath
 @implementation GXAITools {
     NSString *_backup; int _bn;
 }
-- (instancetype)initWithRoot:(NSString *)root {
+- (instancetype)initWithRoot:(NSString *)root { return [self initWithRoot:root state:nil]; }
+- (instancetype)initWithRoot:(NSString *)root state:(NSDictionary *)st {
     if ((self = [super init])) {
         NSString *r = root.stringByStandardizingPath;
         while (r.length > 1 && [r hasSuffix:@"/"]) r = [r substringToIndex:r.length - 1];
         _root = r;
         _journal = [NSMutableArray array];
-        NSDateFormatter *f = [NSDateFormatter new]; f.dateFormat = @"yyyyMMdd-HHmmss";
-        _backup = [GXAIBackupRoot() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@", [f stringFromDate:NSDate.date], [NSUUID.UUID.UUIDString substringToIndex:6]]];
+        NSString *bname = [st[@"backup"] isKindOfClass:NSString.class] ? st[@"backup"] : nil;
+        if (!bname.length || [bname containsString:@"/"]) {
+            NSDateFormatter *f = [NSDateFormatter new]; f.dateFormat = @"yyyyMMdd-HHmmss";
+            bname = [NSString stringWithFormat:@"%@-%@", [f stringFromDate:NSDate.date], [NSUUID.UUID.UUIDString substringToIndex:6]];
+        }
+        _backup = [GXAIBackupRoot() stringByAppendingPathComponent:bname];
+        _bn = [st[@"bn"] respondsToSelector:@selector(intValue)] ? [st[@"bn"] intValue] : 0;
+        // журнал хранится с относительными путями — переводим обратно в абсолютные
+        NSString *br = GXAIBackupRoot();
+        for (NSDictionary *e in ([st[@"journal"] isKindOfClass:NSArray.class] ? st[@"journal"] : @[])) {
+            if (![e isKindOfClass:NSDictionary.class] || ![e[@"op"] isKindOfClass:NSString.class]) continue;
+            NSMutableDictionary *x = [NSMutableDictionary dictionaryWithObject:e[@"op"] forKey:@"op"];
+            BOOL ok = YES;
+            for (NSString *k in @[@"path", @"from", @"to"]) if ([e[k] isKindOfClass:NSString.class]) {
+                NSString *rel = e[k];
+                if ([rel hasPrefix:@"/"] || [rel containsString:@".."]) { ok = NO; break; }
+                x[k] = [rel isEqualToString:@"."] ? _root : [_root stringByAppendingPathComponent:rel];
+            }
+            if ([e[@"backup"] isKindOfClass:NSString.class]) {
+                if ([e[@"backup"] containsString:@".."]) ok = NO; else x[@"backup"] = [br stringByAppendingPathComponent:e[@"backup"]];
+            }
+            if (ok && x[@"path"]) [_journal addObject:x];
+        }
     }
     return self;
 }
+// состояние для сохранения чата (пути — относительные)
+- (NSDictionary *)state {
+    NSString *br = [GXAIBackupRoot() stringByAppendingString:@"/"];
+    NSMutableArray *j = [NSMutableArray array];
+    for (NSDictionary *e in _journal) {
+        NSMutableDictionary *x = [NSMutableDictionary dictionaryWithObject:e[@"op"] forKey:@"op"];
+        for (NSString *k in @[@"path", @"from", @"to"]) if (e[k]) x[k] = [self rel:e[k]];
+        if ([e[@"backup"] hasPrefix:br]) x[@"backup"] = [e[@"backup"] substringFromIndex:br.length];
+        [j addObject:x];
+    }
+    return @{@"backup": _backup.lastPathComponent, @"bn": @(_bn), @"journal": j};
+}
+- (NSString *)backupDir { return _backup; }
 
 + (NSDictionary *)obj:(NSDictionary *)props req:(NSArray *)req { return @{@"type": @"object", @"properties": props, @"required": req}; }
 + (NSArray<NSDictionary *> *)specs {
@@ -666,3 +701,148 @@ static NSUInteger GXCount(NSString *hay, NSString *needle) {
 }
 @end
 
+
+#pragma mark - Сохранённые чаты
+
+@implementation GXAISessions
++ (NSString *)dir {
+    NSString *d = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/GXAIChats"];
+    [FM() createDirectoryAtPath:d withIntermediateDirectories:YES attributes:nil error:nil];
+    return d;
+}
++ (dispatch_queue_t)queue { static dispatch_queue_t q; static dispatch_once_t once; dispatch_once(&once, ^{ q = dispatch_queue_create("gx.ai.sessions", DISPATCH_QUEUE_SERIAL); }); return q; }
++ (NSString *)fileFor:(NSString *)sid { return [[self dir] stringByAppendingPathComponent:[sid stringByAppendingPathExtension:@"json"]]; }
++ (BOOL)validId:(NSString *)sid { return [sid isKindOfClass:NSString.class] && sid.length && sid.length < 80 && ![sid containsString:@"/"] && ![sid hasPrefix:@"."]; }
++ (nullable id)readJSON:(NSString *)path {
+    NSData *d = [NSData dataWithContentsOfFile:path];
+    return d ? [NSJSONSerialization JSONObjectWithData:d options:0 error:nil] : nil;
+}
++ (BOOL)writeJSON:(id)obj to:(NSString *)path {
+    NSData *d = [NSJSONSerialization dataWithJSONObject:obj options:0 error:nil];
+    return d && [d writeToFile:path options:NSDataWritingAtomic error:nil];
+}
++ (NSDictionary *)metaOf:(NSDictionary *)c {
+    NSMutableDictionary *m = [NSMutableDictionary dictionary];
+    for (NSString *k in @[@"id", @"title", @"root", @"home", @"created", @"updated", @"model"]) if (c[k]) m[k] = c[k];
+    NSUInteger n = 0;
+    for (NSDictionary *t in c[@"turns"]) if ([t isKindOfClass:NSDictionary.class] && [t[@"role"] isEqual:@"user"]) n++;
+    m[@"messages"] = @(n);
+    return m;
+}
+// индекс: краткие сведения обо всех чатах, чтобы список открывался быстро
++ (NSMutableArray *)indexLocked {
+    NSString *ip = [[self dir] stringByAppendingPathComponent:@"index.json"];
+    NSArray *idx = [self readJSON:ip];
+    if ([idx isKindOfClass:NSArray.class]) return [idx mutableCopy];
+    NSMutableArray *a = [NSMutableArray array];   // нет индекса — собрать по файлам
+    for (NSString *f in [FM() contentsOfDirectoryAtPath:[self dir] error:nil]) {
+        if (![f.pathExtension isEqualToString:@"json"] || [f isEqualToString:@"index.json"]) continue;
+        NSDictionary *c = [self readJSON:[[self dir] stringByAppendingPathComponent:f]];
+        if ([c isKindOfClass:NSDictionary.class] && [self validId:c[@"id"]]) [a addObject:[self metaOf:c]];
+    }
+    [self writeJSON:a to:ip];
+    return a;
+}
++ (void)saveIndexLocked:(NSArray *)a { [self writeJSON:a to:[[self dir] stringByAppendingPathComponent:@"index.json"]]; }
+
++ (NSArray<NSDictionary *> *)list {
+    __block NSArray *r;
+    dispatch_sync([self queue], ^{ r = [self indexLocked]; });
+    return [r sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) {
+        return [@([b[@"updated"] doubleValue]) compare:@([a[@"updated"] doubleValue])];
+    }];
+}
++ (nullable NSDictionary *)load:(NSString *)sid {
+    if (![self validId:sid]) return nil;
+    __block NSDictionary *c;
+    dispatch_sync([self queue], ^{ c = [self readJSON:[self fileFor:sid]]; });
+    if (![c isKindOfClass:NSDictionary.class]) return nil;
+    NSMutableDictionary *m = [c mutableCopy];
+    m[@"root"] = [self currentPath:c[@"root"] home:c[@"home"]];
+    m[@"turns"] = [self sanitize:[c[@"turns"] isKindOfClass:NSArray.class] ? c[@"turns"] : @[]];
+    return m;
+}
+// путь из старого контейнера (после обновления приложения iOS может сменить папку приложения)
++ (NSString *)currentPath:(NSString *)p home:(NSString *)oldHome {
+    if (![p isKindOfClass:NSString.class]) return @"";
+    if ([FM() fileExistsAtPath:p] || ![oldHome isKindOfClass:NSString.class] || !oldHome.length) return p;
+    if ([p isEqualToString:oldHome] || [p hasPrefix:[oldHome stringByAppendingString:@"/"]]) {
+        NSString *np = [NSHomeDirectory() stringByAppendingString:[p substringFromIndex:oldHome.length]];
+        if ([FM() fileExistsAtPath:np]) return np;
+    }
+    return p;
+}
+// незавершённый шаг (вызов инструмента без результата) закрываем, чтобы модель приняла историю
++ (NSArray *)sanitize:(NSArray *)turns {
+    NSMutableArray *out = [NSMutableArray array];
+    for (NSUInteger i = 0; i < turns.count; i++) {
+        NSDictionary *t = turns[i];
+        if (![t isKindOfClass:NSDictionary.class] || ![t[@"role"] isKindOfClass:NSString.class]) continue;
+        [out addObject:t];
+        NSArray *calls = t[@"calls"];
+        BOOL needResults = [t[@"role"] isEqual:@"assistant"] && [calls isKindOfClass:NSArray.class] && calls.count;
+        BOOL hasNext = i + 1 < turns.count && [turns[i + 1] isKindOfClass:NSDictionary.class] && [turns[i + 1][@"role"] isEqual:@"tool"];
+        if (needResults && !hasNext) {
+            NSMutableArray *res = [NSMutableArray array];
+            for (NSDictionary *c in calls) if ([c isKindOfClass:NSDictionary.class])
+                [res addObject:@{@"id": c[@"id"] ?: @"?", @"name": c[@"name"] ?: @"?", @"content": @"Interrupted: the chat was closed before this action ran.", @"error": @YES}];
+            [out addObject:@{@"role": @"tool", @"results": res}];
+        }
+    }
+    return out;
+}
++ (void)save:(NSDictionary *)chat {
+    if (![self validId:chat[@"id"]]) return;
+    NSMutableDictionary *c = [chat mutableCopy];
+    c[@"home"] = NSHomeDirectory();
+    c[@"updated"] = @(NSDate.date.timeIntervalSince1970);
+    if (!c[@"created"]) c[@"created"] = c[@"updated"];
+    dispatch_async([self queue], ^{
+        if (![self writeJSON:c to:[self fileFor:c[@"id"]]]) return;
+        NSMutableArray *idx = [self indexLocked];
+        NSUInteger i = [idx indexOfObjectPassingTest:^BOOL(NSDictionary *x, NSUInteger n, BOOL *s) { return [x[@"id"] isEqual:c[@"id"]]; }];
+        NSDictionary *m = [self metaOf:c];
+        if (i == NSNotFound) [idx addObject:m]; else idx[i] = m;
+        [self saveIndexLocked:idx];
+    });
+}
++ (void)flush { dispatch_sync([self queue], ^{}); }
++ (void)rename:(NSString *)sid title:(NSString *)title {
+    if (![self validId:sid]) return;
+    dispatch_sync([self queue], ^{
+        NSMutableDictionary *c = [[self readJSON:[self fileFor:sid]] mutableCopy];
+        if (![c isKindOfClass:NSDictionary.class]) return;
+        c[@"title"] = title;
+        [self writeJSON:c to:[self fileFor:sid]];
+        NSMutableArray *idx = [self indexLocked];
+        for (NSUInteger i = 0; i < idx.count; i++) if ([idx[i][@"id"] isEqual:sid]) { NSMutableDictionary *m = [idx[i] mutableCopy]; m[@"title"] = title; idx[i] = m; }
+        [self saveIndexLocked:idx];
+    });
+}
++ (void)remove:(NSString *)sid {
+    if (![self validId:sid]) return;
+    dispatch_sync([self queue], ^{
+        NSDictionary *c = [self readJSON:[self fileFor:sid]];
+        NSString *b = [c isKindOfClass:NSDictionary.class] && [c[@"tools"] isKindOfClass:NSDictionary.class] ? c[@"tools"][@"backup"] : nil;
+        if ([b isKindOfClass:NSString.class] && b.length && ![b containsString:@"/"] && ![b hasPrefix:@"."])   // резервные копии этого чата
+            [FM() removeItemAtPath:[GXAIBackupRoot() stringByAppendingPathComponent:b] error:nil];
+        [FM() removeItemAtPath:[self fileFor:sid] error:nil];
+        NSMutableArray *idx = [self indexLocked];
+        [idx filterUsingPredicate:[NSPredicate predicateWithFormat:@"id != %@", sid]];
+        [self saveIndexLocked:idx];
+    });
+}
+// резервные копии удалены — журналы отмены в чатах больше не действительны
++ (void)forgetUndo {
+    dispatch_sync([self queue], ^{
+        for (NSDictionary *m in [self indexLocked]) {
+            NSString *f = [self fileFor:m[@"id"]];
+            NSMutableDictionary *c = [[self readJSON:f] mutableCopy];
+            if (![c isKindOfClass:NSDictionary.class] || ![c[@"tools"] isKindOfClass:NSDictionary.class]) continue;
+            NSMutableDictionary *t = [c[@"tools"] mutableCopy]; t[@"journal"] = @[];
+            c[@"tools"] = t;
+            [self writeJSON:c to:f];
+        }
+    });
+}
+@end

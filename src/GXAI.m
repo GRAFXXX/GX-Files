@@ -105,8 +105,9 @@ static NSString *GXAIToolIcon(NSString *n) {
     NSMutableArray<NSDictionary *> *_turns;     // для модели
     NSMutableArray<NSDictionary *> *_items;     // для экрана
     UITableView *_tv; UIView *_bar; UITextView *_input; UILabel *_ph; UIButton *_send; NSLayoutConstraint *_inputH;
-    BOOL _busy, _cancel, _allowAll; int _steps;
+    BOOL _busy, _cancel, _allowAll, _loaded; int _steps;
     NSURLSessionDataTask *_task;
+    NSString *_sid, *_chatTitle; NSNumber *_created;   // сохранённый чат (id появляется с первым сообщением)
 }
 - (instancetype)initWithRoot:(NSString *)root {
     if ((self = [super initWithNibName:nil bundle:nil])) {
@@ -118,7 +119,45 @@ static NSString *GXAIToolIcon(NSString *n) {
     }
     return self;
 }
+- (instancetype)initWithSession:(NSString *)sid {
+    NSDictionary *c = [GXAISessions load:sid];
+    if (!c) return nil;
+    if ((self = [self initWithRoot:c[@"root"]])) {
+        _sid = sid.copy; _loaded = YES;
+        _chatTitle = [c[@"title"] isKindOfClass:NSString.class] ? c[@"title"] : nil;
+        _created = c[@"created"];
+        if ([c[@"tools"] isKindOfClass:NSDictionary.class]) _tools = [[GXAITools alloc] initWithRoot:c[@"root"] state:c[@"tools"]];
+        [_turns addObjectsFromArray:c[@"turns"]];
+        for (NSDictionary *it in ([c[@"items"] isKindOfClass:NSArray.class] ? c[@"items"] : @[]))
+            if ([it isKindOfClass:NSDictionary.class] && ![it[@"typing"] boolValue]) [_items addObject:it];
+        if (_chatTitle.length) self.title = _chatTitle;
+    }
+    return self;
+}
 - (void)dealloc { [_task cancel]; }
+
+// сохранить чат (после каждого шага). Пустой чат не сохраняем.
+- (void)save {
+    BOOL hasUser = NO;
+    for (NSDictionary *t in _turns) if ([t[@"role"] isEqual:@"user"]) { hasUser = YES; break; }
+    if (!hasUser) return;
+    if (!_sid) { _sid = NSUUID.UUID.UUIDString; _created = @(NSDate.date.timeIntervalSince1970); }
+    if (!_chatTitle.length) {
+        for (NSDictionary *t in _turns) if ([t[@"role"] isEqual:@"user"] && ![t[@"text"] hasPrefix:@"[System note"]) {
+            NSString *x = [[t[@"text"] stringByReplacingOccurrencesOfString:@"\n" withString:@" "] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];
+            _chatTitle = GXCut(x, 60); break;
+        }
+    }
+    NSMutableArray *items = [NSMutableArray array];
+    for (NSDictionary *it in _items) if (![it[@"typing"] boolValue]) [items addObject:it];
+    NSDictionary *p = GXAIActive();
+    [GXAISessions save:@{@"id": _sid, @"title": _chatTitle ?: @"…", @"root": _root, @"created": _created ?: @(NSDate.date.timeIntervalSince1970),
+                         @"model": p ? [NSString stringWithFormat:@"%@ · %@", p[@"name"], p[@"model"]] : @"",
+                         @"turns": [_turns copy], @"items": items, @"tools": [_tools state]}];
+}
+- (BOOL)rootOK { return GXIsDir(_root); }
+- (NSString *)sessionID { return _sid; }
+- (void)applyTitle:(NSString *)t { _chatTitle = t.copy; self.title = t; }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -171,11 +210,22 @@ static NSString *GXAIToolIcon(NSString *n) {
     ]];
     [self updateSend];
     [self buildMenu];
+    if (_loaded) {
+        [_tv reloadData];
+        if (![self rootOK]) [self addItem:@{@"kind": @"err", @"text": [NSString stringWithFormat:GXL(@"Папка этого чата сейчас недоступна:\n%@\nЧат можно читать, но продолжить его нельзя."), _root]}];
+        else if (_items.count) dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_tv scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:(NSInteger)self->_items.count - 1 inSection:0] atScrollPosition:UITableViewScrollPositionBottom animated:NO]; });
+        return;
+    }
+    [self addIntro];
+}
+- (void)addIntro {
     NSDictionary *p = GXAIActive();
     [self addItem:@{@"kind": @"info", @"text": [NSString stringWithFormat:GXL(@"Папка: %@\nОпиши, что сделать — ИИ сам посмотрит файлы и внесёт изменения. Всё, что он меняет, сохраняется в резервную копию, изменения чата можно отменить в меню «…».%@"),
                                                  _root, p ? [NSString stringWithFormat:GXL(@"\nМодель: %@ · %@"), p[@"name"], p[@"model"]] : GXL(@"\n\nСначала подключи модель: «…» → «Модели ИИ».")]}];
 }
 - (void)viewWillAppear:(BOOL)a { [super viewWillAppear:a]; [self.navigationController setToolbarHidden:YES animated:a]; [self buildMenu]; }
+- (void)viewWillDisappear:(BOOL)a { [super viewWillDisappear:a]; [self save]; }
 
 - (void)buildMenu {
     __weak typeof(self) ws = self;
@@ -197,14 +247,33 @@ static NSString *GXAIToolIcon(NSString *n) {
     if (!nch) undo.attributes = UIMenuElementAttributesDisabled;
     UIAction *fresh = [UIAction actionWithTitle:GXL(@"Новый чат") image:[UIImage systemImageNamed:@"square.and.pencil"] identifier:nil handler:^(UIAction *y) { [ws newChat]; }];
     UIAction *open = [UIAction actionWithTitle:GXL(@"Открыть папку") image:[UIImage systemImageNamed:@"folder"] identifier:nil handler:^(UIAction *y) {
+        if (!ws.rootOK) { GXAlert(ws, GXL(@"Папка не найдена"), GXL(@"Нет такой папки или к ней нет доступа.")); return; }
         [ws.navigationController pushViewController:[[GXBrowserVC alloc] initWithPath:ws.rootPath] animated:YES]; }];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] menu:[UIMenu menuWithChildren:@[
+    UIAction *hist = [UIAction actionWithTitle:GXL(@"История чатов") image:[UIImage systemImageNamed:@"clock.arrow.circlepath"] identifier:nil handler:^(UIAction *y) { [ws showHistory]; }];
+    UIAction *ren = [UIAction actionWithTitle:GXL(@"Переименовать чат…") image:[UIImage systemImageNamed:@"pencil"] identifier:nil handler:^(UIAction *y) { [ws renameChat]; }];
+    if (!_sid) ren.attributes = UIMenuElementAttributesDisabled;
+    UIBarButtonItem *menu = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] menu:[UIMenu menuWithChildren:@[
         [UIMenu menuWithTitle:GXL(@"Модель") image:[UIImage systemImageNamed:@"cpu"] identifier:nil options:0 children:models],
         [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[ask, undo]],
-        [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[fresh, open]],
+        [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[fresh, hist, ren, open]],
     ]]];
+    UIBarButtonItem *h = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"clock.arrow.circlepath"] style:UIBarButtonItemStylePlain target:self action:@selector(showHistory)];
+    self.navigationItem.rightBarButtonItems = @[menu, h];
 }
 - (NSString *)rootPath { return _root; }
+- (void)showHistory {
+    [self save];
+    [self.navigationController pushViewController:[GXAIHistoryVC new] animated:YES];
+}
+- (void)renameChat {
+    if (!_sid) return;
+    GXPrompt(self, GXL(@"Название чата"), nil, _chatTitle, GXL(@"Название"), GXL(@"Готово"), ^(NSString *v) {
+        NSString *t = [v stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        if (!t.length) return;
+        self->_chatTitle = t; self.title = t;
+        [self save];
+    });
+}
 
 #pragma mark ввод
 
@@ -226,13 +295,18 @@ static NSString *GXAIToolIcon(NSString *n) {
     if (_busy) { [self stop]; return; }
     NSString *t = [_input.text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
     if (!t.length) return;
+    if (![self rootOK]) { GXAlert(self, GXL(@"Папка не найдена"), GXL(@"Нет такой папки или к ней нет доступа.")); return; }
     NSDictionary *p = GXAIActive();
     if (!p) { GXAlert(self, GXL(@"Нет модели"), GXL(@"Подключи модель ИИ: «…» → «Модели ИИ».")); return; }
     if (![p[@"model"] length]) { GXAlert(self, GXL(@"Не указана модель"), GXL(@"Открой «Модели ИИ» и выбери модель для этого подключения.")); return; }
     _input.text = @""; [self textViewDidChange:_input];
+    [_input resignFirstResponder];                 // спрятать клавиатуру — чтобы был виден ответ
     [_turns addObject:@{@"role": @"user", @"text": t}];
     [self addItem:@{@"kind": @"user", @"text": t}];
     _steps = 0; _cancel = NO;
+    [self save];
+    if (_chatTitle.length && ![self.title isEqualToString:_chatTitle]) self.title = _chatTitle;
+    [self buildMenu];
     [self step];
 }
 
@@ -280,9 +354,11 @@ static NSString *GXAIToolIcon(NSString *n) {
         if (err) {
             [me setBusy:NO];
             [me addItem:@{@"kind": [err isEqualToString:@"cancelled"] ? @"info" : @"err", @"text": [err isEqualToString:@"cancelled"] ? GXL(@"Остановлено") : err}];
+            [me save];
             return;
         }
         [me->_turns addObject:turn];
+        [me save];
         NSString *tx = [turn[@"text"] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
         if (tx.length) [me addItem:@{@"kind": @"ai", @"text": tx}];
         NSArray *calls = turn[@"calls"];
@@ -295,6 +371,7 @@ static NSString *GXAIToolIcon(NSString *n) {
         for (NSUInteger k = results.count; k < calls.count; k++)
             [results addObject:@{@"id": calls[k][@"id"], @"name": calls[k][@"name"], @"content": @"Cancelled by the user.", @"error": @YES}];
         [_turns addObject:@{@"role": @"tool", @"results": results}];
+        [self save];
         [self buildMenu];
         if (_cancel) { [self setBusy:NO]; [self addItem:@{@"kind": @"info", @"text": GXL(@"Остановлено")}]; return; }
         [self step];
@@ -345,14 +422,21 @@ static NSString *GXAIToolIcon(NSString *n) {
         [self addItem:@{@"kind": @"info", @"text": r}];
         [self->_turns addObject:@{@"role": @"user", @"text": @"[System note: the user has undone all file changes you made in this chat. Files are back to their original state.]"}];
         [self->_turns addObject:@{@"role": @"assistant", @"text": @"OK.", @"calls": @[]}];
+        [self save];
         [self buildMenu];
     });
 }
 - (void)newChat {
     if (_busy) [self stop];
-    [_turns removeAllObjects]; [_items removeAllObjects]; _allowAll = NO;
+    [self save];                                   // прежний чат остаётся в истории
+    [_turns removeAllObjects]; [_items removeAllObjects]; _allowAll = NO; _loaded = NO;
+    _sid = nil; _chatTitle = nil; _created = nil;
+    _tools = [[GXAITools alloc] initWithRoot:_root];
+    self.title = _root.lastPathComponent.length ? _root.lastPathComponent : _root;
     [_tv reloadData];
-    [self addItem:@{@"kind": @"info", @"text": [NSString stringWithFormat:GXL(@"Новый чат · папка %@"), self.title]}];
+    [self buildMenu];
+    if (![self rootOK]) { [self addItem:@{@"kind": @"err", @"text": GXL(@"Нет такой папки или к ней нет доступа.")}]; return; }
+    [self addIntro];
 }
 
 #pragma mark таблица
@@ -597,7 +681,7 @@ static NSString *GXAIToolIcon(NSString *n) {
         return;
     }
     if (ip.row == 1) GXConfirm(self, GXL(@"Удалить резервные копии?"), GXL(@"Отменить прошлые изменения ИИ будет уже нельзя."), GXL(@"Удалить"), YES, ^{
-        [FM() removeItemAtPath:GXAIBackupRoot() error:nil]; [tv reloadData]; });
+        [FM() removeItemAtPath:GXAIBackupRoot() error:nil]; [GXAISessions forgetUndo]; [tv reloadData]; });
 }
 - (UIContextMenuConfiguration *)tableView:(UITableView *)tv contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)ip point:(CGPoint)pt {
     NSArray *ps = GXAIProviders();
@@ -630,58 +714,222 @@ static NSString *GXAIToolIcon(NSString *n) {
 }
 @end
 
+#pragma mark - История чатов
+
+static NSString *GXAIWhen(NSNumber *t) {
+    static NSDateFormatter *f; static dispatch_once_t once;
+    dispatch_once(&once, ^{ f = [NSDateFormatter new]; f.dateStyle = NSDateFormatterShortStyle; f.timeStyle = NSDateFormatterShortStyle; f.doesRelativeDateFormatting = YES; });
+    return [f stringFromDate:[NSDate dateWithTimeIntervalSince1970:t.doubleValue]];
+}
+static NSString *GXAISessionSubtitle(NSDictionary *m) {
+    NSString *root = [m[@"root"] isKindOfClass:NSString.class] ? m[@"root"] : @"";
+    return [NSString stringWithFormat:GXL(@"%@ · %@ · сообщений: %@"), root.lastPathComponent.length ? root.lastPathComponent : root, GXAIWhen(m[@"updated"]), m[@"messages"] ?: @0];
+}
+// открыть чат; если он уже открыт ниже в стеке — вернуться к нему
+static void GXAIOpenSession(UIViewController *from, NSString *sid) {
+    UINavigationController *nav = from.navigationController;
+    for (UIViewController *vc in nav.viewControllers)
+        if ([vc isKindOfClass:GXAIChatVC.class] && [((GXAIChatVC *)vc).sessionID isEqualToString:sid]) { [nav popToViewController:vc animated:YES]; return; }
+    GXAIChatVC *c = [[GXAIChatVC alloc] initWithSession:sid];
+    if (!c) { GXAlert(from, GXL(@"Не удалось открыть чат"), GXL(@"Файл чата повреждён или удалён.")); return; }
+    [nav pushViewController:c animated:YES];
+}
+
+@interface GXAIHistoryVC () <UISearchResultsUpdating>
+@end
+
+@implementation GXAIHistoryVC {
+    NSArray<NSDictionary *> *_all, *_shown;
+}
+- (instancetype)init { if ((self = [super initWithStyle:UITableViewStyleInsetGrouped])) self.title = GXL(@"История чатов"); return self; }
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    UISearchController *sc = [[UISearchController alloc] initWithSearchResultsController:nil];
+    sc.searchResultsUpdater = self; sc.obscuresBackgroundDuringPresentation = NO;
+    self.navigationItem.searchController = sc;
+    __weak typeof(self) ws = self;
+    UIAction *clear = [UIAction actionWithTitle:GXL(@"Удалить все чаты…") image:[UIImage systemImageNamed:@"trash"] identifier:nil handler:^(UIAction *x) { [ws removeAll]; }];
+    clear.attributes = UIMenuElementAttributesDestructive;
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] menu:[UIMenu menuWithChildren:@[clear]]];
+}
+- (void)viewWillAppear:(BOOL)a { [super viewWillAppear:a]; [self reload]; }
+- (void)reload {
+    [GXAISessions flush];
+    _all = [GXAISessions list];
+    [self updateSearchResultsForSearchController:self.navigationItem.searchController];
+}
+- (void)updateSearchResultsForSearchController:(UISearchController *)sc {
+    NSString *q = sc.searchBar.text;
+    _shown = q.length ? [_all filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"title CONTAINS[cd] %@ OR root CONTAINS[cd] %@", q, q]] : _all;
+    [self.tableView reloadData];
+}
+- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s { return MAX((NSInteger)_shown.count, 1); }
+- (NSString *)tableView:(UITableView *)tv titleForFooterInSection:(NSInteger)s {
+    return _all.count ? GXL(@"Чаты сохраняются сами. Удаление чата удаляет и резервные копии его изменений — отменить их потом будет нельзя.") : nil;
+}
+- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)ip {
+    UITableViewCell *c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:nil];
+    if (!_shown.count) {
+        c.textLabel.text = _all.count ? GXL(@"Ничего не найдено") : GXL(@"Чатов пока нет");
+        c.textLabel.textColor = UIColor.secondaryLabelColor; c.selectionStyle = UITableViewCellSelectionStyleNone;
+        return c;
+    }
+    NSDictionary *m = _shown[ip.row];
+    c.textLabel.text = [m[@"title"] length] ? m[@"title"] : @"…";
+    c.detailTextLabel.text = GXAISessionSubtitle(m);
+    c.detailTextLabel.textColor = UIColor.secondaryLabelColor;
+    BOOL ok = GXIsDir([m[@"root"] isKindOfClass:NSString.class] ? m[@"root"] : @"");
+    c.imageView.image = GXSymbolTile(@"bubble.left.and.text.bubble.right.fill", ok ? UIColor.systemPurpleColor : UIColor.systemGrayColor, 32);
+    c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    return c;
+}
+- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)ip {
+    [tv deselectRowAtIndexPath:ip animated:YES];
+    if (!_shown.count) return;
+    GXAIOpenSession(self, _shown[ip.row][@"id"]);
+}
+- (void)renameSession:(NSDictionary *)m {
+    GXPrompt(self, GXL(@"Название чата"), nil, m[@"title"], GXL(@"Название"), GXL(@"Готово"), ^(NSString *v) {
+        NSString *t = [v stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        if (!t.length) return;
+        [GXAISessions rename:m[@"id"] title:t];
+        for (UIViewController *vc in self.navigationController.viewControllers)   // открытый ниже чат — тоже переименовать
+            if ([vc isKindOfClass:GXAIChatVC.class] && [((GXAIChatVC *)vc).sessionID isEqualToString:m[@"id"]]) [(GXAIChatVC *)vc applyTitle:t];
+        [self reload];
+    });
+}
+// убрать из стека открытые экраны удалённых чатов, чтобы они не сохранились заново
+- (void)dropOpen:(NSSet<NSString *> *)ids {
+    NSMutableArray *keep = [NSMutableArray array];
+    for (UIViewController *vc in self.navigationController.viewControllers)
+        if (!([vc isKindOfClass:GXAIChatVC.class] && ((GXAIChatVC *)vc).sessionID && [ids containsObject:((GXAIChatVC *)vc).sessionID])) [keep addObject:vc];
+    if (keep.count != self.navigationController.viewControllers.count) [self.navigationController setViewControllers:keep animated:NO];
+}
+- (void)removeSession:(NSDictionary *)m {
+    GXConfirm(self, GXL(@"Удалить чат?"), GXL(@"Резервные копии изменений этого чата тоже удалятся — отменить их потом будет нельзя."), GXL(@"Удалить"), YES, ^{
+        [self dropOpen:[NSSet setWithObject:m[@"id"]]];
+        [GXAISessions remove:m[@"id"]];
+        [self reload];
+    });
+}
+- (void)removeAll {
+    if (!_all.count) return;
+    GXConfirm(self, GXL(@"Удалить все чаты?"), GXL(@"Резервные копии изменений этого чата тоже удалятся — отменить их потом будет нельзя."), GXL(@"Удалить"), YES, ^{
+        [self dropOpen:[NSSet setWithArray:[self->_all valueForKey:@"id"]]];
+        for (NSDictionary *m in self->_all) [GXAISessions remove:m[@"id"]];
+        [self reload];
+    });
+}
+- (UIContextMenuConfiguration *)tableView:(UITableView *)tv contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)ip point:(CGPoint)pt {
+    if (!_shown.count) return nil;
+    NSDictionary *m = _shown[ip.row];
+    __weak typeof(self) ws = self;
+    return [UIContextMenuConfiguration configurationWithIdentifier:nil previewProvider:nil actionProvider:^UIMenu *(NSArray *s) {
+        UIAction *del = [UIAction actionWithTitle:GXL(@"Удалить") image:[UIImage systemImageNamed:@"trash"] identifier:nil handler:^(UIAction *x) { [ws removeSession:m]; }];
+        del.attributes = UIMenuElementAttributesDestructive;
+        NSMutableArray *a = [NSMutableArray arrayWithObjects:
+            [UIAction actionWithTitle:GXL(@"Переименовать…") image:[UIImage systemImageNamed:@"pencil"] identifier:nil handler:^(UIAction *x) { [ws renameSession:m]; }], nil];
+        if (GXIsDir([m[@"root"] isKindOfClass:NSString.class] ? m[@"root"] : @""))
+            [a addObject:[UIAction actionWithTitle:GXL(@"Открыть папку") image:[UIImage systemImageNamed:@"folder"] identifier:nil handler:^(UIAction *x) {
+                [ws.navigationController pushViewController:[[GXBrowserVC alloc] initWithPath:m[@"root"]] animated:YES]; }]];
+        [a addObject:[UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[del]]];
+        return [UIMenu menuWithChildren:a];
+    }];
+}
+- (UISwipeActionsConfiguration *)tableView:(UITableView *)tv trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)ip {
+    if (!_shown.count) return nil;
+    NSDictionary *m = _shown[ip.row];
+    UIContextualAction *del = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:GXL(@"Удалить") handler:^(UIContextualAction *a, UIView *v, void (^done)(BOOL)) {
+        [self removeSession:m]; done(NO); }];
+    return [UISwipeActionsConfiguration configurationWithActions:@[del]];
+}
+@end
+
 #pragma mark - Выбор папки
 
 @implementation GXAIStartVC {
-    NSArray<NSDictionary *> *_rows;   // @{title, subtitle, path, icon, color}
+    NSArray<NSDictionary *> *_rows;     // папки: @{title, subtitle, path, icon, color}
+    NSArray<NSDictionary *> *_recent;   // последние чаты
+    NSUInteger _total;
 }
+// разделы: 0 — модель, 1 — недавние чаты, 2 — папки, 3 — путь
 - (instancetype)init { if ((self = [super initWithStyle:UITableViewStyleInsetGrouped])) self.title = GXL(@"ИИ-помощник"); return self; }
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"gearshape"] style:UIBarButtonItemStylePlain target:self action:@selector(settings)];
+    self.navigationItem.rightBarButtonItems = @[
+        [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"gearshape"] style:UIBarButtonItemStylePlain target:self action:@selector(settings)],
+        [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"clock.arrow.circlepath"] style:UIBarButtonItemStylePlain target:self action:@selector(history)]];
 }
 - (void)viewWillAppear:(BOOL)a {
     [super viewWillAppear:a];
     NSMutableArray *rows = [NSMutableArray array];
     for (NSDictionary *s in GXRootSections()) for (NSDictionary *r in s[@"rows"]) if ([r[@"path"] length] && GXIsDir(r[@"path"])) [rows addObject:r];
     _rows = rows;
+    [GXAISessions flush];
+    NSArray *all = [GXAISessions list];
+    _total = all.count;
+    _recent = [all subarrayWithRange:NSMakeRange(0, MIN(all.count, (NSUInteger)3))];
     [self.tableView reloadData];
 }
 - (void)settings { [self.navigationController pushViewController:[GXAISettingsVC new] animated:YES]; }
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv { return 3; }
-- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s { return s == 0 ? 1 : s == 1 ? (NSInteger)_rows.count : 1; }
-- (NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)s { return s == 1 ? GXL(@"С какой папкой работать") : nil; }
+- (void)history { [self.navigationController pushViewController:[GXAIHistoryVC new] animated:YES]; }
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv { return 4; }
+- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s {
+    if (s == 0) return 1;
+    if (s == 1) return _total ? (NSInteger)_recent.count + 1 : 0;
+    if (s == 2) return (NSInteger)_rows.count;
+    return 1;
+}
+- (NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)s {
+    if (s == 1 && _total) return GXL(@"Недавние чаты");
+    if (s == 2) return GXL(@"Новый чат — с какой папкой работать");
+    return nil;
+}
 - (NSString *)tableView:(UITableView *)tv titleForFooterInSection:(NSInteger)s {
-    if (s == 1) return GXL(@"ИИ видит и меняет файлы только внутри выбранной папки. Любую папку можно открыть и из файлового менеджера: «…» → «ИИ-помощник для этой папки».");
+    if (s == 2) return GXL(@"ИИ видит и меняет файлы только внутри выбранной папки. Любую папку можно открыть и из файлового менеджера: «…» → «ИИ-помощник для этой папки».");
     return nil;
 }
 - (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)ip {
     UITableViewCell *c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:nil];
     c.detailTextLabel.textColor = UIColor.secondaryLabelColor;
+    c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     if (ip.section == 0) {
         NSDictionary *p = GXAIActive();
         c.textLabel.text = p ? p[@"name"] : GXL(@"Подключить модель ИИ…");
         c.detailTextLabel.text = p ? ([p[@"model"] length] ? p[@"model"] : GXL(@"модель не выбрана")) : GXL(@"OpenAI, Claude, Gemini, DeepSeek, Ollama и другие");
         c.imageView.image = GXSymbolTile(@"sparkles", UIColor.systemPurpleColor, 32);
-        c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return c;
     }
     if (ip.section == 1) {
+        if (ip.row < (NSInteger)_recent.count) {
+            NSDictionary *m = _recent[ip.row];
+            c.textLabel.text = [m[@"title"] length] ? m[@"title"] : @"…";
+            c.detailTextLabel.text = GXAISessionSubtitle(m);
+            c.imageView.image = GXSymbolTile(@"bubble.left.and.text.bubble.right.fill", UIColor.systemPurpleColor, 32);
+        } else {
+            c.textLabel.text = [NSString stringWithFormat:GXL(@"Все чаты (%lu)"), (unsigned long)_total];
+            c.textLabel.textColor = c.tintColor;
+            c.imageView.image = GXSymbolTile(@"clock.arrow.circlepath", UIColor.systemGrayColor, 32);
+        }
+        return c;
+    }
+    if (ip.section == 2) {
         NSDictionary *r = _rows[ip.row];
         c.textLabel.text = r[@"title"];
         c.detailTextLabel.text = r[@"path"]; c.detailTextLabel.lineBreakMode = NSLineBreakByTruncatingHead;
         c.imageView.image = GXSymbolTile(r[@"icon"] ?: @"folder.fill", r[@"color"] ?: UIColor.systemBlueColor, 32);
-        c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return c;
     }
     c.textLabel.text = GXL(@"Указать путь к папке…");
     c.imageView.image = GXSymbolTile(@"arrow.right.circle.fill", UIColor.systemGrayColor, 32);
+    c.accessoryType = UITableViewCellAccessoryNone;
     return c;
 }
 - (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)ip {
     [tv deselectRowAtIndexPath:ip animated:YES];
     if (ip.section == 0) { [self settings]; return; }
-    if (ip.section == 1) { [self.navigationController pushViewController:[[GXAIChatVC alloc] initWithRoot:_rows[ip.row][@"path"]] animated:YES]; return; }
+    if (ip.section == 1) { if (ip.row < (NSInteger)_recent.count) GXAIOpenSession(self, _recent[ip.row][@"id"]); else [self history]; return; }
+    if (ip.section == 2) { [self.navigationController pushViewController:[[GXAIChatVC alloc] initWithRoot:_rows[ip.row][@"path"]] animated:YES]; return; }
     GXPrompt(self, GXL(@"Путь к папке"), nil, GXLCHome() ?: GXDocsDir(), @"/var/mobile/…", GXL(@"Открыть"), ^(NSString *v) {
         NSString *p = [v stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].stringByExpandingTildeInPath;
         if (!GXIsDir(p)) { GXAlert(self, GXL(@"Папка не найдена"), GXL(@"Нет такой папки или к ней нет доступа.")); return; }

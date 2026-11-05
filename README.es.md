@@ -46,7 +46,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Transferencia por Wi‑Fi desde el navegador del ordenador
 - «Abrir en GX Files» desde Compartir; apk, dylib, so, dex y btx se abren en GX Files desde la app Archivos
 - Unidades de red por WebDAV — ordenador, NAS, Nextcloud; cliente de GitHub: ver, descargar, editar y hacer commit desde el móvil
-- Asistente de IA: conecta cualquier IA — OpenAI, Claude, Gemini, DeepSeek, OpenRouter u Ollama / LM Studio en local — y deja que edite archivos en la carpeta que elijas (incluso todo LiveContainer), con confirmación, copias de seguridad y deshacer
+- Asistente de IA: conecta cualquier IA — OpenAI, Claude, Gemini, DeepSeek, OpenRouter u Ollama / LM Studio en local — y deja que edite archivos en la carpeta que elijas (incluso todo LiveContainer), con confirmación, copias de seguridad y deshacer — los chats se guardan y se pueden continuar más tarde
 
 **Formatos**
 - ZIP, APK, IPA, JAR: edición directa dentro del archivo; lectura de tar, 7z, rar y más

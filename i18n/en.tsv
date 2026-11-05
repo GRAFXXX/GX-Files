@@ -1478,3 +1478,21 @@
 1485|Properties of “%@”
 1486|AI assistant for this folder
 1487|Any AI via API or a local one — changes files in the chosen folder at your request
+1488|This chat's folder is not available right now:\n%@\nYou can read the chat, but can't continue it.
+1489|Chat history
+1490|Rename chat…
+1491|Chat name
+1492|%@ · %@ · messages: %@
+1493|Couldn't open the chat
+1494|The chat file is damaged or deleted.
+1495|Delete all chats…
+1496|Chats are saved automatically. Deleting a chat also deletes the backups of its changes — you won't be able to undo them afterwards.
+1497|Nothing found
+1498|No chats yet
+1499|Delete chat?
+1500|The backups of this chat's changes will be deleted too — you won't be able to undo them afterwards.
+1501|Delete all chats?
+1502|Rename…
+1503|Recent chats
+1504|New chat — which folder to work with
+1505|All chats (%lu)

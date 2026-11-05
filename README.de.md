@@ -46,7 +46,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - WLAN-Übertragung über den Browser am Computer
 - „In GX Files öffnen“ über das Teilen-Menü; apk, dylib, so, dex und btx öffnen sich aus der Dateien-App in GX Files
 - Netzlaufwerke über WebDAV — Computer, NAS, Nextcloud; GitHub-Client: ansehen, herunterladen, bearbeiten und committen vom Handy
-- KI-Assistent: Verbinde jede KI — OpenAI, Claude, Gemini, DeepSeek, OpenRouter oder lokal Ollama / LM Studio — und lass sie Dateien in einem Ordner deiner Wahl bearbeiten (sogar ganz LiveContainer), mit Bestätigung, Sicherungen und Rückgängig
+- KI-Assistent: Verbinde jede KI — OpenAI, Claude, Gemini, DeepSeek, OpenRouter oder lokal Ollama / LM Studio — und lass sie Dateien in einem Ordner deiner Wahl bearbeiten (sogar ganz LiveContainer), mit Bestätigung, Sicherungen und Rückgängig — Chats werden gespeichert und lassen sich später fortsetzen
 
 **Formate**
 - ZIP, APK, IPA, JAR direkt im Archiv bearbeiten; tar, 7z, rar u. a. lesen

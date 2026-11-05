@@ -220,6 +220,11 @@ NSString *_Nullable GXCompileDylib(NSString *src, NSString *out, NSArray<NSStrin
 @end
 @interface GXAIChatVC : UIViewController
 - (instancetype)initWithRoot:(NSString *)root;
+- (nullable instancetype)initWithSession:(NSString *)sid;   // открыть сохранённый чат
+- (nullable NSString *)sessionID;
+- (void)applyTitle:(NSString *)t;                          // название изменено в истории
+@end
+@interface GXAIHistoryVC : UITableViewController
 @end
 @interface GXDAVAccountsVC : UITableViewController   // сетевые диски WebDAV
 @end

@@ -1478,3 +1478,21 @@
 1485|Propriedades de “%@”
 1486|Assistente de IA para esta pasta
 1487|Qualquer IA por API ou local — altera arquivos na pasta escolhida a seu pedido
+1488|A pasta deste chat não está disponível agora:\n%@\nVocê pode ler o chat, mas não continuá-lo.
+1489|Histórico de chats
+1490|Renomear chat…
+1491|Nome do chat
+1492|%@ · %@ · mensagens: %@
+1493|Não foi possível abrir o chat
+1494|O arquivo do chat está danificado ou foi apagado.
+1495|Apagar todos os chats…
+1496|Os chats são salvos automaticamente. Apagar um chat também apaga os backups das alterações dele — depois não dá para desfazê-las.
+1497|Nada encontrado
+1498|Ainda não há chats
+1499|Apagar o chat?
+1500|Os backups das alterações deste chat também serão apagados — depois não dá para desfazê-las.
+1501|Apagar todos os chats?
+1502|Renomear…
+1503|Chats recentes
+1504|Novo chat — com qual pasta trabalhar
+1505|Todos os chats (%lu)

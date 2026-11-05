@@ -166,9 +166,68 @@ static void testClient(NSString *server) {
     [FM() removeItemAtPath:root error:nil];
 }
 
+
+static void testSessions(void) {
+    NSString *root = [NSTemporaryDirectory() stringByAppendingPathComponent:[@"gxai-s-" stringByAppendingString:NSUUID.UUID.UUIDString]];
+    [FM() createDirectoryAtPath:root withIntermediateDirectories:YES attributes:nil error:nil];
+    [@"one" writeToFile:[root stringByAppendingPathComponent:@"a.txt"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    NSDictionary *before = snap(root);
+
+    // изменения в «первом запуске»
+    GXAITools *t = [[GXAITools alloc] initWithRoot:root];
+    BOOL bad;
+    run(t, @"edit_file", @{@"path": @"a.txt", @"old_text": @"one", @"new_text": @"two"}, &bad);
+    run(t, @"write_file", @{@"path": @"dir/b.txt", @"content": @"new"}, &bad);
+    run(t, @"move", @{@"from": @"a.txt", @"to": @"dir/a2.txt"}, &bad);
+    NSString *backupDir = t.backupDir;
+    NSString *sid = NSUUID.UUID.UUIDString;
+    NSArray *turns = @[@{@"role": @"user", @"text": @"do it"},
+                       @{@"role": @"assistant", @"text": @"", @"calls": @[@{@"id": @"c1", @"name": @"list_dir", @"args": @{}}]}];   // шаг без результата
+    [GXAISessions save:@{@"id": sid, @"title": @"Test chat", @"root": root, @"turns": turns, @"items": @[@{@"kind": @"user", @"text": @"do it"}], @"tools": [t state]}];
+    [GXAISessions flush];
+
+    NSArray *list = [GXAISessions list];
+    NSDictionary *meta = nil; for (NSDictionary *m in list) if ([m[@"id"] isEqual:sid]) meta = m;
+    CHECK(meta && [meta[@"title"] isEqual:@"Test chat"] && [meta[@"messages"] intValue] == 1, "session listed: %s", meta.description.UTF8String);
+
+    // «второй запуск»: загрузка и отмена по сохранённому журналу
+    NSDictionary *c = [GXAISessions load:sid];
+    CHECK([c[@"root"] isEqual:root], "root loaded");
+    NSArray *lt = c[@"turns"];
+    CHECK(lt.count == 3 && [lt.lastObject[@"role"] isEqual:@"tool"] && [lt.lastObject[@"results"][0][@"id"] isEqual:@"c1"], "unfinished step closed: %s", lt.description.UTF8String);
+    GXAITools *t2 = [[GXAITools alloc] initWithRoot:c[@"root"] state:c[@"tools"]];
+    CHECK(t2.journal.count == t.journal.count && [t2.backupDir isEqual:backupDir], "journal restored (%lu vs %lu)", (unsigned long)t2.journal.count, (unsigned long)t.journal.count);
+    [t2 undoAll];
+    CHECK([snap(root) isEqualToDictionary:before], "undo after reload restores folder");
+
+    // переименование и удаление (с резервными копиями чата)
+    [GXAISessions rename:sid title:@"Renamed"];
+    meta = nil; for (NSDictionary *m in [GXAISessions list]) if ([m[@"id"] isEqual:sid]) meta = m;
+    CHECK([meta[@"title"] isEqual:@"Renamed"] && [[GXAISessions load:sid][@"title"] isEqual:@"Renamed"], "rename");
+    CHECK([FM() fileExistsAtPath:backupDir], "backup dir exists before delete");
+    [GXAISessions remove:sid];
+    BOOL still = NO; for (NSDictionary *m in [GXAISessions list]) if ([m[@"id"] isEqual:sid]) still = YES;
+    CHECK(!still && ![GXAISessions load:sid] && ![FM() fileExistsAtPath:backupDir], "remove deletes chat and its backups");
+
+    // путь из старого контейнера переводится в текущий
+    NSString *rel = [@"Library/gxai-move-" stringByAppendingString:NSUUID.UUID.UUIDString];
+    NSString *cur = [NSHomeDirectory() stringByAppendingPathComponent:rel];
+    [FM() createDirectoryAtPath:cur withIntermediateDirectories:YES attributes:nil error:nil];
+    NSString *sid2 = NSUUID.UUID.UUIDString;
+    NSString *f = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/GXAIChats"] stringByAppendingPathComponent:[sid2 stringByAppendingPathExtension:@"json"]];
+    NSDictionary *raw = @{@"id": sid2, @"title": @"old", @"home": @"/var/old/container", @"root": [@"/var/old/container" stringByAppendingPathComponent:rel], @"turns": @[]};
+    [[NSJSONSerialization dataWithJSONObject:raw options:0 error:nil] writeToFile:f atomically:YES];
+    CHECK([[GXAISessions load:sid2][@"root"] isEqual:cur], "root remapped to current container: %s", [[GXAISessions load:sid2][@"root"] UTF8String]);
+    CHECK(![GXAISessions load:@"../../etc/passwd"], "bad session id rejected");
+    [GXAISessions remove:sid2];
+    [FM() removeItemAtPath:cur error:nil];
+    [FM() removeItemAtPath:root error:nil];
+}
+
 int main(int argc, char **argv) {
     @autoreleasepool {
         testTools();
+        testSessions();
         if (argc > 1) testClient([NSString stringWithUTF8String:argv[1]]);
         printf("AI engine tests: %d passed, %d failed\n", passes, fails);
         return fails ? 1 : 0;

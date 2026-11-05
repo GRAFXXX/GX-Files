@@ -1478,3 +1478,21 @@
 1485|Eigenschaften von „%@“
 1486|KI-Assistent für diesen Ordner
 1487|Jede KI per API oder lokal — ändert Dateien im gewählten Ordner auf deine Bitte
+1488|Der Ordner dieses Chats ist gerade nicht verfügbar:\n%@\nDu kannst den Chat lesen, aber nicht fortsetzen.
+1489|Chatverlauf
+1490|Chat umbenennen…
+1491|Chatname
+1492|%@ · %@ · Nachrichten: %@
+1493|Chat konnte nicht geöffnet werden
+1494|Die Chatdatei ist beschädigt oder gelöscht.
+1495|Alle Chats löschen…
+1496|Chats werden automatisch gespeichert. Beim Löschen eines Chats werden auch die Sicherungen seiner Änderungen gelöscht — rückgängig machen geht dann nicht mehr.
+1497|Nichts gefunden
+1498|Noch keine Chats
+1499|Chat löschen?
+1500|Die Sicherungen der Änderungen dieses Chats werden ebenfalls gelöscht — rückgängig machen geht dann nicht mehr.
+1501|Alle Chats löschen?
+1502|Umbenennen…
+1503|Letzte Chats
+1504|Neuer Chat — mit welchem Ordner arbeiten
+1505|Alle Chats (%lu)

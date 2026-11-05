@@ -1478,3 +1478,21 @@
 1485|Propriétés de « %@ »
 1486|Assistant IA pour ce dossier
 1487|N'importe quelle IA via API ou en local — modifie les fichiers du dossier choisi à ta demande
+1488|Le dossier de ce chat est indisponible pour le moment :\n%@\nTu peux lire le chat, mais pas le poursuivre.
+1489|Historique des chats
+1490|Renommer le chat…
+1491|Nom du chat
+1492|%@ · %@ · messages : %@
+1493|Impossible d'ouvrir le chat
+1494|Le fichier du chat est endommagé ou supprimé.
+1495|Supprimer tous les chats…
+1496|Les chats sont enregistrés automatiquement. Supprimer un chat supprime aussi les sauvegardes de ses modifications — impossible de les annuler ensuite.
+1497|Aucun résultat
+1498|Pas encore de chats
+1499|Supprimer le chat ?
+1500|Les sauvegardes des modifications de ce chat seront aussi supprimées — impossible de les annuler ensuite.
+1501|Supprimer tous les chats ?
+1502|Renommer…
+1503|Chats récents
+1504|Nouveau chat — avec quel dossier travailler
+1505|Tous les chats (%lu)

@@ -42,6 +42,9 @@ NSString *GXCut(NSString *s, NSUInteger n);
 
 @interface GXAITools : NSObject
 - (instancetype)initWithRoot:(NSString *)root;
+- (instancetype)initWithRoot:(NSString *)root state:(nullable NSDictionary *)st;   // восстановить из сохранённого чата
+- (NSDictionary *)state;                                                           // для сохранения: журнал отмены и папка копий
+@property (nonatomic, readonly) NSString *backupDir;
 @property (nonatomic, readonly) NSString *root;
 @property (nonatomic, readonly) NSMutableArray<NSDictionary *> *journal;   // для отмены
 + (NSArray<NSDictionary *> *)specs;                 // описания инструментов для модели
@@ -49,6 +52,20 @@ NSString *GXCut(NSString *s, NSUInteger n);
 - (NSString *)describe:(NSString *)name args:(NSDictionary *)a;     // текст для подтверждения
 - (NSString *)run:(NSString *)name args:(NSDictionary *)a isError:(BOOL *)isErr summary:(NSString *_Nullable *_Nonnull)sum;
 - (NSString *)undoAll;
+@end
+
+#pragma mark - Сохранённые чаты
+
+// Чат: @{id, title, root, created, updated, model, turns, items, tools} — файл Library/GXAIChats/<id>.json + index.json
+@interface GXAISessions : NSObject
++ (NSArray<NSDictionary *> *)list;                  // кратко: id, title, root, updated, model, messages — новые сверху
++ (nullable NSDictionary *)load:(NSString *)sid;    // путь папки уточняется, незавершённые шаги закрываются
++ (void)save:(NSDictionary *)chat;                  // асинхронно, по порядку
++ (void)flush;                                      // дождаться записи
++ (void)rename:(NSString *)sid title:(NSString *)title;
++ (void)remove:(NSString *)sid;                     // вместе с резервными копиями этого чата
++ (void)forgetUndo;                                 // после удаления всех резервных копий
++ (NSArray *)sanitize:(NSArray *)turns;
 @end
 
 NS_ASSUME_NONNULL_END

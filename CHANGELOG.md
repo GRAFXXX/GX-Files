@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.4
+- Keyboard: tapping anywhere outside a text field or scrolling now hides the keyboard everywhere in the app (buttons and list rows keep working as usual); in the AI chat the keyboard also hides after sending
+- AI assistant chat history: chats are saved automatically and can be reopened and continued later; recent chats on the assistant screen, full history with search, rename and delete
+- “Undo chat changes” also works in a reopened chat; deleting a chat removes its backups; folder paths are re-linked if iOS moves the app container after an update
+- More automated tests for the AI engine (saving, loading, undo after reopening)
+
 ## 4.3
 - AI assistant: connect any AI by API — OpenAI-compatible (OpenAI, Gemini, OpenRouter, DeepSeek, Groq, Mistral, xAI), Anthropic, or a local model (Ollama, LM Studio) on a computer in your network
 - The assistant works with files only inside the folder you pick — any folder GX Files can reach, including the whole LiveContainer: lists, reads, searches, creates, edits, moves, copies and deletes files; binary .plist files are edited as XML and saved back as binary
