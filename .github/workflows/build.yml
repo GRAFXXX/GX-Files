@@ -36,6 +36,10 @@ jobs:
       - name: Check translations
         run: python3 tools/i18n/build.py --stats
 
+      # автотесты движка ИИ-помощника: файловые операции, отмена, форматы OpenAI/Anthropic
+      - name: Test AI engine
+        run: bash tests/run_ai_tests.sh
+
       - name: Build
         run: SDK="$(xcrun --sdk iphoneos --show-sdk-path)" bash build.sh
 

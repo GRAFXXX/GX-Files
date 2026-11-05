@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.3
+- AI assistant: connect any AI by API — OpenAI-compatible (OpenAI, Gemini, OpenRouter, DeepSeek, Groq, Mistral, xAI), Anthropic, or a local model (Ollama, LM Studio) on a computer in your network
+- The assistant works with files only inside the folder you pick — any folder GX Files can reach, including the whole LiveContainer: lists, reads, searches, creates, edits, moves, copies and deletes files; binary .plist files are edited as XML and saved back as binary
+- Safety: asks before every change (can be turned off), keeps a backup of everything it changes or deletes, and one tap undoes all changes of the chat
+- Model list loading, connection test, API keys stored in the Keychain
+- Automated tests of the assistant engine run in CI before every build
+- Translations in 8 languages
+
 ## 4.2
 - Decompiler: pseudocode is now structured into if/else and while loops (dominator-based), with goto kept only for irregular control flow — much closer to readable C
 - Security audit (SAST) in the binary editor: finds unsafe string functions (strcpy, sprintf, gets, scanf), command execution (system/popen/exec*), weak hashes (MD5/SHA-1) and ciphers (DES/RC4), insecure RNG, and disabled transport security (ATS off, certificate checks disabled); tap a finding to jump to the function

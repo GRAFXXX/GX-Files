@@ -46,6 +46,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Передача файлов по Wi‑Fi через браузер на компьютере
 - «Открыть в GX Files» через «Поделиться»; apk, dylib, so, dex и btx открываются в GX Files из «Файлов»
 - Сетевые диски по WebDAV — компьютер, NAS, Nextcloud; клиент GitHub: смотреть, скачивать, править и коммитить с телефона
+- ИИ-помощник: подключи любой ИИ — OpenAI, Claude, Gemini, DeepSeek, OpenRouter или локальный Ollama / LM Studio — и он меняет файлы в выбранной папке (хоть во всём LiveContainer), с подтверждением, резервными копиями и отменой
 
 **Форматы**
 - ZIP, APK, IPA, JAR — правка прямо в архиве; чтение tar, 7z, rar и других

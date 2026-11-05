@@ -1379,8 +1379,102 @@
 1386|Audit de sécurité (SAST)
 1387|Format non reconnu
 1388|L'audit fonctionne avec Mach-O et ELF.
-1389|ATS désactivé — l'app autorise le HTTP non chiffré
-1390|Exception ATS : HTTP autorisé pour un domaine précis
-1391|Toutes les versions TLS/SSL autorisées, y compris obsolètes
-1392|Vérification du certificat TLS désactivée
-1393|Certificats expirés autorisés
+1389|Que faire avec les fichiers ?
+1390|Dossier : %@\nDécris ce qu'il faut faire — l'IA parcourt elle-même les fichiers et fait les modifications. Tout ce qu'elle modifie est sauvegardé, et tu peux annuler les changements du chat depuis le menu « … ».%@
+1391|\nModèle : %@ · %@
+1392|\n\nConnecte d'abord un modèle : « … » → « Modèles d'IA ».
+1393|Modèles d'IA…
+1394|Demander avant les modifications
+1395|Annuler les changements du chat (%lu)
+1396|Nouveau chat
+1397|Ouvrir le dossier
+1398|Modèle
+1399|Aucun modèle
+1400|Connecte un modèle d'IA : « … » → « Modèles d'IA ».
+1401|Aucun modèle indiqué
+1402|Ouvre « Modèles d'IA » et choisis un modèle pour cette connexion.
+1403|Je réfléchis…
+1404|Arrêté : trop d'étapes d'affilée. Écris « continue » pour poursuivre.
+1405|L'IA veut modifier des fichiers
+1406|Autoriser
+1407|Tout autoriser dans ce chat
+1408|Refuser
+1409|Refusé par toi
+1410|Attends la fin ou arrête l'IA
+1411|Annuler les changements ?
+1412|Toutes les modifications de fichiers faites par l'IA dans ce chat seront annulées (%lu).
+1413|Annuler
+1414|Nouveau chat · dossier %@
+1415|Modèles
+1416|Nouvelle connexion
+1417|Connexion
+1418|Généralement inutile
+1419|Nom du modèle
+1420|Compatible OpenAI
+1421|IA locale : lance Ollama ou LM Studio sur un ordinateur du même réseau Wi‑Fi et indique son IP. Ollama doit autoriser les connexions réseau (OLLAMA_HOST=0.0.0.0) ; dans LM Studio, active « Serve on Local Network ». À la première connexion, iOS demande l'accès au réseau local — autorise-le.
+1422|La clé est stockée uniquement dans le trousseau de cet iPhone et n'est envoyée qu'à l'adresse d'API ci-dessus.
+1423|Touche « Choisir dans la liste » pour charger les modèles disponibles. Le modèle doit prendre en charge l'appel d'outils (tools / function calling).
+1424|Choisir dans la liste…
+1425|Tester la connexion
+1426|Chargement de la liste des modèles…
+1427|Impossible de charger la liste
+1428|\n\nTu peux saisir le nom du modèle à la main.
+1429|Liste vide
+1430|Le service n'a renvoyé aucun modèle. Saisis le nom à la main.
+1431|Choisis un modèle dans la liste ou saisis son nom.
+1432|Vérification…
+1433|Ne fonctionne pas
+1434|Fonctionne
+1435|Le modèle a répondu : %@
+1436|(appel d'outil)
+1437|Indique l'adresse de l'API, par ex. https://api.openai.com/v1
+1438|Modèles d'IA
+1439|Connexions
+1440|Sécurité
+1441|Tout service doté d'une API au format OpenAI ou Anthropic convient, ainsi que les modèles locaux (Ollama, LM Studio) sur un ordinateur de ton réseau. La connexion cochée est utilisée dans les chats.
+1442|Avant chaque modification, l'IA demande la permission. Les fichiers modifiés et supprimés sont sauvegardés — tu peux les récupérer avec « Annuler les changements du chat ».
+1443|aucun modèle choisi
+1444|Ajouter une connexion…
+1445|Supprimer les sauvegardes
+1446|Quelle IA connecter ?
+1447|Supprimer les sauvegardes ?
+1448|Tu ne pourras plus annuler les anciennes modifications de l'IA.
+1449|Assistant IA
+1450|Avec quel dossier travailler
+1451|L'IA voit et modifie les fichiers uniquement dans le dossier choisi. Tu peux aussi ouvrir n'importe quel dossier depuis le gestionnaire de fichiers : « … » → « Assistant IA pour ce dossier ».
+1452|Connecter un modèle d'IA…
+1453|OpenAI, Claude, Gemini, DeepSeek, Ollama et d'autres
+1454|Saisir le chemin d'un dossier…
+1455|Chemin du dossier
+1456|Dossier introuvable
+1457|Ce dossier n'existe pas ou n'est pas accessible.
+1458|Ollama sur un ordinateur
+1459|LM Studio sur un ordinateur
+1460|Autre (compatible OpenAI)
+1461|La clé d'API n'a pas fonctionné (HTTP %ld). %@
+1462|Adresse ou modèle introuvable (HTTP 404). Vérifie l'adresse de l'API et le nom du modèle. %@
+1463|Trop de requêtes ou quota épuisé (HTTP 429). %@
+1464|Adresse d'API invalide
+1465|Actions annulées : %d, échecs : %d
+1466|Actions annulées : %d
+1467|Écraser le fichier
+1468|Créer le fichier
+1469| (l'ancienne version sera gardée en sauvegarde)
+1470|Modifier le fichier
+1471|Créer le dossier
+1472|Déplacer / renommer
+1473|(part en sauvegarde — peut être annulé)
+1474|Dossier « %@ » parcouru
+1475|« %@ » lu
+1476|« %@ » écrasé
+1477|« %@ » créé
+1478|« %@ » modifié
+1479|Le dossier « %@ » existe déjà
+1480|Dossier « %@ » créé
+1481|« %@ » → « %@ » déplacé
+1482|« %@ » → « %@ » copié
+1483|« %@ » supprimé
+1484|Recherche de « %@ »
+1485|Propriétés de « %@ »
+1486|Assistant IA pour ce dossier
+1487|N'importe quelle IA via API ou en local — modifie les fichiers du dossier choisi à ta demande

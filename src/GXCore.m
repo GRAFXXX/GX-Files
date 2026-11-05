@@ -388,6 +388,7 @@ NSArray<NSDictionary *> *GXRootSections(void) {
     add(sys, GXL(@"Корень /"), GXL(@"Только то, что разрешает песочница"), @"/", @"internaldrive.fill", UIColor.systemGrayColor);
 
     NSMutableArray *tools = section(GXL(@"Инструменты"));
+    action(tools, GXL(@"ИИ-помощник"), GXL(@"Любой ИИ по API или локальный — меняет файлы в выбранной папке по твоей просьбе"), @"ai", @"sparkles", UIColor.systemPurpleColor);
     action(tools, GXL(@"Передача по Wi‑Fi"), GXL(@"Скачивайте и загружайте файлы с компьютера через браузер"), @"wifi", @"wifi", UIColor.systemBlueColor);
     action(tools, GXL(@"GitHub"), GXL(@"Свои и публичные репозитории: скачать, изменить, отправить коммит"), @"github", @"chevron.left.forwardslash.chevron.right", UIColor.labelColor);
     action(tools, GXL(@"Сетевые диски (WebDAV)"), GXL(@"Компьютер, NAS, Nextcloud, Яндекс Диск — скачать и загрузить"), @"webdav", @"externaldrive.connected.to.line.below.fill", UIColor.systemCyanColor);

@@ -1379,8 +1379,102 @@
 1386|Auditoría de seguridad (SAST)
 1387|Formato no reconocido
 1388|La auditoría funciona con Mach-O y ELF.
-1389|ATS desactivado — la app permite HTTP sin cifrar
-1390|Excepción de ATS: HTTP permitido para un dominio concreto
-1391|Se permiten todas las versiones de TLS/SSL, incluidas las obsoletas
-1392|Verificación del certificado TLS desactivada
-1393|Se permiten certificados caducados
+1389|¿Qué hago con los archivos?
+1390|Carpeta: %@\nDescribe qué hacer — la IA revisará los archivos y hará los cambios por sí misma. Todo lo que cambia se guarda en una copia de seguridad, y puedes deshacer los cambios del chat desde el menú «…».%@
+1391|\nModelo: %@ · %@
+1392|\n\nPrimero conecta un modelo: «…» → «Modelos de IA».
+1393|Modelos de IA…
+1394|Preguntar antes de cambiar
+1395|Deshacer cambios del chat (%lu)
+1396|Chat nuevo
+1397|Abrir carpeta
+1398|Modelo
+1399|Sin modelo
+1400|Conecta un modelo de IA: «…» → «Modelos de IA».
+1401|No se indicó modelo
+1402|Abre «Modelos de IA» y elige un modelo para esta conexión.
+1403|Pensando…
+1404|Detenido: demasiados pasos seguidos. Escribe «continúa» para seguir.
+1405|La IA quiere cambiar archivos
+1406|Permitir
+1407|Permitir todo en este chat
+1408|Denegar
+1409|Denegado por ti
+1410|Espera a que termine o detén la IA
+1411|¿Deshacer los cambios?
+1412|Se desharán todos los cambios de archivos que la IA hizo en este chat (%lu).
+1413|Deshacer
+1414|Chat nuevo · carpeta %@
+1415|Modelos
+1416|Nueva conexión
+1417|Conexión
+1418|Normalmente no hace falta
+1419|Nombre del modelo
+1420|Compatible con OpenAI
+1421|IA local: ejecuta Ollama o LM Studio en un ordenador de la misma red Wi‑Fi e indica su IP. Ollama debe permitir conexiones de red (OLLAMA_HOST=0.0.0.0); en LM Studio activa «Serve on Local Network». En la primera conexión iOS pedirá acceso a la red local — permítelo.
+1422|La clave se guarda solo en el llavero de este iPhone y se envía solo a la dirección de API de arriba.
+1423|Toca «Elegir de la lista» para cargar los modelos disponibles. El modelo debe admitir llamadas a herramientas (tools / function calling).
+1424|Elegir de la lista…
+1425|Probar conexión
+1426|Cargando la lista de modelos…
+1427|No se pudo cargar la lista
+1428|\n\nPuedes escribir el nombre del modelo a mano.
+1429|Lista vacía
+1430|El servicio no devolvió modelos. Escribe el nombre a mano.
+1431|Elige un modelo de la lista o escribe su nombre.
+1432|Comprobando…
+1433|No funciona
+1434|Funciona
+1435|El modelo respondió: %@
+1436|(llamada a herramienta)
+1437|Indica la dirección de la API, p. ej. https://api.openai.com/v1
+1438|Modelos de IA
+1439|Conexiones
+1440|Seguridad
+1441|Sirve cualquier servicio con API en formato OpenAI o Anthropic, y también modelos locales (Ollama, LM Studio) en un ordenador de tu red. La conexión marcada se usa en los chats.
+1442|Antes de cada cambio la IA pide permiso. Los archivos cambiados y borrados se guardan en copias de seguridad — puedes recuperarlos con «Deshacer cambios del chat».
+1443|sin modelo elegido
+1444|Añadir conexión…
+1445|Borrar copias de seguridad
+1446|¿Qué IA conectar?
+1447|¿Borrar las copias de seguridad?
+1448|Ya no podrás deshacer los cambios anteriores de la IA.
+1449|Asistente de IA
+1450|Con qué carpeta trabajar
+1451|La IA ve y cambia archivos solo dentro de la carpeta elegida. También puedes abrir cualquier carpeta desde el gestor de archivos: «…» → «Asistente de IA para esta carpeta».
+1452|Conectar un modelo de IA…
+1453|OpenAI, Claude, Gemini, DeepSeek, Ollama y otros
+1454|Indicar la ruta de una carpeta…
+1455|Ruta de la carpeta
+1456|Carpeta no encontrada
+1457|No existe esa carpeta o no hay acceso a ella.
+1458|Ollama en un ordenador
+1459|LM Studio en un ordenador
+1460|Otro (compatible con OpenAI)
+1461|La clave de API no funcionó (HTTP %ld). %@
+1462|No se encontró la dirección o el modelo (HTTP 404). Revisa la dirección de la API y el nombre del modelo. %@
+1463|Demasiadas solicitudes o se acabó la cuota (HTTP 429). %@
+1464|Dirección de API no válida
+1465|Acciones deshechas: %d, fallidas: %d
+1466|Acciones deshechas: %d
+1467|Sobrescribir archivo
+1468|Crear archivo
+1469| (la versión anterior quedará en una copia de seguridad)
+1470|Editar archivo
+1471|Crear carpeta
+1472|Mover / renombrar
+1473|(va a una copia de seguridad — se puede deshacer)
+1474|Revisó la carpeta «%@»
+1475|Leyó «%@»
+1476|Sobrescribió «%@»
+1477|Creó «%@»
+1478|Editó «%@»
+1479|La carpeta «%@» ya existe
+1480|Creó la carpeta «%@»
+1481|Movió «%@» → «%@»
+1482|Copió «%@» → «%@»
+1483|Borró «%@»
+1484|Buscó «%@»
+1485|Propiedades de «%@»
+1486|Asistente de IA para esta carpeta
+1487|Cualquier IA por API o local — cambia archivos en la carpeta elegida cuando se lo pides

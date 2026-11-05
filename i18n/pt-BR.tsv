@@ -1379,8 +1379,102 @@
 1386|Auditoria de segurança (SAST)
 1387|Formato não reconhecido
 1388|A auditoria funciona com Mach-O e ELF.
-1389|ATS desativado — o app permite HTTP sem criptografia
-1390|Exceção de ATS: HTTP permitido para um domínio específico
-1391|Todas as versões de TLS/SSL permitidas, inclusive obsoletas
-1392|Verificação do certificado TLS desativada
-1393|Certificados expirados permitidos
+1389|O que fazer com os arquivos?
+1390|Pasta: %@\nDescreva o que fazer — a IA vai olhar os arquivos e fazer as alterações sozinha. Tudo o que ela muda é guardado em backup, e você pode desfazer as alterações do chat no menu “…”.%@
+1391|\nModelo: %@ · %@
+1392|\n\nPrimeiro conecte um modelo: “…” → “Modelos de IA”.
+1393|Modelos de IA…
+1394|Perguntar antes de alterar
+1395|Desfazer alterações do chat (%lu)
+1396|Novo chat
+1397|Abrir pasta
+1398|Modelo
+1399|Sem modelo
+1400|Conecte um modelo de IA: “…” → “Modelos de IA”.
+1401|Modelo não informado
+1402|Abra “Modelos de IA” e escolha um modelo para esta conexão.
+1403|Pensando…
+1404|Parado: passos demais seguidos. Escreva “continue” para prosseguir.
+1405|A IA quer alterar arquivos
+1406|Permitir
+1407|Permitir tudo neste chat
+1408|Negar
+1409|Negado por você
+1410|Espere terminar ou pare a IA
+1411|Desfazer alterações?
+1412|Todas as alterações de arquivos feitas pela IA neste chat serão desfeitas (%lu).
+1413|Desfazer
+1414|Novo chat · pasta %@
+1415|Modelos
+1416|Nova conexão
+1417|Conexão
+1418|Geralmente não é necessário
+1419|Nome do modelo
+1420|Compatível com OpenAI
+1421|IA local: rode o Ollama ou o LM Studio em um computador na mesma rede Wi‑Fi e informe o IP do computador. O Ollama precisa permitir conexões da rede (OLLAMA_HOST=0.0.0.0); no LM Studio, ative “Serve on Local Network”. Na primeira conexão o iOS pede acesso à rede local — permita.
+1422|A chave fica guardada só nas Chaves deste iPhone e é enviada só para o endereço de API acima.
+1423|Toque em “Escolher da lista” para carregar os modelos disponíveis. O modelo precisa suportar chamada de ferramentas (tools / function calling).
+1424|Escolher da lista…
+1425|Testar conexão
+1426|Carregando a lista de modelos…
+1427|Não foi possível carregar a lista
+1428|\n\nVocê pode digitar o nome do modelo manualmente.
+1429|Lista vazia
+1430|O serviço não retornou modelos. Digite o nome manualmente.
+1431|Escolha um modelo da lista ou digite o nome.
+1432|Verificando…
+1433|Não funciona
+1434|Funciona
+1435|O modelo respondeu: %@
+1436|(chamada de ferramenta)
+1437|Informe o endereço da API, ex.: https://api.openai.com/v1
+1438|Modelos de IA
+1439|Conexões
+1440|Segurança
+1441|Funciona qualquer serviço com API no formato OpenAI ou Anthropic, e também modelos locais (Ollama, LM Studio) em um computador da sua rede. A conexão marcada é usada nos chats.
+1442|Antes de cada alteração a IA pede permissão. Arquivos alterados e apagados ficam em backup — você pode recuperá-los com “Desfazer alterações do chat”.
+1443|nenhum modelo escolhido
+1444|Adicionar conexão…
+1445|Apagar backups
+1446|Qual IA conectar?
+1447|Apagar backups?
+1448|Não será mais possível desfazer alterações antigas da IA.
+1449|Assistente de IA
+1450|Com qual pasta trabalhar
+1451|A IA vê e altera arquivos só dentro da pasta escolhida. Você também pode abrir qualquer pasta pelo gerenciador de arquivos: “…” → “Assistente de IA para esta pasta”.
+1452|Conectar um modelo de IA…
+1453|OpenAI, Claude, Gemini, DeepSeek, Ollama e outros
+1454|Informar o caminho de uma pasta…
+1455|Caminho da pasta
+1456|Pasta não encontrada
+1457|Essa pasta não existe ou não há acesso a ela.
+1458|Ollama em um computador
+1459|LM Studio em um computador
+1460|Outro (compatível com OpenAI)
+1461|A chave de API não funcionou (HTTP %ld). %@
+1462|Endereço ou modelo não encontrado (HTTP 404). Verifique o endereço da API e o nome do modelo. %@
+1463|Solicitações demais ou a cota acabou (HTTP 429). %@
+1464|Endereço de API inválido
+1465|Ações desfeitas: %d, falharam: %d
+1466|Ações desfeitas: %d
+1467|Sobrescrever arquivo
+1468|Criar arquivo
+1469| (a versão antiga fica guardada em backup)
+1470|Editar arquivo
+1471|Criar pasta
+1472|Mover / renomear
+1473|(vai para o backup — pode ser desfeito)
+1474|Olhou a pasta “%@”
+1475|Leu “%@”
+1476|Sobrescreveu “%@”
+1477|Criou “%@”
+1478|Editou “%@”
+1479|A pasta “%@” já existe
+1480|Criou a pasta “%@”
+1481|Moveu “%@” → “%@”
+1482|Copiou “%@” → “%@”
+1483|Apagou “%@”
+1484|Procurou “%@”
+1485|Propriedades de “%@”
+1486|Assistente de IA para esta pasta
+1487|Qualquer IA por API ou local — altera arquivos na pasta escolhida a seu pedido

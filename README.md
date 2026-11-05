@@ -46,6 +46,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Wi‑Fi transfer through a browser on your computer
 - “Open in GX Files” from the share sheet; apk, dylib, so, dex and btx open in GX Files from the Files app
 - Network drives over WebDAV — computer, NAS, Nextcloud; GitHub client: browse, download, edit and commit from the phone
+- AI assistant: connect any AI — OpenAI, Claude, Gemini, DeepSeek, OpenRouter or a local Ollama / LM Studio — and let it edit files in a folder you choose (even all of LiveContainer), with confirmation, backups and undo
 
 **Formats**
 - ZIP, APK, IPA, JAR — edit right inside the archive; read tar, 7z, rar and more

@@ -1379,8 +1379,102 @@
 1386|Sicherheitsaudit (SAST)
 1387|Format nicht erkannt
 1388|Das Audit funktioniert mit Mach-O und ELF.
-1389|ATS deaktiviert — die App erlaubt unverschlüsseltes HTTP
-1390|ATS-Ausnahme: HTTP für eine bestimmte Domain erlaubt
-1391|Alle TLS/SSL-Versionen erlaubt, auch veraltete
-1392|TLS-Zertifikatsprüfung deaktiviert
-1393|Abgelaufene Zertifikate erlaubt
+1389|Was soll mit den Dateien passieren?
+1390|Ordner: %@\nBeschreibe, was zu tun ist — die KI sieht sich die Dateien selbst an und nimmt die Änderungen vor. Alles, was sie ändert, wird gesichert, und die Änderungen des Chats lassen sich im Menü „…“ rückgängig machen.%@
+1391|\nModell: %@ · %@
+1392|\n\nVerbinde zuerst ein Modell: „…“ → „KI-Modelle“.
+1393|KI-Modelle…
+1394|Vor Änderungen fragen
+1395|Chat-Änderungen rückgängig machen (%lu)
+1396|Neuer Chat
+1397|Ordner öffnen
+1398|Modell
+1399|Kein Modell
+1400|Verbinde ein KI-Modell: „…“ → „KI-Modelle“.
+1401|Kein Modell angegeben
+1402|Öffne „KI-Modelle“ und wähle ein Modell für diese Verbindung.
+1403|Denke nach…
+1404|Angehalten: zu viele Schritte hintereinander. Schreibe „weiter“, um fortzufahren.
+1405|Die KI möchte Dateien ändern
+1406|Erlauben
+1407|Alles in diesem Chat erlauben
+1408|Verbieten
+1409|Von dir verboten
+1410|Warte, bis sie fertig ist, oder stoppe die KI
+1411|Änderungen rückgängig machen?
+1412|Alle Dateiänderungen der KI in diesem Chat werden rückgängig gemacht (%lu).
+1413|Rückgängig
+1414|Neuer Chat · Ordner %@
+1415|Modelle
+1416|Neue Verbindung
+1417|Verbindung
+1418|Meist nicht nötig
+1419|Modellname
+1420|OpenAI-kompatibel
+1421|Lokale KI: Starte Ollama oder LM Studio auf einem Computer im selben WLAN und gib die IP des Computers ein. Ollama muss Verbindungen aus dem Netz erlauben (OLLAMA_HOST=0.0.0.0), in LM Studio „Serve on Local Network“ aktivieren. Bei der ersten Verbindung fragt iOS nach Zugriff aufs lokale Netzwerk — erlaube ihn.
+1422|Der Schlüssel wird nur im Schlüsselbund dieses iPhones gespeichert und nur an die API-Adresse oben gesendet.
+1423|Tippe auf „Aus Liste wählen“, um die verfügbaren Modelle zu laden. Das Modell muss Tool-Aufrufe unterstützen (tools / function calling).
+1424|Aus Liste wählen…
+1425|Verbindung testen
+1426|Lade die Modellliste…
+1427|Liste konnte nicht geladen werden
+1428|\n\nDu kannst den Modellnamen auch von Hand eingeben.
+1429|Liste ist leer
+1430|Der Dienst hat keine Modelle geliefert. Gib den Namen von Hand ein.
+1431|Wähle ein Modell aus der Liste oder gib den Namen ein.
+1432|Prüfe…
+1433|Funktioniert nicht
+1434|Funktioniert
+1435|Das Modell antwortete: %@
+1436|(Tool-Aufruf)
+1437|Gib die API-Adresse an, z. B. https://api.openai.com/v1
+1438|KI-Modelle
+1439|Verbindungen
+1440|Sicherheit
+1441|Jeder Dienst mit einer API im OpenAI- oder Anthropic-Format funktioniert, ebenso lokale Modelle (Ollama, LM Studio) auf einem Computer in deinem Netzwerk. Die markierte Verbindung wird in Chats verwendet.
+1442|Vor jeder Änderung fragt die KI um Erlaubnis. Geänderte und gelöschte Dateien werden gesichert — du kannst sie mit „Chat-Änderungen rückgängig machen“ zurückholen.
+1443|kein Modell gewählt
+1444|Verbindung hinzufügen…
+1445|Sicherungen löschen
+1446|Welche KI verbinden?
+1447|Sicherungen löschen?
+1448|Frühere KI-Änderungen lassen sich dann nicht mehr rückgängig machen.
+1449|KI-Assistent
+1450|Mit welchem Ordner arbeiten
+1451|Die KI sieht und ändert Dateien nur im gewählten Ordner. Jeden Ordner kannst du auch im Dateimanager öffnen: „…“ → „KI-Assistent für diesen Ordner“.
+1452|KI-Modell verbinden…
+1453|OpenAI, Claude, Gemini, DeepSeek, Ollama und mehr
+1454|Ordnerpfad eingeben…
+1455|Ordnerpfad
+1456|Ordner nicht gefunden
+1457|Diesen Ordner gibt es nicht, oder es besteht kein Zugriff.
+1458|Ollama auf einem Computer
+1459|LM Studio auf einem Computer
+1460|Andere (OpenAI-kompatibel)
+1461|Der API-Schlüssel passt nicht (HTTP %ld). %@
+1462|Adresse oder Modell nicht gefunden (HTTP 404). Prüfe API-Adresse und Modellnamen. %@
+1463|Zu viele Anfragen oder Kontingent aufgebraucht (HTTP 429). %@
+1464|Ungültige API-Adresse
+1465|Rückgängig gemacht: %d, fehlgeschlagen: %d
+1466|Rückgängig gemacht: %d
+1467|Datei überschreiben
+1468|Datei erstellen
+1469| (die alte Version bleibt in einer Sicherung)
+1470|Datei ändern
+1471|Ordner erstellen
+1472|Verschieben / umbenennen
+1473|(kommt in eine Sicherung — rückgängig machbar)
+1474|Ordner „%@“ angesehen
+1475|„%@“ gelesen
+1476|„%@“ überschrieben
+1477|„%@“ erstellt
+1478|„%@“ geändert
+1479|Ordner „%@“ existiert bereits
+1480|Ordner „%@“ erstellt
+1481|„%@“ → „%@“ verschoben
+1482|„%@“ → „%@“ kopiert
+1483|„%@“ gelöscht
+1484|Nach „%@“ gesucht
+1485|Eigenschaften von „%@“
+1486|KI-Assistent für diesen Ordner
+1487|Jede KI per API oder lokal — ändert Dateien im gewählten Ordner auf deine Bitte

@@ -1379,8 +1379,102 @@
 1386|Security audit (SAST)
 1387|Format not recognized
 1388|The audit works with Mach-O and ELF.
-1389|ATS disabled — the app allows unencrypted HTTP
-1390|ATS exception: HTTP allowed for a specific domain
-1391|All TLS/SSL versions allowed, including outdated ones
-1392|TLS certificate validation disabled
-1393|Expired certificates allowed
+1389|What should I do with the files?
+1390|Folder: %@\nDescribe what to do — the AI will look through the files and make the changes itself. Everything it changes is backed up, and you can undo the chat's changes from the “…” menu.%@
+1391|\nModel: %@ · %@
+1392|\n\nFirst connect a model: “…” → “AI models”.
+1393|AI models…
+1394|Ask before changes
+1395|Undo chat changes (%lu)
+1396|New chat
+1397|Open folder
+1398|Model
+1399|No model
+1400|Connect an AI model: “…” → “AI models”.
+1401|No model selected
+1402|Open “AI models” and choose a model for this connection.
+1403|Thinking…
+1404|Stopped: too many steps in a row. Type “continue” to go on.
+1405|The AI wants to change files
+1406|Allow
+1407|Allow everything in this chat
+1408|Deny
+1409|Denied by you
+1410|Wait until it finishes or stop the AI
+1411|Undo changes?
+1412|All file changes the AI made in this chat will be undone (%lu).
+1413|Undo
+1414|New chat · folder %@
+1415|Models
+1416|New connection
+1417|Connection
+1418|Usually not needed
+1419|Model name
+1420|OpenAI-compatible
+1421|Local AI: run Ollama or LM Studio on a computer on the same Wi‑Fi network and enter the computer's IP. Ollama must allow network connections (OLLAMA_HOST=0.0.0.0); in LM Studio turn on “Serve on Local Network”. On first connection iOS asks for local network access — allow it.
+1422|The key is stored only in this iPhone's Keychain and is sent only to the API address above.
+1423|Tap “Choose from list” to load the available models. The model must support tool calling (tools / function calling).
+1424|Choose from list…
+1425|Test connection
+1426|Loading the model list…
+1427|Couldn't load the list
+1428|\n\nYou can type the model name manually.
+1429|List is empty
+1430|The service returned no models. Type the name manually.
+1431|Choose a model from the list or type its name.
+1432|Checking…
+1433|Not working
+1434|Working
+1435|The model replied: %@
+1436|(tool call)
+1437|Enter the API address, e.g. https://api.openai.com/v1
+1438|AI models
+1439|Connections
+1440|Safety
+1441|Any service with an OpenAI- or Anthropic-format API works, as well as local models (Ollama, LM Studio) on a computer in your network. The checked connection is used in chats.
+1442|Before every change the AI asks for permission. Changed and deleted files are backed up — you can bring them back with “Undo chat changes”.
+1443|no model selected
+1444|Add connection…
+1445|Delete backups
+1446|Which AI to connect?
+1447|Delete backups?
+1448|You won't be able to undo past AI changes anymore.
+1449|AI assistant
+1450|Which folder to work with
+1451|The AI sees and changes files only inside the chosen folder. You can also open any folder from the file manager: “…” → “AI assistant for this folder”.
+1452|Connect an AI model…
+1453|OpenAI, Claude, Gemini, DeepSeek, Ollama and more
+1454|Enter a folder path…
+1455|Folder path
+1456|Folder not found
+1457|No such folder, or no access to it.
+1458|Ollama on a computer
+1459|LM Studio on a computer
+1460|Other (OpenAI-compatible)
+1461|The API key didn't work (HTTP %ld). %@
+1462|Address or model not found (HTTP 404). Check the API address and model name. %@
+1463|Too many requests or the quota ran out (HTTP 429). %@
+1464|Invalid API address
+1465|Actions undone: %d, failed: %d
+1466|Actions undone: %d
+1467|Overwrite file
+1468|Create file
+1469| (the old version will be kept in a backup)
+1470|Edit file
+1471|Create folder
+1472|Move / rename
+1473|(goes to a backup — can be undone)
+1474|Looked at folder “%@”
+1475|Read “%@”
+1476|Overwrote “%@”
+1477|Created “%@”
+1478|Edited “%@”
+1479|Folder “%@” already exists
+1480|Created folder “%@”
+1481|Moved “%@” → “%@”
+1482|Copied “%@” → “%@”
+1483|Deleted “%@”
+1484|Searched for “%@”
+1485|Properties of “%@”
+1486|AI assistant for this folder
+1487|Any AI via API or a local one — changes files in the chosen folder at your request

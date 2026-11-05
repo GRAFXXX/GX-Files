@@ -164,6 +164,8 @@ typedef NS_ENUM(NSInteger, GXSort) { GXSortName, GXSortDate, GXSortSize, GXSortT
     UIMenu *view = [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[sortMenu, hidden, big]];
     UIMenu *tools = [UIMenu menuWithTitle:@"" image:nil identifier:nil options:UIMenuOptionsDisplayInline children:@[
         [UIAction actionWithTitle:GXL(@"Выбрать") image:[UIImage systemImageNamed:@"checkmark.circle"] identifier:nil handler:^(UIAction *x) { [ws setEditing:YES animated:YES]; }],
+        [UIAction actionWithTitle:GXL(@"ИИ-помощник для этой папки") image:[UIImage systemImageNamed:@"sparkles"] identifier:nil handler:^(UIAction *x) {
+            [ws.navigationController pushViewController:[[GXAIChatVC alloc] initWithRoot:p] animated:YES]; }],
         [UIAction actionWithTitle:GXL(@"Найти и заменить текст во всей папке") image:[UIImage systemImageNamed:@"text.magnifyingglass"] identifier:nil handler:^(UIAction *x) {
             [ws.navigationController pushViewController:[[GXFindVC alloc] initWithRoot:p] animated:YES]; }],
         [UIAction actionWithTitle:GXL(@"Поиск файлов по имени") image:[UIImage systemImageNamed:@"magnifyingglass"] identifier:nil handler:^(UIAction *x) {
@@ -482,6 +484,8 @@ typedef NS_ENUM(NSInteger, GXSort) { GXSortName, GXSortDate, GXSortSize, GXSortT
             [mt addObject:[UIAction actionWithTitle:GXL(@"В текстовом редакторе") image:[UIImage systemImageNamed:@"doc.plaintext"] identifier:nil handler:^(UIAction *a) { [GXOpener openText:it.path from:ws readOnly:NO]; }]];
             [mt addObject:[UIAction actionWithTitle:GXL(@"В hex-редакторе") image:[UIImage systemImageNamed:@"number"] identifier:nil handler:^(UIAction *a) { [GXOpener openHex:it.path from:ws readOnly:NO]; }]];
         }
+        if (it.isDir) [mt addObject:[UIAction actionWithTitle:GXL(@"ИИ-помощник для этой папки") image:[UIImage systemImageNamed:@"sparkles"] identifier:nil handler:^(UIAction *a) {
+            [ws.navigationController pushViewController:[[GXAIChatVC alloc] initWithRoot:it.path] animated:YES]; }]];
         if (it.isDir) [mt addObject:[UIAction actionWithTitle:GXL(@"Найти дубликаты") image:[UIImage systemImageNamed:@"square.on.square"] identifier:nil handler:^(UIAction *a) {
             [ws.navigationController pushViewController:[[GXDupVC alloc] initWithRoot:it.path] animated:YES]; }]];
         if (!it.isDir && GXIsAPKPath(it.path)) [mt addObject:[UIAction actionWithTitle:GXL(@"Подписать APK") image:[UIImage systemImageNamed:@"signature"] identifier:nil handler:^(UIAction *a) { [ws signAPK:it.path]; }]];
