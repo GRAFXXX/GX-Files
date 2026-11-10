@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.6.2
+- Fixed: certificate-signed dylibs were rejected by iOS at load (`dlopen`: "code signature invalid", errno=1) because the CodeDirectory's execute-segment range was left empty. It now covers the `__TEXT` segment (execSegBase/execSegLimit), as iOS requires, so a correctly-signed dylib loads
+- CI signing test now also checks the execute-segment range, `codeLimit`, and that every code page hash matches the file — the checks that would have caught this
+
 ## 4.6.1
 - Certificate import now reads modern `.p12` files that iOS itself can't (`SecPKCS12Import` fails on them with errSecDecode/-26275) — the kind OpenSSL 3 produces by default (PBES2: PBKDF2 + AES-256-CBC). GX Files now parses PKCS#12 itself, like Feather/zsign, instead of relying on `SecPKCS12Import`
 - Own PKCS#12 parser (`gx_p12`): PBES2 (PBKDF2-HMAC-SHA1/256/384/512 + AES-128/192/256-CBC or 3DES) and legacy PKCS#12 PBE (3DES, RC2-40); the private key is handed to the Security framework via `SecKeyCreateWithData`, so signing still goes through `SecKeyCreateSignature` and the key is never used in the clear. `SecPKCS12Import` stays as a fallback

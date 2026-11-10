@@ -10,6 +10,7 @@
 // ---------- big-endian helpers ----------
 static uint32_t RB32(const uint8_t *p) { return (uint32_t)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
 static void WB32(uint8_t *p, uint32_t v) { p[0] = v >> 24; p[1] = v >> 16; p[2] = v >> 8; p[3] = v; }
+static void WB64(uint8_t *p, uint64_t v) { for (int i = 7; i >= 0; i--) { p[i] = (uint8_t)v; v >>= 8; } }
 static uint32_t LE32(const uint8_t *p) { return (uint32_t)p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24; }
 static void WLE32(uint8_t *p, uint32_t v) { p[0] = v; p[1] = v >> 8; p[2] = v >> 16; p[3] = v >> 24; }
 static uint64_t LE64(const uint8_t *p) { uint64_t v = 0; for (int i = 7; i >= 0; i--) v = v << 8 | p[i]; return v; }
@@ -254,7 +255,8 @@ static void make_requirements(uint8_t out[12]) { WB32(out, 0xFADE0C01); WB32(out
 
 // Построить CodeDirectory. Возвращает malloc-буфер и длину.
 static uint8_t *make_cd(const uint8_t *file, uint32_t codelimit, const char *ident, const char *teamid,
-                        const uint8_t *reqhash /*32, slot -2*/, int have_req, size_t *outlen) {
+                        const uint8_t *reqhash /*32, slot -2*/, int have_req,
+                        uint64_t execBase, uint64_t execLimit, uint64_t execFlags, size_t *outlen) {
     uint32_t nslots = (codelimit + 4095) / 4096;
     size_t idl = strlen(ident) + 1, tml = teamid && *teamid ? strlen(teamid) + 1 : 0;
     int nspecial = have_req ? 2 : 0;                 // слоты -1 (Info.plist=0) и -2 (Requirements)
@@ -270,9 +272,11 @@ static uint8_t *make_cd(const uint8_t *file, uint32_t codelimit, const char *ide
     WB32(cd + 24, (uint32_t)nspecial); WB32(cd + 28, nslots);
     WB32(cd + 32, codelimit); cd[36] = 32; cd[37] = 2; cd[38] = 0; cd[39] = 12;
     if (tml) WB32(cd + 48, (uint32_t)teamOffset);     // teamOffset (version >= 0x20200)
-    // execSegment (version 0x20400): __TEXT. Для dylib флаг main-binary не ставим.
-    // base/limit заполнит вызывающий через параметры? Проще — найдём __TEXT здесь не можем (нет макро);
-    // dyld для dylib это не критично, оставляем 0 (как и ad-hoc путь при отсутствии textcmd).
+    // execSegment (version 0x20400): покрывает __TEXT. Без этого AMFI отвергает подпись
+    // («code signature invalid»), т.к. исполняемый регион вне подписанного exec-сегмента.
+    WB64(cd + 64, execBase);                           // execSegBase  (fileoff __TEXT)
+    WB64(cd + 72, execLimit);                          // execSegLimit (filesize __TEXT)
+    WB64(cd + 80, execFlags);                          // execSegFlags (0 для dylib; main-binary не ставим)
     memcpy(cd + identOffset, ident, idl);
     if (tml) memcpy(cd + teamOffset, teamid, tml);
     if (have_req) {
@@ -318,6 +322,7 @@ static uint8_t *sign_thin(const uint8_t *in, size_t len, const gx_sign_opts *o, 
     uint32_t ncmds = LE32(in + 16), szc = LE32(in + 20);
     if (32 + (size_t)szc > len) { snprintf(err, errlen, GXT("битые команды загрузки")); return NULL; }
     size_t sigcmd = 0, linkcmd = 0;
+    uint64_t textoff = 0, textsize = 0;
     const uint8_t *p = in + 32;
     for (uint32_t i = 0; i < ncmds; i++) {
         if ((size_t)(p - in) + 8 > 32 + (size_t)szc) break;
@@ -325,6 +330,7 @@ static uint8_t *sign_thin(const uint8_t *in, size_t len, const gx_sign_opts *o, 
         if (cs < 8 || (size_t)(p - in) + cs > 32 + (size_t)szc) break;
         if (cmd == 0x1D) sigcmd = (size_t)(p - in);
         if (cmd == 0x19 && !strncmp((const char *)p + 8, "__LINKEDIT", 16)) linkcmd = (size_t)(p - in);
+        if (cmd == 0x19 && !strncmp((const char *)p + 8, "__TEXT", 16)) { textoff = LE64(p + 40); textsize = LE64(p + 48); }  // для execSegment
         p += cs;
     }
     if (!sigcmd || !linkcmd) { snprintf(err, errlen, GXT("нет LC_CODE_SIGNATURE/__LINKEDIT (нужен dylib из этого компилятора)")); return NULL; }
@@ -359,7 +365,8 @@ static uint8_t *sign_thin(const uint8_t *in, size_t len, const gx_sign_opts *o, 
 
     // CodeDirectory (хеши страниц уже по финальным командам загрузки)
     size_t cdlen = 0;
-    uint8_t *cd = make_cd(f, (uint32_t)codelimit, o->ident, o->teamid ? o->teamid : "", reqhash, 1, &cdlen);
+    uint8_t *cd = make_cd(f, (uint32_t)codelimit, o->ident, o->teamid ? o->teamid : "", reqhash, 1,
+                          textoff, textsize, 0 /*execSegFlags: dylib, не main-binary*/, &cdlen);
     if (!cd) { free(f); snprintf(err, errlen, GXT("ошибка CodeDirectory")); return NULL; }
 
     // CMS

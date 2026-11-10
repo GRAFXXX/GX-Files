@@ -51,6 +51,23 @@ for i in range(count):
 cd=blobs[0]; clen,=struct.unpack('>I',d[cd+4:cd+8]); cdb=d[cd:cd+clen]
 flags,=struct.unpack('>I',d[cd+12:cd+16])
 if flags&2: print("FAIL: ad-hoc flag set"); fails+=1
+# codeLimit должен указывать на начало подписи
+hashOff,=struct.unpack('>I',d[cd+16:cd+20]); nCode,=struct.unpack('>I',d[cd+28:cd+32]); codeLimit,=struct.unpack('>I',d[cd+32:cd+36])
+if codeLimit!=so: print("FAIL: codeLimit 0x%x != sig dataoff 0x%x"%(codeLimit,so)); fails+=1
+# хеши страниц обязаны совпадать с байтами файла (иначе AMFI: code signature invalid)
+import hashlib as _h
+for i in range(nCode):
+    hh=_h.sha256(d[i*4096:min(i*4096+4096,codeLimit)]).digest()
+    if hh!=d[cd+hashOff+i*32:cd+hashOff+(i+1)*32]: print("FAIL: page %d hash mismatch"%i); fails+=1
+# execSegment обязан покрывать __TEXT (execSegLimit!=0), иначе AMFI отвергает подпись
+eb,el,ef=struct.unpack('>QQQ',d[cd+64:cd+88])
+toff=tsz=0; o2=32
+for _ in range(nc):
+    c2,s2=struct.unpack('<II',d[o2:o2+8])
+    if c2==0x19 and d[o2+8:o2+14]==b'__TEXT': toff,tsz=struct.unpack('<QQ',d[o2+40:o2+56])
+    o2+=s2
+if el!=tsz or el==0: print("FAIL: execSegLimit 0x%x != __TEXT filesize 0x%x"%(el,tsz)); fails+=1
+if eb!=toff: print("FAIL: execSegBase 0x%x != __TEXT fileoff 0x%x"%(eb,toff)); fails+=1
 cw=blobs[0x10000]; wm,wl=struct.unpack('>II',d[cw:cw+8])
 if wm!=0xfade0b01: print("FAIL: CMS wrapper magic",hex(wm)); fails+=1
 open(OUT+'/cms.der','wb').write(d[cw+8:cw+wl]); open(OUT+'/cd.bin','wb').write(cdb)
