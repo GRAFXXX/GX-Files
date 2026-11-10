@@ -1510,3 +1510,46 @@
 1518|Base uniquement
 1520|Le compilateur produit du C → dylib arm64 directement sur l'iPhone. C'est un compilateur C (TinyCC), pas Objective-C, donc tu ne peux pas écrire [view setAlpha:0.5]. Mais toutes les classes iOS (UIKit, Foundation, AVFoundation et plus de 90 autres frameworks) sont disponibles — tu les appelles via le runtime Objective-C avec les macros GX_MSG. gxkit.h n'est pas un remplacement d'UIKit, c'est un pont du C vers n'importe quelle classe iOS.\n\nLes frameworks à lier s'activent dans le menu « Bibliothèques ». Les frameworks C de base ont des en-têtes (CoreGraphics, CommonCrypto, CoreFoundation) — un #include normal. Les autres (UIKit, AVFoundation, Security…) s'appellent via GX_MSG, ou déclare les prototypes toi-même.\n\ngxkit.h — utilitaires pour tweaks en C :\n\nGX_CLS("UIView") — classe\nGX_SEL("setAlpha:") — sélecteur\nGX_MSG0(type, objet, "sélecteur")\nGX_MSG1(type, objet, "sel:", type1, arg1) … jusqu'à GX_MSG5\n  exemple: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("texte") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — retour vers C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"nom") / gx_setprop(obj,"nom",val) — propriétés par nom (KVC)\ngx_log("format %d", x) — dans le journal système (NSLog)\ngx_alert("titre", "texte") — alerte (sur le thread principal)\ngx_main(fn, ctx), gx_main_after(s, fn, ctx) — exécuter sur le thread principal\ngx_top_vc() — écran du dessus de l'app\n\ngx_hook_method("Classe", "sel:", 0, (IMP)ma, (IMP*)&orig) — hooker une méthode (1 — méthode de classe +)\ngx_rebind("fonction", ma, (void**)&orig) — hooker une fonction C via son import\ngx_image_base("UnityFramework") — adresse de chargement d'une bibliothèque en mémoire\n\nLa .dylib finale apparaît à côté du .c. Pour l'injecter dans une app : outils de l'app → « Injecter une dylib ».
 1521|Les cases cochées sont liées à la dylib. libSystem (libc, le runtime Objective-C) est toujours lié. Les en-têtes sont fournis pour les frameworks C de base (CoreGraphics, CommonCrypto, CoreFoundation) ; les autres (UIKit, AVFoundation, etc.) s'appellent via gxkit.h — les macros GX_MSG.
+
+1522|✓ %@ — %@, fonctions : %zu\n
+1523|Signature par certificat…
+1524|Aucun certificat chargé
+1525|Mot de passe du certificat incorrect
+1526|Impossible d'ouvrir le .p12 (code %d)
+1527|Le .p12 ne contient ni clé privée ni certificat
+1528|Pas de clé privée dans le certificat
+1529|Impossible de lire le certificat
+1530|Impossible de lire le dylib
+1531|Impossible d'écrire le fichier signé
+1532|✓ signé avec le certificat (team %@, %d certificat(s) dans la chaîne)\n
+1533|Mot de passe incorrect
+1534|Signature par certificat
+1535|Certificat
+1536|Si activé, le compilateur et « Injecter un dylib » signent les fichiers avec ce certificat au lieu de l'ad-hoc. Le dylib se charge alors sans JIT — sur un appareil ayant le même Team ID que l'app.
+1537|Il te faut un .p12 (certificat de développeur avec clé privée) et son mot de passe. Un profil de provisionnement (.mobileprovision) est facultatif mais précise le Team ID. Ce sont les mêmes fichiers que pour signer un IPA.
+1538|Signer avec le certificat
+1539|%@ · valable jusqu'au %@
+1540|Remplacer le certificat (.p12)…
+1541|Importer un certificat (.p12)…
+1542|Remplacer le provisioning…
+1543|Ajouter un provisioning (.mobileprovision)…
+1544|Supprimer le certificat
+1545|Supprimer le certificat ?
+1546|Les fichiers du certificat et le mot de passe seront supprimés de l'appareil.
+1547|Impossible de lire le fichier.
+1548|Ne ressemble pas à un profil de provisionnement
+1549|Aucun profil plist à l'intérieur.
+1550|Provisioning ajouté
+1551|Mot de passe du certificat
+1552|Le mot de passe qui protège le .p12. S'il n'y en a pas, laisse vide.
+1553|Vérifier et enregistrer
+1554|Échec
+1555|Certificat enregistré
+1556|pas un Mach-O 64 bits
+1557|pas de LC_CODE_SIGNATURE/__LINKEDIT (nécessite un dylib de ce compilateur)
+1558|mémoire insuffisante
+1559|erreur CodeDirectory
+1560|erreur de signature/CMS (certificat ou clé)
+1561|erreur de construction de la signature
+1562|signature plus grande que l'espace réservé
+1563|pas de certificat ni de callback de signature

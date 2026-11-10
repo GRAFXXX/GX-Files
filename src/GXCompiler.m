@@ -80,6 +80,17 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
         // подпись и проверка результата
         NSData *d = [NSData dataWithContentsOfFile:out];
         if (d.length < 32) { err = GXL(@"Компилятор не создал файл"); return; }
+        if (GXSignEnabled()) {
+            // настоящий сертификат — файл уже лежит в out (без подписи)
+            NSString *se = GXSignFileWithCert(out, name.stringByDeletingPathExtension, log);
+            if (se) { err = se; return; }
+            NSData *sd = [NSData dataWithContentsOfFile:out];
+            gx_bin b; gx_bin_open(&b, sd.bytes, sd.length, 0);
+            BOOL good = b.fmt == 1 && b.arm64; size_t nfn = b.nfn; gx_bin_close(&b);
+            if (!good) { err = GXL(@"Получился неверный Mach-O"); return; }
+            [log appendFormat:GXL(@"✓ %@ — %@, функций: %zu\n"), name, GXHuman(sd.length), nfn];
+            return;
+        }
         char e[256] = {0}; size_t ol = 0; int signedN = 0;
         uint8_t *sg = gx_adhoc_sign(d.bytes, d.length, name.stringByDeletingPathExtension.UTF8String, 2, &ol, &signedN, e, sizeof e);
         if (!sg) { err = [NSString stringWithFormat:GXL(@"Подпись: %s"), e]; return; }
@@ -219,6 +230,7 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
     return [UIMenu menuWithChildren:@[
         [UIMenu menuWithTitle:GXL(@"Шаблоны") image:[UIImage systemImageNamed:@"doc.on.doc"] identifier:nil options:0 children:ta],
         act(GXL(@"Библиотеки для линковки…"), @"shippingbox", ^{ [ws chooseLibs]; }),
+        act(GXL(@"Подпись сертификатом…"), @"signature", ^{ [ws.navigationController pushViewController:[GXSignVC new] animated:YES]; }),
         act(GXL(@"Новый файл…"), @"doc.badge.plus", ^{ [ws newFile]; }),
         act(GXL(@"Папка с исходниками"), @"folder", ^{ [ws openFolder]; }),
         act(GXL(@"Справка по gxkit.h"), @"questionmark.circle", ^{ [ws help]; }),

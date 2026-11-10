@@ -59,14 +59,14 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Strings — search and edit in place, with code references
 - Objective-C classes → .h headers
 - ARM64 disassembler, approximate C pseudocode, built-in assembler
-- On-device C→arm64 compiler (TinyCC) with 95 linkable iOS frameworks and libraries, ad-hoc signing and dylib injection
+- On-device C→arm64 compiler (TinyCC) with 95 linkable iOS frameworks and libraries, dylib injection, and signing with either ad-hoc or your own developer certificate (`.p12`) so dylibs load without JIT
 - ARM64 emulator: run a function step by step in a sandbox and watch the registers
 - Pseudocode structured into if/else/while, not just goto
 - Security audit (SAST): flags strcpy/sprintf/system, MD5/SHA-1, disabled TLS checks
 - Numbers and constants, embedded images and fonts, UI colors
 - Ad-hoc re-signing after edits
 
-**On-device compiler** — [TinyCC](https://github.com/TinyCC/tinycc) with iOS SDK headers and the `gxkit.h` helper: write C, get an arm64 dylib.
+**On-device compiler** — [TinyCC](https://github.com/TinyCC/tinycc) with iOS SDK headers and the `gxkit.h` helper: write C, get an arm64 dylib. Import your own developer `.p12` and the compiler signs with your certificate (CodeDirectory + CMS, RSA via the Keychain) instead of ad-hoc, so the result loads without JIT on a device that shares the certificate's Team ID.
 
 **8 languages** — English, Русский, Українська, Беларуская, Deutsch, Français, Español, Português (Brasil).
 

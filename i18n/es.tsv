@@ -1510,3 +1510,46 @@
 1518|Solo básicas
 1520|El compilador genera C → dylib arm64 directamente en el iPhone. Es un compilador de C (TinyCC), no de Objective-C, así que no puedes escribir [view setAlpha:0.5]. Pero todas las clases de iOS (UIKit, Foundation, AVFoundation y más de 90 frameworks) están disponibles — las llamas a través del runtime de Objective-C con las macros GX_MSG. gxkit.h no sustituye a UIKit, es un puente de C a cualquier clase de iOS.\n\nLos frameworks a enlazar se activan en el menú «Bibliotecas». Los frameworks de C básicos tienen cabeceras (CoreGraphics, CommonCrypto, CoreFoundation) — un #include normal. Los demás (UIKit, AVFoundation, Security…) los llamas con GX_MSG, o declara los prototipos tú mismo.\n\ngxkit.h — utilidades para tweaks en C:\n\nGX_CLS("UIView") — clase\nGX_SEL("setAlpha:") — selector\nGX_MSG0(tipo, objeto, "selector")\nGX_MSG1(tipo, objeto, "sel:", tipo1, arg1) … hasta GX_MSG5\n  ejemplo: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("texto") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — de vuelta a C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"nombre") / gx_setprop(obj,"nombre",valor) — propiedades por nombre (KVC)\ngx_log("formato %d", x) — al registro del sistema (NSLog)\ngx_alert("título", "texto") — alerta (en el hilo principal)\ngx_main(fn, ctx), gx_main_after(s, fn, ctx) — ejecutar en el hilo principal\ngx_top_vc() — pantalla superior de la app\n\ngx_hook_method("Clase", "sel:", 0, (IMP)mía, (IMP*)&orig) — interceptar un método (1 — método de clase +)\ngx_rebind("función", mía, (void**)&orig) — interceptar una función C por su import\ngx_image_base("UnityFramework") — dirección de carga de una biblioteca en memoria\n\nLa .dylib final aparece junto al .c. Para inyectarla en una app: herramientas de la app → «Inyectar dylib».
 1521|Las marcadas se enlazan a la dylib. libSystem (libc, el runtime de Objective-C) se enlaza siempre. Las cabeceras vienen para los frameworks de C básicos (CoreGraphics, CommonCrypto, CoreFoundation); los demás (UIKit, AVFoundation, etc.) los llamas con gxkit.h — las macros GX_MSG.
+
+1522|✓ %@ — %@, funciones: %zu\n
+1523|Firma con certificado…
+1524|No hay certificado cargado
+1525|Contraseña del certificado incorrecta
+1526|No se pudo abrir el .p12 (código %d)
+1527|El .p12 no tiene clave privada ni certificado
+1528|No hay clave privada en el certificado
+1529|No se pudo leer el certificado
+1530|No se pudo leer el dylib
+1531|No se pudo escribir el archivo firmado
+1532|✓ firmado con certificado (team %@, %d certificado(s) en la cadena)\n
+1533|Contraseña incorrecta
+1534|Firma con certificado
+1535|Certificado
+1536|Si está activado, el compilador y «Inyectar dylib» firman los archivos con este certificado en lugar de ad-hoc. Entonces un dylib carga sin JIT — en un dispositivo con el mismo Team ID que la app.
+1537|Necesitas un .p12 (certificado de desarrollador con clave privada) y su contraseña. Un perfil de aprovisionamiento (.mobileprovision) es opcional pero precisa el Team ID. Son los mismos archivos con los que firmas un IPA.
+1538|Firmar con certificado
+1539|%@ · válido hasta %@
+1540|Reemplazar certificado (.p12)…
+1541|Importar certificado (.p12)…
+1542|Reemplazar provisioning…
+1543|Añadir provisioning (.mobileprovision)…
+1544|Eliminar certificado
+1545|¿Eliminar certificado?
+1546|Los archivos del certificado y la contraseña se eliminarán del dispositivo.
+1547|No se pudo leer el archivo.
+1548|No parece un perfil de aprovisionamiento
+1549|No hay perfil plist dentro.
+1550|Provisioning añadido
+1551|Contraseña del certificado
+1552|La contraseña que protege el .p12. Si no hay, déjalo vacío.
+1553|Comprobar y guardar
+1554|No funcionó
+1555|Certificado guardado
+1556|no es un Mach-O de 64 bits
+1557|sin LC_CODE_SIGNATURE/__LINKEDIT (requiere un dylib de este compilador)
+1558|sin memoria
+1559|error de CodeDirectory
+1560|error de firma/CMS (certificado o clave)
+1561|error al construir la firma
+1562|la firma supera el espacio reservado
+1563|sin certificado ni callback de firma

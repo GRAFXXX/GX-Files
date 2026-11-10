@@ -1510,3 +1510,46 @@
 1518|Nur Kern
 1520|Der Compiler baut C → arm64-dylib direkt auf dem iPhone. Es ist ein C-Compiler (TinyCC), kein Objective-C, du kannst also nicht [view setAlpha:0.5] schreiben. Aber jede iOS-Klasse (UIKit, Foundation, AVFoundation und 90+ weitere Frameworks) ist verfügbar — du rufst sie über die Objective-C-Runtime mit den GX_MSG-Makros auf. gxkit.h ist kein Ersatz für UIKit, sondern eine Brücke von C zu jeder iOS-Klasse.\n\nZu linkende Frameworks schaltest du im Menü „Bibliotheken“ ein. Die Kern-C-Frameworks haben Header (CoreGraphics, CommonCrypto, CoreFoundation) — ein normales #include. Den Rest (UIKit, AVFoundation, Security…) rufst du über GX_MSG auf oder deklarierst die Prototypen selbst.\n\ngxkit.h — Helfer für Tweaks in C:\n\nGX_CLS("UIView") — Klasse\nGX_SEL("setAlpha:") — Selektor\nGX_MSG0(Typ, Objekt, "Selektor")\nGX_MSG1(Typ, Objekt, "sel:", Typ1, Arg1) … bis GX_MSG5\n  Beispiel: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("Text") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — zurück nach C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"Name") / gx_setprop(obj,"Name",Wert) — Eigenschaften per Name (KVC)\ngx_log("Format %d", x) — ins Systemlog (NSLog)\ngx_alert("Titel", "Text") — Hinweis (im Hauptthread)\ngx_main(fn, ctx), gx_main_after(s, fn, ctx) — im Hauptthread ausführen\ngx_top_vc() — oberster Bildschirm der App\n\ngx_hook_method("Klasse", "sel:", 0, (IMP)meine, (IMP*)&orig) — eine Methode hooken (1 — Klassenmethode +)\ngx_rebind("Funktion", meine, (void**)&orig) — eine C-Funktion über ihren Import hooken\ngx_image_base("UnityFramework") — Ladeadresse einer Bibliothek im Speicher\n\nDie fertige .dylib liegt neben der .c. In eine App einschleusen: App-Werkzeuge → „dylib einschleusen“.
 1521|Markierte werden in die dylib gelinkt. libSystem (libc, die Objective-C-Runtime) wird immer gelinkt. Header sind für die Kern-C-Frameworks dabei (CoreGraphics, CommonCrypto, CoreFoundation); den Rest (UIKit, AVFoundation usw.) rufst du über gxkit.h auf — die GX_MSG-Makros.
+
+1522|✓ %@ — %@, Funktionen: %zu\n
+1523|Signieren mit Zertifikat…
+1524|Kein Zertifikat geladen
+1525|Falsches Zertifikatspasswort
+1526|.p12 konnte nicht geöffnet werden (Code %d)
+1527|Die .p12 enthält keinen privaten Schlüssel und kein Zertifikat
+1528|Kein privater Schlüssel im Zertifikat
+1529|Zertifikat konnte nicht gelesen werden
+1530|dylib konnte nicht gelesen werden
+1531|Signierte Datei konnte nicht geschrieben werden
+1532|✓ mit Zertifikat signiert (Team %@, %d Zertifikat(e) in der Kette)\n
+1533|Falsches Passwort
+1534|Signieren mit Zertifikat
+1535|Zertifikat
+1536|Wenn aktiviert, signieren der Compiler und „dylib einschleusen" Dateien mit diesem Zertifikat statt ad-hoc. Dann lädt ein dylib auch ohne JIT — auf einem Gerät mit derselben Team-ID wie die App.
+1537|Du brauchst eine .p12 (Entwicklerzertifikat mit privatem Schlüssel) und ihr Passwort. Ein Provisioning-Profil (.mobileprovision) ist optional, präzisiert aber die Team-ID. Es sind dieselben Dateien, mit denen du eine IPA signierst.
+1538|Mit Zertifikat signieren
+1539|%@ · gültig bis %@
+1540|Zertifikat ersetzen (.p12)…
+1541|Zertifikat importieren (.p12)…
+1542|Provisioning ersetzen…
+1543|Provisioning hinzufügen (.mobileprovision)…
+1544|Zertifikat löschen
+1545|Zertifikat löschen?
+1546|Die Zertifikatsdateien und das Passwort werden vom Gerät entfernt.
+1547|Datei konnte nicht gelesen werden.
+1548|Sieht nicht wie ein Provisioning-Profil aus
+1549|Kein plist-Profil enthalten.
+1550|Provisioning hinzugefügt
+1551|Zertifikatspasswort
+1552|Das Passwort, das die .p12 schützt. Wenn keins vorhanden ist, leer lassen.
+1553|Prüfen und speichern
+1554|Hat nicht geklappt
+1555|Zertifikat gespeichert
+1556|kein 64-Bit-Mach-O
+1557|kein LC_CODE_SIGNATURE/__LINKEDIT (benötigt ein dylib aus diesem Compiler)
+1558|kein Speicher
+1559|CodeDirectory-Fehler
+1560|Signier-/CMS-Fehler (Zertifikat oder Schlüssel)
+1561|Fehler beim Erstellen der Signatur
+1562|Signatur größer als reservierter Platz
+1563|kein Zertifikat oder Signatur-Callback

@@ -1510,3 +1510,46 @@
 1518|Core only
 1520|The compiler builds C → arm64 dylib right on the iPhone. It's a C compiler (TinyCC), not Objective-C, so you can't write [view setAlpha:0.5]. But every iOS class (UIKit, Foundation, AVFoundation and 90+ other frameworks) is available — you call them through the Objective-C runtime with the GX_MSG macros. gxkit.h isn't a replacement for UIKit, it's a bridge from C to any iOS class.\n\nFrameworks to link are turned on in the “Libraries” menu. The core C frameworks have headers (CoreGraphics, CommonCrypto, CoreFoundation) — a normal #include. The rest (UIKit, AVFoundation, Security…) you call through GX_MSG, or declare the prototypes yourself.\n\ngxkit.h — helpers for tweaks in C:\n\nGX_CLS("UIView") — class\nGX_SEL("setAlpha:") — selector\nGX_MSG0(type, object, "selector")\nGX_MSG1(type, object, "sel:", type1, arg1) … up to GX_MSG5\n  example: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("text") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — back to C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"name") / gx_setprop(obj,"name",value) — properties by name (KVC)\ngx_log("format %d", x) — to the system log (NSLog)\ngx_alert("title", "message") — alert (on the main thread)\ngx_main(fn, ctx), gx_main_after(sec, fn, ctx) — run on the main thread\ngx_top_vc() — the app's top screen\n\ngx_hook_method("Class", "sel:", 0, (IMP)my, (IMP*)&orig) — hook a method (1 — class method +)\ngx_rebind("func", my, (void**)&orig) — hook a C function via its import\ngx_image_base("UnityFramework") — load address of a library in memory\n\nThe finished .dylib appears next to the .c. To inject it into an app: app tools → “Inject dylib”.
 1521|Checked ones are linked into the dylib. libSystem (libc, the Objective-C runtime) is always linked. Headers are bundled for the core C frameworks (CoreGraphics, CommonCrypto, CoreFoundation); the rest (UIKit, AVFoundation, etc.) you call through gxkit.h — the GX_MSG macros.
+
+1522|✓ %@ — %@, functions: %zu\n
+1523|Certificate signing…
+1524|No certificate loaded
+1525|Wrong certificate password
+1526|Couldn't open .p12 (code %d)
+1527|The .p12 has no private key and certificate
+1528|No private key in the certificate
+1529|Couldn't read the certificate
+1530|Couldn't read the dylib
+1531|Couldn't write the signed file
+1532|✓ signed with certificate (team %@, %d cert(s) in chain)\n
+1533|Wrong password
+1534|Certificate signing
+1535|Certificate
+1536|When on, the compiler and "Inject dylib" sign files with this certificate instead of ad-hoc. Then a dylib loads without JIT — on a device with the same Team ID as the app.
+1537|You need a .p12 (developer certificate with private key) and its password. A provisioning profile (.mobileprovision) is optional but refines the Team ID. These are the same files you sign an IPA with.
+1538|Sign with certificate
+1539|%@ · valid until %@
+1540|Replace certificate (.p12)…
+1541|Import certificate (.p12)…
+1542|Replace provisioning…
+1543|Add provisioning (.mobileprovision)…
+1544|Delete certificate
+1545|Delete certificate?
+1546|The certificate files and password will be removed from the device.
+1547|Couldn't read the file.
+1548|Doesn't look like a provisioning profile
+1549|No plist profile inside.
+1550|Provisioning added
+1551|Certificate password
+1552|The password protecting the .p12. If there is none, leave it empty.
+1553|Check and save
+1554|Didn't work
+1555|Certificate saved
+1556|not a 64-bit Mach-O
+1557|no LC_CODE_SIGNATURE/__LINKEDIT (needs a dylib from this compiler)
+1558|out of memory
+1559|CodeDirectory error
+1560|signing/CMS error (certificate or key)
+1561|signature build error
+1562|signature larger than reserved space
+1563|no certificate or signing callback

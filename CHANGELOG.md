@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.6
+- Certificate signing: import your own developer `.p12` (and optionally a `.mobileprovision`) and the on-device compiler signs the dylibs it builds with it instead of ad-hoc — so they load without JIT on a device whose app shares the certificate's Team ID
+- New "Certificate signing" screen in the compiler menu: toggle, import/replace the `.p12` with its password, add a provisioning profile, and delete everything (certificate files and password are kept in the iOS Keychain, never in plain files)
+- Signing is built as pure C (`gx_csign`): CodeDirectory (SHA-256) + Requirements + a full CMS/PKCS#7 signature, with the RSA step done through the Security framework so the private key never leaves the Keychain
+- CI now signs a compiled dylib with a test certificate on every build and verifies the CMS with OpenSSL; AI-engine and compiler regression tests also run in CI
+
 ## 4.5.2
 - Compiled dylibs now export __mh_dylib_header instead of __mh_execute_header, so binary analysers correctly see them as a dylib (the Mach-O filetype was already MH_DYLIB — only the symbol name was misleading)
 - CI compiler test now also checks the filetype is MH_DYLIB and that no _mh_execute_header symbol is emitted

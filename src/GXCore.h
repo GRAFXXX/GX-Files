@@ -228,6 +228,17 @@ NSString *_Nullable GXCompileDylib(NSString *src, NSString *out, NSArray<NSStrin
 @end
 @interface GXLibsVC : UITableViewController
 @end
+@interface GXSignVC : UITableViewController
+@end
+#ifdef __cplusplus
+extern "C" {
+#endif
+BOOL GXSignHasIdentity(void);
+BOOL GXSignEnabled(void);
+NSString *_Nullable GXSignFileWithCert(NSString *path, NSString *ident, NSMutableString *_Nullable log);
+#ifdef __cplusplus
+}
+#endif
 @interface GXDAVAccountsVC : UITableViewController   // сетевые диски WebDAV
 @end
 
