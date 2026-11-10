@@ -63,6 +63,19 @@ static inline const char *gx_cstr(id s) {
 /* Имя класса объекта */
 static inline const char *gx_classname(id o) { return o ? class_getName(object_getClass(o)) : "nil"; }
 
+/* ---------- NSNumber ---------- */
+static inline id gx_num_i(long v) { return GX_MSG1(id, GX_CLS("NSNumber"), "numberWithLongLong:", long long, v); }
+static inline id gx_num_d(double v) { return GX_MSG1(id, GX_CLS("NSNumber"), "numberWithDouble:", double, v); }
+static inline id gx_num_b(int v) { return GX_MSG1(id, GX_CLS("NSNumber"), "numberWithBool:", BOOL, v ? 1 : 0); }
+static inline long gx_int(id n) { return n ? GX_MSG0(long long, n, "longLongValue") : 0; }
+static inline double gx_double(id n) { return n ? GX_MSG0(double, n, "doubleValue") : 0; }
+static inline int gx_bool(id n) { return n ? (GX_MSG0(BOOL, n, "boolValue") ? 1 : 0) : 0; }
+
+/* ---------- alloc+init и доступ к свойствам по имени (KVC) ---------- */
+static inline id gx_alloc(const char *cls) { id o = GX_MSG0(id, GX_CLS(cls), "alloc"); return o ? GX_MSG0(id, o, "init") : 0; }
+static inline id gx_prop(id o, const char *key) { return o ? GX_MSG1(id, o, "valueForKey:", id, gx_str(key)) : 0; }
+static inline void gx_setprop(id o, const char *key, id value) { if (o) GX_MSG2(void, o, "setValue:forKey:", id, value, id, gx_str(key)); }
+
 /* ---------- лог ---------- */
 extern void NSLog(id format, ...);
 static void gx_log(const char *fmt, ...) {

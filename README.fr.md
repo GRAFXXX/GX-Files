@@ -59,6 +59,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Chaînes : recherche et modification sur place, références depuis le code
 - Classes Objective-C → en-têtes .h
 - Désassembleur ARM64, pseudocode C approximatif, assembleur intégré
+- Compilateur C→arm64 sur l'appareil (TinyCC) : 95 frameworks et bibliothèques iOS à lier, signature ad-hoc et injection de dylib
 - Émulateur ARM64 : exécuter une fonction pas à pas dans un bac à sable et suivre les registres
 - Pseudocode structuré en if/else/while, pas seulement des goto
 - Audit de sécurité (SAST) : repère strcpy/sprintf/system, MD5/SHA-1, vérifications TLS désactivées

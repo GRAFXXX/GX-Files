@@ -1496,3 +1496,17 @@
 1503|Chats recientes
 1504|Chat nuevo — con qué carpeta trabajar
 1505|Todos los chats (%lu)
+1506|Básicas
+1507|Red y seguridad
+1508|Medios y audio
+1509|Gráficos y 3D
+1510|IA (Core ML)
+1511|Sensores y dispositivo
+1512|Datos y nube
+1513|Interfaz y servicios
+1514|Bibliotecas del sistema
+1516|Buscar un framework
+1517|Quitar todo
+1518|Solo básicas
+1520|El compilador genera C → dylib arm64 directamente en el iPhone. Es un compilador de C (TinyCC), no de Objective-C, así que no puedes escribir [view setAlpha:0.5]. Pero todas las clases de iOS (UIKit, Foundation, AVFoundation y más de 90 frameworks) están disponibles — las llamas a través del runtime de Objective-C con las macros GX_MSG. gxkit.h no sustituye a UIKit, es un puente de C a cualquier clase de iOS.\n\nLos frameworks a enlazar se activan en el menú «Bibliotecas». Los frameworks de C básicos tienen cabeceras (CoreGraphics, CommonCrypto, CoreFoundation) — un #include normal. Los demás (UIKit, AVFoundation, Security…) los llamas con GX_MSG, o declara los prototipos tú mismo.\n\ngxkit.h — utilidades para tweaks en C:\n\nGX_CLS("UIView") — clase\nGX_SEL("setAlpha:") — selector\nGX_MSG0(tipo, objeto, "selector")\nGX_MSG1(tipo, objeto, "sel:", tipo1, arg1) … hasta GX_MSG5\n  ejemplo: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("texto") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — de vuelta a C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"nombre") / gx_setprop(obj,"nombre",valor) — propiedades por nombre (KVC)\ngx_log("formato %d", x) — al registro del sistema (NSLog)\ngx_alert("título", "texto") — alerta (en el hilo principal)\ngx_main(fn, ctx), gx_main_after(s, fn, ctx) — ejecutar en el hilo principal\ngx_top_vc() — pantalla superior de la app\n\ngx_hook_method("Clase", "sel:", 0, (IMP)mía, (IMP*)&orig) — interceptar un método (1 — método de clase +)\ngx_rebind("función", mía, (void**)&orig) — interceptar una función C por su import\ngx_image_base("UnityFramework") — dirección de carga de una biblioteca en memoria\n\nLa .dylib final aparece junto al .c. Para inyectarla en una app: herramientas de la app → «Inyectar dylib».
+1521|Las marcadas se enlazan a la dylib. libSystem (libc, el runtime de Objective-C) se enlaza siempre. Las cabeceras vienen para los frameworks de C básicos (CoreGraphics, CommonCrypto, CoreFoundation); los demás (UIKit, AVFoundation, etc.) los llamas con gxkit.h — las macros GX_MSG.

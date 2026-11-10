@@ -76,15 +76,54 @@ for rel, target in meta.get('links', []):
 print('заголовков:', n)
 
 # 2. сжатые .tbd: install-name + все экспортируемые символы
-libs = {
-    'libSystem.tbd': 'usr/lib/libSystem.B.tbd', 'libobjc.tbd': 'usr/lib/libobjc.A.tbd',
-    'libz.tbd': 'usr/lib/libz.1.tbd', 'libsqlite3.tbd': 'usr/lib/libsqlite3.tbd',
-    'Foundation.tbd': 'System/Library/Frameworks/Foundation.framework/Foundation.tbd',
-    'CoreFoundation.tbd': 'System/Library/Frameworks/CoreFoundation.framework/CoreFoundation.tbd',
-    'UIKit.tbd': 'System/Library/Frameworks/UIKit.framework/UIKit.tbd',
-    'CoreGraphics.tbd': 'System/Library/Frameworks/CoreGraphics.framework/CoreGraphics.tbd',
-    'QuartzCore.tbd': 'System/Library/Frameworks/QuartzCore.framework/QuartzCore.tbd',
+# Системные dylib (usr/lib) и фреймворки (System/Library/Frameworks). Берём только те,
+# что реально есть в этом SDK. Для фреймворков имя .tbd = имя фреймворка.
+DYLIBS = {
+    'libSystem.tbd': ['usr/lib/libSystem.B.tbd'],
+    'libobjc.tbd': ['usr/lib/libobjc.A.tbd'],
+    'libz.tbd': ['usr/lib/libz.1.tbd', 'usr/lib/libz.tbd'],
+    'libsqlite3.tbd': ['usr/lib/libsqlite3.tbd'],
+    'libc++.tbd': ['usr/lib/libc++.1.tbd', 'usr/lib/libc++.tbd'],
+    'libc++abi.tbd': ['usr/lib/libc++abi.tbd'],
+    'libcompression.tbd': ['usr/lib/libcompression.tbd'],
+    'libbz2.tbd': ['usr/lib/libbz2.1.0.tbd', 'usr/lib/libbz2.tbd'],
+    'libiconv.tbd': ['usr/lib/libiconv.2.tbd', 'usr/lib/libiconv.tbd'],
+    'libxml2.tbd': ['usr/lib/libxml2.2.tbd', 'usr/lib/libxml2.tbd'],
+    'libresolv.tbd': ['usr/lib/libresolv.9.tbd', 'usr/lib/libresolv.tbd'],
+    'libcharset.tbd': ['usr/lib/libcharset.1.tbd', 'usr/lib/libcharset.tbd'],
+    'libarchive.tbd': ['usr/lib/libarchive.2.tbd', 'usr/lib/libarchive.tbd'],
+    'libnetwork.tbd': ['usr/lib/libnetwork.tbd'],
+    'libxslt.tbd': ['usr/lib/libxslt.1.tbd', 'usr/lib/libxslt.tbd'],
+    'libenergytrace.tbd': ['usr/lib/libenergytrace.tbd'],
+    'libMobileGestalt.tbd': ['usr/lib/libMobileGestalt.tbd'],
 }
+# фреймворки: системные (ObjC вызываются через рантайм, C-API — напрямую)
+FRAMEWORKS = [
+    'Foundation', 'CoreFoundation', 'UIKit', 'CoreGraphics', 'QuartzCore',
+    'Security', 'SystemConfiguration', 'CFNetwork', 'Network',
+    'CoreLocation', 'CoreMotion', 'CoreTelephony', 'CoreBluetooth', 'ExternalAccessory',
+    'CoreMedia', 'CoreVideo', 'CoreAudio', 'AudioToolbox', 'AVFoundation', 'AVKit',
+    'MediaPlayer', 'VideoToolbox', 'CoreImage', 'ImageIO', 'CoreText', 'PDFKit',
+    'Accelerate', 'Metal', 'MetalKit', 'ModelIO', 'SpriteKit', 'SceneKit',
+    'GameController', 'GameKit', 'CoreData', 'CloudKit', 'Contacts', 'ContactsUI',
+    'EventKit', 'EventKitUI', 'Photos', 'PhotosUI', 'MapKit', 'WebKit', 'SafariServices',
+    'StoreKit', 'UserNotifications', 'LocalAuthentication', 'AuthenticationServices',
+    'MessageUI', 'Social', 'MultipeerConnectivity', 'Vision', 'NaturalLanguage',
+    'CoreML', 'Speech', 'SoundAnalysis', 'DeviceCheck', 'BackgroundTasks',
+    'LinkPresentation', 'UniformTypeIdentifiers', 'MobileCoreServices', 'PushKit',
+    'CoreSpotlight', 'Intents', 'CoreNFC', 'NearbyInteraction', 'FileProvider',
+    'QuickLook', 'QuickLookThumbnailing', 'HealthKit', 'HomeKit', 'PassKit',
+    'ReplayKit', 'ARKit', 'RealityKit', 'WatchConnectivity', 'OSLog',
+]
+libs = {}
+for name, cands in DYLIBS.items():
+    hit = next((c for c in cands if os.path.isfile(os.path.join(SDK, c))), None)
+    if hit: libs[name] = hit
+    else: print('нет dylib в SDK:', name)
+for fw in FRAMEWORKS:
+    rel = 'System/Library/Frameworks/%s.framework/%s.tbd' % (fw, fw)
+    if os.path.isfile(os.path.join(SDK, rel)): libs[fw + '.tbd'] = rel
+    else: print('нет фреймворка в SDK:', fw)
 def lists(text, key):
     out = []
     for m in re.finditer(r'\b' + key + r':\s*\[(.*?)\]', text, re.S):

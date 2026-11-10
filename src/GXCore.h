@@ -226,6 +226,8 @@ NSString *_Nullable GXCompileDylib(NSString *src, NSString *out, NSArray<NSStrin
 @end
 @interface GXAIHistoryVC : UITableViewController
 @end
+@interface GXLibsVC : UITableViewController
+@end
 @interface GXDAVAccountsVC : UITableViewController   // сетевые диски WebDAV
 @end
 

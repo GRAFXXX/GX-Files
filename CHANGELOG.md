@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.5
+- On-device C compiler: link against 95 system libraries and frameworks instead of 8 — Security, AVFoundation, CoreMedia, CoreImage, Metal, Vision, Core ML, MapKit, CoreLocation, StoreKit, and dozens more (via the Objective-C runtime); plus libc++, libcompression, libxml2, libarchive and other system libs
+- New grouped framework picker with search, "Core only" and "Clear all"
+- gxkit.h: new helpers — NSNumber (gx_num_*/gx_int/gx_double/gx_bool), gx_alloc, and gx_prop/gx_setprop (properties by name via KVC)
+- Help now explains that the compiler is C (not Objective-C) and that gxkit.h bridges C to any iOS class
+
 ## 4.4
 - Keyboard: tapping anywhere outside a text field or scrolling now hides the keyboard everywhere in the app (buttons and list rows keep working as usual); in the AI chat the keyboard also hides after sending
 - AI assistant chat history: chats are saved automatically and can be reopened and continued later; recent chats on the assistant screen, full history with search, rename and delete

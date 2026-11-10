@@ -59,6 +59,7 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Cadenas: búsqueda y edición en su sitio, referencias desde el código
 - Clases Objective-C → cabeceras .h
 - Desensamblador ARM64, pseudocódigo C aproximado, ensamblador integrado
+- Compilador C→arm64 en el dispositivo (TinyCC): 95 frameworks y bibliotecas de iOS para enlazar, firma ad-hoc e inyección de dylib
 - Emulador ARM64: ejecuta una función paso a paso en un entorno aislado y observa los registros
 - Pseudocódigo con estructuras if/else/while, no solo goto
 - Auditoría de seguridad (SAST): detecta strcpy/sprintf/system, MD5/SHA-1, comprobaciones TLS desactivadas

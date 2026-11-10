@@ -1496,3 +1496,17 @@
 1503|Chats récents
 1504|Nouveau chat — avec quel dossier travailler
 1505|Tous les chats (%lu)
+1506|Base
+1507|Réseau et sécurité
+1508|Médias et audio
+1509|Graphismes et 3D
+1510|IA (Core ML)
+1511|Capteurs et appareil
+1512|Données et cloud
+1513|Interface et services
+1514|Bibliothèques système
+1516|Chercher un framework
+1517|Tout décocher
+1518|Base uniquement
+1520|Le compilateur produit du C → dylib arm64 directement sur l'iPhone. C'est un compilateur C (TinyCC), pas Objective-C, donc tu ne peux pas écrire [view setAlpha:0.5]. Mais toutes les classes iOS (UIKit, Foundation, AVFoundation et plus de 90 autres frameworks) sont disponibles — tu les appelles via le runtime Objective-C avec les macros GX_MSG. gxkit.h n'est pas un remplacement d'UIKit, c'est un pont du C vers n'importe quelle classe iOS.\n\nLes frameworks à lier s'activent dans le menu « Bibliothèques ». Les frameworks C de base ont des en-têtes (CoreGraphics, CommonCrypto, CoreFoundation) — un #include normal. Les autres (UIKit, AVFoundation, Security…) s'appellent via GX_MSG, ou déclare les prototypes toi-même.\n\ngxkit.h — utilitaires pour tweaks en C :\n\nGX_CLS("UIView") — classe\nGX_SEL("setAlpha:") — sélecteur\nGX_MSG0(type, objet, "sélecteur")\nGX_MSG1(type, objet, "sel:", type1, arg1) … jusqu'à GX_MSG5\n  exemple: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("texte") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — retour vers C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"nom") / gx_setprop(obj,"nom",val) — propriétés par nom (KVC)\ngx_log("format %d", x) — dans le journal système (NSLog)\ngx_alert("titre", "texte") — alerte (sur le thread principal)\ngx_main(fn, ctx), gx_main_after(s, fn, ctx) — exécuter sur le thread principal\ngx_top_vc() — écran du dessus de l'app\n\ngx_hook_method("Classe", "sel:", 0, (IMP)ma, (IMP*)&orig) — hooker une méthode (1 — méthode de classe +)\ngx_rebind("fonction", ma, (void**)&orig) — hooker une fonction C via son import\ngx_image_base("UnityFramework") — adresse de chargement d'une bibliothèque en mémoire\n\nLa .dylib finale apparaît à côté du .c. Pour l'injecter dans une app : outils de l'app → « Injecter une dylib ».
+1521|Les cases cochées sont liées à la dylib. libSystem (libc, le runtime Objective-C) est toujours lié. Les en-têtes sont fournis pour les frameworks C de base (CoreGraphics, CommonCrypto, CoreFoundation) ; les autres (UIKit, AVFoundation, etc.) s'appellent via gxkit.h — les macros GX_MSG.

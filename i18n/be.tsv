@@ -1496,3 +1496,17 @@
 1503|Апошнія чаты
 1504|Новы чат — з якой папкай працаваць
 1505|Усе чаты (%lu)
+1506|Асноўныя
+1507|Сетка і бяспека
+1508|Медыя і гук
+1509|Графіка і 3D
+1510|ШІ (Core ML)
+1511|Датчыкі і прылада
+1512|Даныя і воблака
+1513|Інтэрфейс і сэрвісы
+1514|Сістэмныя бібліятэкі
+1516|Знайсці фреймворк
+1517|Зняць усе
+1518|Толькі асноўныя
+1520|Кампілятар збірае C → arm64 dylib проста на iPhone. Гэта C-кампілятар (TinyCC), а не Objective-C, таму пісаць [view setAlpha:0.5] нельга. Але ўсе класы iOS (UIKit, Foundation, AVFoundation і 90+ іншых фреймворкаў) даступныя — ты выклікаеш іх праз рантайм Objective-C макрасамі GX_MSG. gxkit.h — не замена UIKit, а масток з C да любога класа iOS.\n\nФреймворкі для лінкавання ўключаюцца ў меню «Бібліятэкі». У базавых C-фреймворкаў ёсць загалоўкі (CoreGraphics, CommonCrypto, CoreFoundation) — звычайны #include. Астатнія (UIKit, AVFoundation, Security…) выклікай праз GX_MSG або аб'яві прататыпы сам.\n\ngxkit.h — памочнікі для твікаў на C:\n\nGX_CLS("UIView") — клас\nGX_SEL("setAlpha:") — селектар\nGX_MSG0(тып, аб'ект, "селектар")\nGX_MSG1(тып, аб'ект, "сел:", тып1, арг1) … да GX_MSG5\n  прыклад: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("тэкст") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — назад у C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"імя") / gx_setprop(obj,"імя",знач) — уласцівасці па імені (KVC)\ngx_log("фармат %d", x) — у сістэмны лог (NSLog)\ngx_alert("загаловак", "тэкст") — алерт (на галоўным патоку)\ngx_main(fn, ctx), gx_main_after(с, fn, ctx) — выканаць на галоўным патоку\ngx_top_vc() — верхні экран праграмы\n\ngx_hook_method("Клас", "сел:", 0, (IMP)мая, (IMP*)&арыгінал) — хук метаду (1 — метад класа +)\ngx_rebind("функцыя", мая, (void**)&арыгінал) — хук C-функцыі праз імпарт\ngx_image_base("UnityFramework") — адрас загрузкі бібліятэкі ў памяці\n\nГатовы .dylib з'яўляецца побач з .c. Унесці ў праграму: інструменты праграмы → «Унесці dylib».
+1521|Адзначаныя падключаюцца да dylib. libSystem (libc, рантайм Objective-C) падключаецца заўсёды. Загалоўкі ёсць у базавых C-фреймворкаў (CoreGraphics, CommonCrypto, CoreFoundation); астатнія (UIKit, AVFoundation і інш.) выклікай праз gxkit.h — макрасы GX_MSG.

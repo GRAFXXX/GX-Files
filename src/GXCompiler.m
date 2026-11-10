@@ -11,8 +11,24 @@ static NSString *GXCompilerHome(void) {
     return d;
 }
 
+// Группы библиотек для экрана выбора. libSystem подключается всегда и в списке не нужна.
+static NSArray<NSDictionary *> *GXLibGroups(void) {
+    return @[
+        @{@"name": GXL(@"Основные"), @"libs": @[@"libobjc", @"Foundation", @"CoreFoundation", @"UIKit", @"CoreGraphics", @"QuartzCore"]},
+        @{@"name": GXL(@"Сеть и безопасность"), @"libs": @[@"Security", @"CFNetwork", @"Network", @"SystemConfiguration", @"AuthenticationServices", @"LocalAuthentication", @"libresolv"]},
+        @{@"name": GXL(@"Медиа и звук"), @"libs": @[@"AVFoundation", @"AVKit", @"CoreMedia", @"CoreVideo", @"CoreAudio", @"AudioToolbox", @"MediaPlayer", @"VideoToolbox", @"Speech", @"SoundAnalysis"]},
+        @{@"name": GXL(@"Графика и 3D"), @"libs": @[@"CoreImage", @"ImageIO", @"CoreText", @"PDFKit", @"Metal", @"MetalKit", @"ModelIO", @"SpriteKit", @"SceneKit", @"Accelerate", @"ARKit", @"RealityKit"]},
+        @{@"name": GXL(@"ИИ (Core ML)"), @"libs": @[@"CoreML", @"Vision", @"NaturalLanguage"]},
+        @{@"name": GXL(@"Датчики и устройство"), @"libs": @[@"CoreLocation", @"CoreMotion", @"CoreTelephony", @"CoreBluetooth", @"ExternalAccessory", @"CoreNFC", @"NearbyInteraction", @"DeviceCheck", @"WatchConnectivity", @"libMobileGestalt"]},
+        @{@"name": GXL(@"Данные и облако"), @"libs": @[@"CoreData", @"CloudKit", @"Contacts", @"ContactsUI", @"EventKit", @"EventKitUI", @"Photos", @"PhotosUI", @"HealthKit", @"HomeKit", @"FileProvider", @"CoreSpotlight"]},
+        @{@"name": GXL(@"Интерфейс и сервисы"), @"libs": @[@"MapKit", @"WebKit", @"SafariServices", @"StoreKit", @"PassKit", @"UserNotifications", @"PushKit", @"MessageUI", @"Social", @"MultipeerConnectivity", @"GameController", @"GameKit", @"Intents", @"LinkPresentation", @"QuickLook", @"QuickLookThumbnailing", @"ReplayKit", @"BackgroundTasks", @"OSLog", @"UniformTypeIdentifiers", @"MobileCoreServices"]},
+        @{@"name": GXL(@"Системные библиотеки"), @"libs": @[@"libz", @"libsqlite3", @"libc++", @"libc++abi", @"libcompression", @"libbz2", @"libiconv", @"libxml2", @"libxslt", @"libcharset", @"libarchive", @"libnetwork", @"libenergytrace"]},
+    ];
+}
 static NSArray<NSString *> *GXAllLibs(void) {
-    return @[@"libobjc", @"Foundation", @"CoreFoundation", @"UIKit", @"CoreGraphics", @"QuartzCore", @"libz", @"libsqlite3"];
+    NSMutableArray *a = [NSMutableArray array];
+    for (NSDictionary *g in GXLibGroups()) [a addObjectsFromArray:g[@"libs"]];
+    return a;
 }
 static NSArray<NSString *> *GXEnabledLibs(void) {
     NSArray *a = [NSUserDefaults.standardUserDefaults arrayForKey:@"GXCompilerLibs"];
@@ -236,28 +252,19 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
 }
 
 - (void)chooseLibs {
-    UIAlertController *a = [UIAlertController alertControllerWithTitle:GXL(@"Библиотеки") message:GXL(@"Отмеченные подключаются к dylib (libSystem — всегда). Нажми, чтобы включить/выключить.") preferredStyle:UIAlertControllerStyleActionSheet];
-    NSArray *en = GXEnabledLibs();
-    for (NSString *l in GXAllLibs()) {
-        BOOL on = [en containsObject:l];
-        [a addAction:[UIAlertAction actionWithTitle:[NSString stringWithFormat:@"%@ %@", on ? @"✓" : @"   ", l] style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) {
-            NSMutableArray *m = [GXEnabledLibs() mutableCopy];
-            if (on) [m removeObject:l]; else [m addObject:l];
-            [NSUserDefaults.standardUserDefaults setObject:m forKey:@"GXCompilerLibs"];
-            [self chooseLibs];
-        }]];
-    }
-    [a addAction:[UIAlertAction actionWithTitle:GXL(@"Готово") style:UIAlertActionStyleCancel handler:nil]];
-    a.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItems.lastObject;
-    [self presentViewController:a animated:YES completion:nil];
+    [self.navigationController pushViewController:[GXLibsVC new] animated:YES];
 }
 
 - (void)help {
-    NSString *t = GXL(@"gxkit.h — помощники для твиков на C:\n\n"
+    NSString *t = GXL(@"Компилятор собирает C → arm64 dylib прямо на iPhone. Это C-компилятор (TinyCC), а не Objective-C, поэтому писать [view setAlpha:0.5] нельзя. Но все классы iOS (UIKit, Foundation, AVFoundation и 90+ других фреймворков) доступны — ты вызываешь их через Objective-C рантайм макросами GX_MSG. gxkit.h — не замена UIKit, а мостик из C в любой класс iOS.\n\n"
+    "Фреймворки для линковки включаются в меню «Библиотеки». У базовых C-фреймворков есть заголовки (CoreGraphics, CommonCrypto, CoreFoundation) — обычный #include. Остальные (UIKit, AVFoundation, Security…) вызывай через GX_MSG или объяви нужные прототипы сам.\n\n"
+    "gxkit.h — помощники для твиков на C:\n\n"
     "GX_CLS(\"UIView\") — класс\nGX_SEL(\"setAlpha:\") — селектор\n"
     "GX_MSG0(тип, объект, \"селектор\")\nGX_MSG1(тип, объект, \"сел:\", тип1, арг1) … до GX_MSG5\n"
     "  пример: GX_MSG1(void, view, \"setAlpha:\", CGFloat, 0.5);\n\n"
     "gx_str(\"текст\") — NSString, gx_cstr(nsstr) — char*\n"
+    "gx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — обратно\n"
+    "gx_alloc(\"UIView\") — alloc+init; gx_prop(obj,\"имя\") / gx_setprop(obj,\"имя\",знач) — свойства по имени (KVC)\n"
     "gx_log(\"формат %d\", x) — в системный лог (NSLog)\n"
     "gx_alert(\"заголовок\", \"текст\") — алерт (на главном потоке)\n"
     "gx_main(fn, ctx), gx_main_after(сек, fn, ctx) — выполнить на главном потоке\n"
@@ -337,5 +344,65 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
     [a addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
     a.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItems.firstObject;
     [self presentViewController:a animated:YES completion:nil];
+}
+@end
+
+#pragma mark - Экран выбора библиотек
+
+@interface GXLibsVC () <UISearchResultsUpdating>
+@end
+
+@implementation GXLibsVC {
+    NSArray<NSDictionary *> *_groups;     // показываемые группы (с учётом поиска)
+}
+- (instancetype)init { if ((self = [super initWithStyle:UITableViewStyleInsetGrouped])) self.title = GXL(@"Библиотеки"); return self; }
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    _groups = GXLibGroups();
+    UISearchController *sc = [[UISearchController alloc] initWithSearchResultsController:nil];
+    sc.searchResultsUpdater = self; sc.obscuresBackgroundDuringPresentation = NO;
+    sc.searchBar.placeholder = GXL(@"Найти фреймворк");
+    self.navigationItem.searchController = sc; self.navigationItem.hidesSearchBarWhenScrolling = NO;
+    __weak typeof(self) ws = self;
+    UIAction *none = [UIAction actionWithTitle:GXL(@"Снять все") image:[UIImage systemImageNamed:@"xmark.circle"] identifier:nil handler:^(UIAction *x) {
+        [NSUserDefaults.standardUserDefaults setObject:@[] forKey:@"GXCompilerLibs"]; [ws.tableView reloadData]; }];
+    UIAction *base = [UIAction actionWithTitle:GXL(@"Только основные") image:[UIImage systemImageNamed:@"star"] identifier:nil handler:^(UIAction *x) {
+        [NSUserDefaults.standardUserDefaults setObject:@[@"libobjc", @"Foundation", @"CoreFoundation", @"UIKit"] forKey:@"GXCompilerLibs"]; [ws.tableView reloadData]; }];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] menu:[UIMenu menuWithChildren:@[base, none]]];
+}
+- (void)updateSearchResultsForSearchController:(UISearchController *)sc {
+    NSString *q = [sc.searchBar.text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];
+    if (!q.length) { _groups = GXLibGroups(); [self.tableView reloadData]; return; }
+    NSMutableArray *g = [NSMutableArray array];
+    for (NSDictionary *grp in GXLibGroups()) {
+        NSArray *f = [grp[@"libs"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF CONTAINS[cd] %@", q]];
+        if (f.count) [g addObject:@{@"name": grp[@"name"], @"libs": f}];
+    }
+    _groups = g; [self.tableView reloadData];
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv { return MAX((NSInteger)_groups.count, 1); }
+- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)s { return _groups.count ? (NSInteger)[_groups[s][@"libs"] count] : 1; }
+- (NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)s { return _groups.count ? _groups[s][@"name"] : nil; }
+- (NSString *)tableView:(UITableView *)tv titleForFooterInSection:(NSInteger)s {
+    if (!_groups.count || s != (NSInteger)_groups.count - 1) return nil;
+    return GXL(@"Отмеченные подключаются к dylib. libSystem (libc, Objective-C рантайм) подключается всегда. Заголовки есть у базовых C-фреймворков (CoreGraphics, CommonCrypto, CoreFoundation); остальные (UIKit, AVFoundation и др.) вызывай через gxkit.h — макросы GX_MSG.");
+}
+- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)ip {
+    UITableViewCell *c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+    if (!_groups.count) { c.textLabel.text = GXL(@"Ничего не найдено"); c.textLabel.textColor = UIColor.secondaryLabelColor; c.selectionStyle = UITableViewCellSelectionStyleNone; return c; }
+    NSString *l = _groups[ip.section][@"libs"][ip.row];
+    c.textLabel.text = l;
+    c.textLabel.font = [UIFont monospacedSystemFontOfSize:15 weight:UIFontWeightRegular];
+    c.accessoryType = [GXEnabledLibs() containsObject:l] ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+    return c;
+}
+- (void)tableView:(UITableView *)tv didSelectRowAtIndexPath:(NSIndexPath *)ip {
+    [tv deselectRowAtIndexPath:ip animated:YES];
+    if (!_groups.count) return;
+    NSString *l = _groups[ip.section][@"libs"][ip.row];
+    NSMutableArray *m = [GXEnabledLibs() mutableCopy];
+    if ([m containsObject:l]) [m removeObject:l]; else [m addObject:l];
+    [NSUserDefaults.standardUserDefaults setObject:m forKey:@"GXCompilerLibs"];
+    [tv reloadRowsAtIndexPaths:@[ip] withRowAnimation:UITableViewRowAnimationNone];
 }
 @end

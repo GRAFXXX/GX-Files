@@ -1496,3 +1496,17 @@
 1503|Recent chats
 1504|New chat — which folder to work with
 1505|All chats (%lu)
+1506|Core
+1507|Networking & security
+1508|Media & audio
+1509|Graphics & 3D
+1510|AI (Core ML)
+1511|Sensors & device
+1512|Data & cloud
+1513|Interface & services
+1514|System libraries
+1516|Find a framework
+1517|Clear all
+1518|Core only
+1520|The compiler builds C → arm64 dylib right on the iPhone. It's a C compiler (TinyCC), not Objective-C, so you can't write [view setAlpha:0.5]. But every iOS class (UIKit, Foundation, AVFoundation and 90+ other frameworks) is available — you call them through the Objective-C runtime with the GX_MSG macros. gxkit.h isn't a replacement for UIKit, it's a bridge from C to any iOS class.\n\nFrameworks to link are turned on in the “Libraries” menu. The core C frameworks have headers (CoreGraphics, CommonCrypto, CoreFoundation) — a normal #include. The rest (UIKit, AVFoundation, Security…) you call through GX_MSG, or declare the prototypes yourself.\n\ngxkit.h — helpers for tweaks in C:\n\nGX_CLS("UIView") — class\nGX_SEL("setAlpha:") — selector\nGX_MSG0(type, object, "selector")\nGX_MSG1(type, object, "sel:", type1, arg1) … up to GX_MSG5\n  example: GX_MSG1(void, view, "setAlpha:", CGFloat, 0.5);\n\ngx_str("text") — NSString, gx_cstr(nsstr) — char*\ngx_num_i/gx_num_d/gx_num_b — NSNumber; gx_int/gx_double/gx_bool — back to C\ngx_alloc("UIView") — alloc+init; gx_prop(obj,"name") / gx_setprop(obj,"name",value) — properties by name (KVC)\ngx_log("format %d", x) — to the system log (NSLog)\ngx_alert("title", "message") — alert (on the main thread)\ngx_main(fn, ctx), gx_main_after(sec, fn, ctx) — run on the main thread\ngx_top_vc() — the app's top screen\n\ngx_hook_method("Class", "sel:", 0, (IMP)my, (IMP*)&orig) — hook a method (1 — class method +)\ngx_rebind("func", my, (void**)&orig) — hook a C function via its import\ngx_image_base("UnityFramework") — load address of a library in memory\n\nThe finished .dylib appears next to the .c. To inject it into an app: app tools → “Inject dylib”.
+1521|Checked ones are linked into the dylib. libSystem (libc, the Objective-C runtime) is always linked. Headers are bundled for the core C frameworks (CoreGraphics, CommonCrypto, CoreFoundation); the rest (UIKit, AVFoundation, etc.) you call through gxkit.h — the GX_MSG macros.
