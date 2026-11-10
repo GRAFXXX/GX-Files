@@ -1,6 +1,11 @@
 # Changelog
 
 ## 4.6.1
+- Certificate import now reads modern `.p12` files that iOS itself can't (`SecPKCS12Import` fails on them with errSecDecode/-26275) — the kind OpenSSL 3 produces by default (PBES2: PBKDF2 + AES-256-CBC). GX Files now parses PKCS#12 itself, like Feather/zsign, instead of relying on `SecPKCS12Import`
+- Own PKCS#12 parser (`gx_p12`): PBES2 (PBKDF2-HMAC-SHA1/256/384/512 + AES-128/192/256-CBC or 3DES) and legacy PKCS#12 PBE (3DES, RC2-40); the private key is handed to the Security framework via `SecKeyCreateWithData`, so signing still goes through `SecKeyCreateSignature` and the key is never used in the clear. `SecPKCS12Import` stays as a fallback
+- CI parses four `.p12` fixtures (modern AES-256, AES-128, legacy 3DES/RC2-40, empty password) and checks the extracted key and certificate byte-for-byte
+
+## 4.6.1
 - Certificate import: a clear message when iOS cannot read the .p12 format (errSecDecode, typical for OpenSSL 3 / AES-256 files) instead of a bare error code
 
 ## 4.6

@@ -2,6 +2,7 @@
 // Разбор .p12 и RSA-подпись — через Security.framework; сборка подписи — в gx_csign.c.
 #import "GXCore.h"
 #import "core/gx_csign.h"
+#import "core/gx_p12.h"
 #import <Security/Security.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
@@ -52,51 +53,100 @@ static NSDictionary *_Nullable GXParseProfile(NSData *d) {
     return [o isKindOfClass:NSDictionary.class] ? o : nil;
 }
 
-#pragma mark - загрузка identity
+#pragma mark - загрузка подписанта
 
-// Понятный текст ошибки SecPKCS12Import.
+// Понятный текст ошибки системного импорта (фолбэк).
 static NSString *GXP12Err(OSStatus st, BOOL longPw) {
     if (st == errSecAuthFailed) return longPw ? GXL(@"Неверный пароль сертификата") : GXL(@"Неверный пароль");
-    if (st == errSecDecode) return [NSString stringWithFormat:GXL(@"iOS не может прочитать этот формат .p12 (код %d). Обычно так бывает с файлами, сохранёнными в OpenSSL 3 (шифрование AES-256). Пересохрани .p12 в совместимом формате (3DES / SHA-1) и импортируй снова."), (int)st];
+    if (st == errSecDecode) return GXL(@"Не удалось разобрать .p12");
     return [NSString stringWithFormat:GXL(@"Не удалось открыть .p12 (код %d)"), (int)st];
 }
 
-// Возвращает identity + цепочку сертификатов + team id. nil + *err при ошибке.
-static SecIdentityRef GXLoadIdentity(NSArray **certChainOut, NSString **teamOut, NSString **err) {
-    NSData *p12 = [NSData dataWithContentsOfFile:GXP12Path()];
-    if (!p12) { *err = GXL(@"Сертификат не загружен"); return NULL; }
-    NSString *pw = GXSignPw() ?: @"";
-    CFArrayRef items = NULL;
-    OSStatus st = SecPKCS12Import((__bridge CFDataRef)p12, (__bridge CFDictionaryRef)@{(__bridge id)kSecImportExportPassphrase: pw}, &items);
-    if (st != errSecSuccess || !items || CFArrayGetCount(items) == 0) {
-        if (items) CFRelease(items);
-        *err = GXP12Err(st, YES);
-        return NULL;
+// Team ID: provisioning важнее, иначе OU сертификата (certTeam).
+static NSString *GXResolveTeam(NSString *certTeam) {
+    NSDictionary *pp = GXParseProfile([NSData dataWithContentsOfFile:GXProfPath()]);
+    NSString *team = nil;
+    if ([pp[@"TeamIdentifier"] isKindOfClass:NSArray.class]) team = [pp[@"TeamIdentifier"] firstObject];
+    if (!team.length && [pp[@"Entitlements"] isKindOfClass:NSDictionary.class]) team = pp[@"Entitlements"][@"com.apple.developer.team-identifier"];
+    return team.length ? team : (certTeam ?: @"");
+}
+
+// SecKeyRef (приватный RSA) из DER PKCS#1 (+1 к счётчику). nil при ошибке.
+static SecKeyRef GXMakeRSAKey(const uint8_t *der, size_t n, int bits) {
+    NSData *kd = [NSData dataWithBytes:der length:n];
+    NSDictionary *a = @{(__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeRSA,
+                        (__bridge id)kSecAttrKeyClass: (__bridge id)kSecAttrKeyClassPrivate,
+                        (__bridge id)kSecAttrKeySizeInBits: @(bits)};
+    CFErrorRef e = NULL;
+    SecKeyRef k = SecKeyCreateWithData((__bridge CFDataRef)kd, (__bridge CFDictionaryRef)a, &e);
+    if (e) CFRelease(e);
+    return k;
+}
+
+// Свой разбор .p12 (поддерживает OpenSSL 3 / AES, который не берёт SecPKCS12Import).
+// Выдаёт ключ (+1), DER-сертификаты (leaf первым) и team из сертификата. reason = GXP12_*.
+static BOOL GXParseP12(NSData *p12, NSString *pw, SecKeyRef *keyOut,
+                       NSMutableArray<NSData *> **dersOut, NSString **certTeamOut, int *reasonOut) {
+    gx_p12 r; int reason = 0; char err[256] = {0};
+    if (!gx_p12_parse(p12.bytes, p12.length, pw.UTF8String ?: "", &r, &reason, err, sizeof err)) {
+        if (reasonOut) *reasonOut = reason; return NO;
     }
+    SecKeyRef key = GXMakeRSAKey(r.key_pkcs1, r.key_len, r.key_bits);
+    NSMutableArray<NSData *> *ders = [NSMutableArray array];
+    for (int i = 0; i < r.ncerts; i++) [ders addObject:[NSData dataWithBytes:r.certs[i] length:r.cert_lens[i]]];
+    NSString *team = nil;
+    if (r.ncerts) { char tm[64] = {0}; if (gx_cert_fields(r.certs[0], r.cert_lens[0], tm, sizeof tm, NULL, 0, NULL) && tm[0]) team = @(tm); }
+    gx_p12_free(&r);
+    if (!key || !ders.count) { if (key) CFRelease(key); if (reasonOut) *reasonOut = GXP12_UNSUPPORTED; return NO; }
+    *keyOut = key; *dersOut = ders; if (certTeamOut) *certTeamOut = team ?: @"";
+    if (reasonOut) *reasonOut = GXP12_OK;
+    return YES;
+}
+
+// Фолбэк: системный SecPKCS12Import. Выдаёт ключ (+1), DER-сертификаты (leaf первым), team из серта.
+static BOOL GXLoadViaSec(NSData *p12, NSString *pw, SecKeyRef *keyOut,
+                         NSMutableArray<NSData *> **dersOut, NSString **certTeamOut, NSString **err) {
+    CFArrayRef items = NULL;
+    OSStatus st = SecPKCS12Import((__bridge CFDataRef)p12, (__bridge CFDictionaryRef)@{(__bridge id)kSecImportExportPassphrase: pw ?: @""}, &items);
+    if (st != errSecSuccess || !items || CFArrayGetCount(items) == 0) { if (items) CFRelease(items); if (err) *err = GXP12Err(st, YES); return NO; }
     NSDictionary *item = (__bridge NSDictionary *)CFArrayGetValueAtIndex(items, 0);
     SecIdentityRef ident = (SecIdentityRef)CFBridgingRetain(item[(__bridge id)kSecImportItemIdentity]);
     NSArray *chain = item[(__bridge id)kSecImportItemCertChain];
-    if (certChainOut) *certChainOut = chain ? [chain copy] : @[];
     CFRelease(items);
-    if (!ident) { *err = GXL(@"В .p12 нет приватного ключа и сертификата"); return NULL; }
-
-    // Team ID: сначала из provisioning, иначе из OU сертификата
-    NSString *team = nil;
-    NSData *prof = [NSData dataWithContentsOfFile:GXProfPath()];
-    NSDictionary *pp = GXParseProfile(prof);
-    if ([pp[@"TeamIdentifier"] isKindOfClass:NSArray.class]) team = [pp[@"TeamIdentifier"] firstObject];
-    if (!team.length && [pp[@"Entitlements"] isKindOfClass:NSDictionary.class]) team = pp[@"Entitlements"][@"com.apple.developer.team-identifier"];
-    if (!team.length) {
-        SecCertificateRef cert = NULL;
-        if (SecIdentityCopyCertificate(ident, &cert) == errSecSuccess && cert) {
-            NSData *der = (__bridge_transfer NSData *)SecCertificateCopyData(cert);
-            char tm[64] = {0};
-            if (der && gx_cert_fields(der.bytes, der.length, tm, sizeof tm, NULL, 0, NULL) && tm[0]) team = [NSString stringWithUTF8String:tm];
-            CFRelease(cert);
-        }
+    if (!ident) { if (err) *err = GXL(@"В .p12 нет приватного ключа и сертификата"); return NO; }
+    SecKeyRef key = NULL;
+    if (SecIdentityCopyPrivateKey(ident, &key) != errSecSuccess || !key) { CFRelease(ident); if (err) *err = GXL(@"Нет приватного ключа в сертификате"); return NO; }
+    NSMutableArray<NSData *> *ders = [NSMutableArray array]; NSString *certTeam = nil;
+    SecCertificateRef leaf = NULL;
+    if (SecIdentityCopyCertificate(ident, &leaf) == errSecSuccess && leaf) {
+        NSData *ld = (__bridge_transfer NSData *)SecCertificateCopyData(leaf);
+        if (ld) { [ders addObject:ld]; char tm[64] = {0}; if (gx_cert_fields(ld.bytes, ld.length, tm, sizeof tm, NULL, 0, NULL) && tm[0]) certTeam = @(tm); }
+        CFRelease(leaf);
     }
-    if (teamOut) *teamOut = team ?: @"";
-    return ident;
+    for (id c in chain) { NSData *dd = (__bridge_transfer NSData *)SecCertificateCopyData((__bridge SecCertificateRef)c); if (dd && ![ders containsObject:dd]) [ders addObject:dd]; }
+    CFRelease(ident);
+    if (!ders.count) { CFRelease(key); if (err) *err = GXL(@"Не удалось прочитать сертификат"); return NO; }
+    *keyOut = key; *dersOut = ders; if (certTeamOut) *certTeamOut = certTeam ?: @"";
+    return YES;
+}
+
+// Загрузить подписанта из данных .p12: сначала свой парсер, затем SecPKCS12Import.
+// Выдаёт ключ (+1), DER-сертификаты (leaf первым) и готовый team (с учётом provisioning).
+static BOOL GXLoadSignerData(NSData *p12, NSString *pw, SecKeyRef *keyOut,
+                             NSMutableArray<NSData *> **dersOut, NSString **teamOut, NSString **err) {
+    int reason = 0; NSString *certTeam = nil;
+    if (GXParseP12(p12, pw, keyOut, dersOut, &certTeam, &reason)) { if (teamOut) *teamOut = GXResolveTeam(certTeam); return YES; }
+    if (reason == GXP12_BADPW) { if (err) *err = GXL(@"Неверный пароль сертификата"); return NO; }
+    if (!GXLoadViaSec(p12, pw, keyOut, dersOut, &certTeam, err)) return NO;   // фолбэк
+    if (teamOut) *teamOut = GXResolveTeam(certTeam);
+    return YES;
+}
+
+// Загрузить сохранённого подписанта (файл + пароль из Keychain).
+static BOOL GXLoadSigner(SecKeyRef *keyOut, NSMutableArray<NSData *> **dersOut, NSString **teamOut, NSString **err) {
+    NSData *p12 = [NSData dataWithContentsOfFile:GXP12Path()];
+    if (!p12) { if (err) *err = GXL(@"Сертификат не загружен"); return NO; }
+    return GXLoadSignerData(p12, GXSignPw() ?: @"", keyOut, dersOut, teamOut, err);
 }
 
 #pragma mark - колбэк подписи
@@ -116,22 +166,9 @@ static int gx_rsa_cb(void *ctx, const uint8_t *data, size_t n, uint8_t *sig, siz
 
 // Подписать файл dylib настоящим сертификатом. nil — успех, иначе текст ошибки.
 NSString *_Nullable GXSignFileWithCert(NSString *path, NSString *ident, NSMutableString *log) {
-    NSString *err = nil; NSArray *chain = nil; NSString *team = nil;
-    SecIdentityRef identity = GXLoadIdentity(&chain, &team, &err);
-    if (!identity) return err;
-    SecKeyRef key = NULL;
-    if (SecIdentityCopyPrivateKey(identity, &key) != errSecSuccess || !key) { CFRelease(identity); return GXL(@"Нет приватного ключа в сертификате"); }
+    SecKeyRef key = NULL; NSMutableArray<NSData *> *ders = nil; NSString *team = nil; NSString *err = nil;
+    if (!GXLoadSigner(&key, &ders, &team, &err)) return err;
 
-    // DER сертификатов: leaf первым
-    NSMutableArray<NSData *> *ders = [NSMutableArray array];
-    SecCertificateRef leaf = NULL;
-    if (SecIdentityCopyCertificate(identity, &leaf) == errSecSuccess && leaf) { [ders addObject:(__bridge_transfer NSData *)SecCertificateCopyData(leaf)]; CFRelease(leaf); }
-    for (id c in chain) { SecCertificateRef cc = (__bridge SecCertificateRef)c; NSData *dd = (__bridge_transfer NSData *)SecCertificateCopyData(cc);
-        if (dd && ![ders containsObject:dd]) [ders addObject:dd]; }   // промежуточные (WWDR и т.п.)
-    CFRelease(identity);
-    if (!ders.count) { CFRelease(key); return GXL(@"Не удалось прочитать сертификат"); }
-
-    size_t keyBytes = (SecKeyGetBlockSize(key));
     NSData *file = [NSData dataWithContentsOfFile:path];
     if (!file) { CFRelease(key); return GXL(@"Не удалось прочитать dylib"); }
 
@@ -140,7 +177,7 @@ NSString *_Nullable GXSignFileWithCert(NSString *path, NSString *ident, NSMutabl
     gxsctx cbctx = { key, nil };
     gx_sign_opts o = {0};
     o.ident = ident.UTF8String; o.teamid = team.UTF8String ?: ""; o.certs = certs; o.cert_lens = clens; o.ncerts = nc;
-    o.sig_size = keyBytes; o.sign = gx_rsa_cb; o.sign_ctx = &cbctx;
+    o.sig_size = SecKeyGetBlockSize(key); o.sign = gx_rsa_cb; o.sign_ctx = &cbctx;
     char e[256] = {0}; size_t ol = 0;
     uint8_t *out = gx_sign_macho(file.bytes, file.length, &o, &ol, e, sizeof e);
     CFRelease(key);
@@ -155,31 +192,18 @@ NSString *_Nullable GXSignFileWithCert(NSString *path, NSString *ident, NSMutabl
 
 // Проверить .p12 паролем и сохранить сведения для показа. nil — успех.
 static NSString *GXTryImport(NSData *p12, NSString *pw) {
-    CFArrayRef items = NULL;
-    OSStatus st = SecPKCS12Import((__bridge CFDataRef)p12, (__bridge CFDictionaryRef)@{(__bridge id)kSecImportExportPassphrase: pw ?: @""}, &items);
-    if (st != errSecSuccess || !items || CFArrayGetCount(items) == 0) {
-        if (items) CFRelease(items);
-        return GXP12Err(st, NO);
-    }
-    NSDictionary *item = (__bridge NSDictionary *)CFArrayGetValueAtIndex(items, 0);
-    SecIdentityRef ident = (__bridge SecIdentityRef)(item[(__bridge id)kSecImportItemIdentity]);
+    SecKeyRef key = NULL; NSMutableArray<NSData *> *ders = nil; NSString *team = nil, *err = nil;
+    if (!GXLoadSignerData(p12, pw, &key, &ders, &team, &err)) return err ?: GXL(@"Не удалось разобрать .p12");
+    CFRelease(key);
+    NSData *leaf = ders.firstObject;
     NSString *name = @"?", *expiry = nil;
-    if (ident) {
-        SecCertificateRef cert = NULL;
-        if (SecIdentityCopyCertificate(ident, &cert) == errSecSuccess && cert) {
-            name = (__bridge_transfer NSString *)SecCertificateCopySubjectSummary(cert) ?: @"?";
-            NSData *der = (__bridge_transfer NSData *)SecCertificateCopyData(cert);
-            char cn[128] = {0}; int64_t na = 0;
-            if (der) gx_cert_fields(der.bytes, der.length, NULL, 0, cn, sizeof cn, &na);
-            if (cn[0] && [name isEqualToString:@"?"]) name = [NSString stringWithUTF8String:cn];
-            if (na > 0) {
-                NSDateFormatter *f = [NSDateFormatter new]; f.dateStyle = NSDateFormatterMediumStyle;
-                expiry = [f stringFromDate:[NSDate dateWithTimeIntervalSince1970:(NSTimeInterval)na]];
-            }
-            CFRelease(cert);
-        }
+    if (leaf) {
+        char cn[128] = {0}; int64_t na = 0;
+        gx_cert_fields(leaf.bytes, leaf.length, NULL, 0, cn, sizeof cn, &na);
+        if (cn[0]) name = @(cn);
+        if (na > 0) { NSDateFormatter *f = [NSDateFormatter new]; f.dateStyle = NSDateFormatterMediumStyle;
+            expiry = [f stringFromDate:[NSDate dateWithTimeIntervalSince1970:(NSTimeInterval)na]]; }
     }
-    CFRelease(items);
     [GXDefaults() setObject:@{@"name": name, @"expiry": expiry ?: @""} forKey:@"gxSignInfo"];
     return nil;
 }

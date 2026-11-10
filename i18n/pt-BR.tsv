@@ -1554,3 +1554,5 @@
 1562|assinatura maior que o espaço reservado
 1563|sem certificado nem callback de assinatura
 1564|O iOS não consegue ler este formato de .p12 (código %d). Isso costuma acontecer com arquivos salvos pelo OpenSSL 3 (criptografia AES-256). Salve o .p12 novamente em um formato compatível (3DES / SHA-1) e importe de novo.
+
+1565|Não foi possível analisar o .p12

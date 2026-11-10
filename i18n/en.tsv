@@ -1554,3 +1554,5 @@
 1562|signature larger than reserved space
 1563|no certificate or signing callback
 1564|iOS can't read this .p12 format (code %d). This usually happens with files saved by OpenSSL 3 (AES-256 encryption). Re-save the .p12 in a compatible format (3DES / SHA-1) and import it again.
+
+1565|Couldn't parse the .p12

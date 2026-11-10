@@ -1554,3 +1554,5 @@
 1562|Signatur größer als reservierter Platz
 1563|kein Zertifikat oder Signatur-Callback
 1564|iOS kann dieses .p12-Format nicht lesen (Code %d). Das passiert meist bei Dateien, die mit OpenSSL 3 gespeichert wurden (AES-256-Verschlüsselung). Speichere die .p12 in einem kompatiblen Format (3DES / SHA-1) neu und importiere sie erneut.
+
+1565|.p12 konnte nicht gelesen werden
