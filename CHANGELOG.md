@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.5.1
+- Fixed: dylibs built by the on-device compiler now include an LC_UUID load command, so they load on current iOS — previously dlopen failed with “missing LC_UUID load command”
+- CI now checks on every build that the compiler emits a valid LC_UUID and that signing keeps it
+
 ## 4.5
 - On-device C compiler: link against 95 system libraries and frameworks instead of 8 — Security, AVFoundation, CoreMedia, CoreImage, Metal, Vision, Core ML, MapKit, CoreLocation, StoreKit, and dozens more (via the Objective-C runtime); plus libc++, libcompression, libxml2, libarchive and other system libs
 - New grouped framework picker with search, "Core only" and "Clear all"

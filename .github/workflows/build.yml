@@ -40,6 +40,10 @@ jobs:
       - name: Test AI engine
         run: bash tests/run_ai_tests.sh
 
+      # регрессия компилятора: dylib обязан содержать LC_UUID (иначе dyld не грузит)
+      - name: Test compiler (LC_UUID)
+        run: bash tests/run_compiler_tests.sh
+
       - name: Build
         run: SDK="$(xcrun --sdk iphoneos --show-sdk-path)" bash build.sh
 

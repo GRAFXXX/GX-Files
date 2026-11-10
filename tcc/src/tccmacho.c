@@ -113,6 +113,7 @@ struct load_command {
 #define LC_DYLD_INFO_ONLY (0x22|LC_REQ_DYLD)
 #define LC_MAIN (0x28|LC_REQ_DYLD)
 #define LC_SOURCE_VERSION 0x2A
+#define LC_UUID 0x1b
 #define LC_BUILD_VERSION 0x32
 #define LC_DYLD_EXPORTS_TRIE (0x33 | LC_REQ_DYLD)
 #define LC_DYLD_CHAINED_FIXUPS (0x34 | LC_REQ_DYLD)
@@ -420,11 +421,18 @@ struct nlist_64 {
 #define N_WEAK_REF      0x0040
 #define N_WEAK_DEF      0x0080
 
+struct uuid_command {
+    uint32_t cmd;       /* LC_UUID */
+    uint32_t cmdsize;   /* 24 */
+    uint8_t  uuid[16];
+};
+
 struct macho {
     struct mach_header_64 mh;
     int *seg2lc, nseg;
     struct load_command **lc;
     struct entry_point_command *ep;
+    struct uuid_command *uuid;   /* GX Files: LC_UUID, заполняется в macho_write */
     int nlc;
     struct {
         Section *s;
@@ -1770,6 +1778,9 @@ static void collect_sections(TCCState *s1, struct macho *mo, const char *filenam
     dyldsv = add_lc(mo, LC_SOURCE_VERSION, sizeof(*dyldsv));
     dyldsv->version = 0;
 #ifdef GX_IOS
+    /* GX Files: LC_UUID обязателен — современный dyld отказывается грузить dylib без него
+       (dlopen → "missing LC_UUID load command"). Значение заполняется в macho_write. */
+    mo->uuid = add_lc(mo, LC_UUID, sizeof(*mo->uuid));
     /* GX Files: заглушка LC_CODE_SIGNATURE (dataoff = datasize = 0) —
        ad-hoc подпись дописывается в конец __LINKEDIT после сборки (gx_adhoc_sign) */
     add_lc(mo, 0x1d /* LC_CODE_SIGNATURE */, sizeof(struct linkedit_data_command));
@@ -1994,6 +2005,27 @@ static void macho_write(TCCState *s1, struct macho *mo, FILE *fp)
     mo->mh.mh.sizeofcmds = 0;
     for (i = 0; i < mo->nlc; i++)
       mo->mh.mh.sizeofcmds += mo->lc[i]->cmdsize;
+
+#ifdef GX_IOS
+    /* GX Files: уникальный UUID из содержимого заголовка и команд загрузки (поле uuid занулено).
+       Нужен только факт наличия непустого LC_UUID; детерминированно и уникально для каждого бинарника. */
+    if (mo->uuid) {
+        uint64_t h1 = 1469598103934665603ULL, h2 = 14695981039346656037ULL;
+        const unsigned char *hp;
+        uint32_t k;
+        memset(mo->uuid->uuid, 0, 16);
+        hp = (const unsigned char *)&mo->mh;
+        for (k = 0; k < sizeof(mo->mh); k++) { h1 = (h1 ^ hp[k]) * 1099511628211ULL; h2 = (h2 ^ hp[k]) * 1099511628211ULL + k; }
+        for (i = 0; i < mo->nlc; i++) {
+            hp = (const unsigned char *)mo->lc[i];
+            for (k = 0; k < mo->lc[i]->cmdsize; k++) { h1 = (h1 ^ hp[k]) * 1099511628211ULL; h2 = (h2 ^ hp[k]) * 1099511628211ULL + k; }
+        }
+        memcpy(mo->uuid->uuid, &h1, 8);
+        memcpy(mo->uuid->uuid + 8, &h2, 8);
+        mo->uuid->uuid[6] = (mo->uuid->uuid[6] & 0x0f) | 0x40;   /* как UUID v4 */
+        mo->uuid->uuid[8] = (mo->uuid->uuid[8] & 0x3f) | 0x80;
+    }
+#endif
 
     fwrite(&mo->mh, 1, sizeof(mo->mh), fp);
     fileofs += sizeof(mo->mh);
