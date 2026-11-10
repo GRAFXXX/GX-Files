@@ -33,7 +33,7 @@ echo 'int gx_test(int a,int b){return a+b;}' > "$TMP/t.c"
 "$TMP/tcc" tcc/res "$TMP/t.c" "$TMP/in.dylib"
 
 # подписать + базовые проверки
-$CC -w -Isrc tests/sign_cert_test.c src/core/gx_csign.c src/core/gx_sha256.c -o "$TMP/sign"
+$CC -w -Isrc tests/sign_cert_test.c src/core/gx_csign.c src/core/gx_sha256.c src/core/gx_tr.c -o "$TMP/sign"
 "$TMP/sign" "$TMP/in.dylib" "$TMP/cert.der" "$TMP/key.pem" "$TMP/signed.dylib"
 
 # извлечь CMS и CodeDirectory, проверить openssl
