@@ -3,6 +3,7 @@
 #import "GXCore.h"
 #import "core/gx_csign.h"
 #import "core/gx_p12.h"
+#import "core/gx_wwdr.h"
 #import <Security/Security.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
@@ -164,10 +165,26 @@ static int gx_rsa_cb(void *ctx, const uint8_t *data, size_t n, uint8_t *sig, siz
     return 1;
 }
 
+// Дополнить цепочку: если издателя leaf нет среди сертификатов, добавить встроенный Apple WWDR.
+// Без промежуточного WWDR amfid не строит цепочку до Apple Root и подпись невалидна.
+static void GXCompleteChain(NSMutableArray<NSData *> *ders) {
+    if (!ders.count) return;
+    NSData *leaf = ders[0];
+    const uint8_t *iss; size_t issl;
+    if (!gx_cert_name(leaf.bytes, leaf.length, 0, &iss, &issl)) return;
+    for (NSData *c in ders) {               // издатель уже в цепочке?
+        const uint8_t *sp; size_t sl;
+        if (gx_cert_name(c.bytes, c.length, 1, &sp, &sl) && sl == issl && !memcmp(sp, iss, issl)) return;
+    }
+    size_t wl; const uint8_t *w = gx_wwdr_for_issuer(iss, issl, &wl);
+    if (w) [ders addObject:[NSData dataWithBytes:w length:wl]];
+}
+
 // Подписать файл dylib настоящим сертификатом. nil — успех, иначе текст ошибки.
 NSString *_Nullable GXSignFileWithCert(NSString *path, NSString *ident, NSMutableString *log) {
     SecKeyRef key = NULL; NSMutableArray<NSData *> *ders = nil; NSString *team = nil; NSString *err = nil;
     if (!GXLoadSigner(&key, &ders, &team, &err)) return err;
+    GXCompleteChain(ders);                  // добавить Apple WWDR, если издателя leaf нет в цепочке
 
     NSData *file = [NSData dataWithContentsOfFile:path];
     if (!file) { CFRelease(key); return GXL(@"Не удалось прочитать dylib"); }

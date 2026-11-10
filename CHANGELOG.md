@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.6.3
+- Certificate signing now embeds the matching Apple WWDR intermediate certificate in the signature when the `.p12` only contains the leaf (most do). Without it the chain leaf → WWDR → Apple Root can't be built and iOS rejects the dylib ("code signature invalid") even though the signature is otherwise correct — the same reason Feather/zsign bundle these certificates
+- Bundled the current Apple WWDR intermediates (G2–G6); the right one is chosen automatically from the signing certificate's issuer
+- CI checks the WWDR matching for every bundled intermediate
+
 ## 4.6.2
 - Fixed: certificate-signed dylibs were rejected by iOS at load (`dlopen`: "code signature invalid", errno=1) because the CodeDirectory's execute-segment range was left empty. It now covers the `__TEXT` segment (execSegBase/execSegLimit), as iOS requires, so a correctly-signed dylib loads
 - CI signing test now also checks the execute-segment range, `codeLimit`, and that every code page hash matches the file — the checks that would have caught this

@@ -36,6 +36,10 @@ echo 'int gx_test(int a,int b){return a+b;}' > "$TMP/t.c"
 $CC -w -Isrc tests/sign_cert_test.c src/core/gx_csign.c src/core/gx_sha256.c src/core/gx_tr.c -o "$TMP/sign"
 "$TMP/sign" "$TMP/in.dylib" "$TMP/cert.der" "$TMP/key.pem" "$TMP/signed.dylib"
 
+# подбор промежуточного Apple WWDR (цепочка leaf -> WWDR -> Apple Root)
+$CC -w -Isrc tests/wwdr_test.c src/core/gx_wwdr.c -o "$TMP/wwdr"
+"$TMP/wwdr" tests/fixtures/wwdr/*.cer
+
 # извлечь CMS и CodeDirectory, проверить openssl
 python3 - "$TMP/signed.dylib" "$TMP" <<'PY'
 import sys,struct,hashlib,subprocess
