@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.6.4
+- Fixed the real reason compiled dylibs were rejected at load ("code signature invalid"): the on-device compiler wrote segment sizes unaligned (e.g. `__TEXT` vmsize `0x1170`), while iOS/arm64 requires every segment except `__LINKEDIT` to be a multiple of the 16 KB page. An unaligned `__TEXT` maps as a full executable page that extends past the signed exec-segment, so the kernel rejects the signature — regardless of who signed it. Segment vm/file sizes are now rounded up to 16 KB, matching ld64
+- CI compiler test now checks every non-`__LINKEDIT` segment is 16 KB-aligned
+
 ## 4.6.3
 - Certificate signing now embeds the matching Apple WWDR intermediate certificate in the signature when the `.p12` only contains the leaf (most do). Without it the chain leaf → WWDR → Apple Root can't be built and iOS rejects the dylib ("code signature invalid") even though the signature is otherwise correct — the same reason Feather/zsign bundle these certificates
 - Bundled the current Apple WWDR intermediates (G2–G6); the right one is chosen automatically from the signing certificate's issuer

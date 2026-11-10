@@ -1825,8 +1825,14 @@ static void collect_sections(TCCState *s1, struct macho *mo, const char *filenam
     for (sk = sk_unknown; sk < sk_last; sk++) {
         struct section_64 *sec = NULL;
         if (seg) {
-            seg->vmsize = curaddr - seg->vmaddr;
-            seg->filesize = fileofs - seg->fileoff;
+            /* iOS/arm64 требует, чтобы vm/file-размеры сегментов (кроме __LINKEDIT)
+               были кратны странице 16 КБ — иначе исполняемая страница вылезает за
+               подписанный exec-сегмент и ядро отвергает подпись (code signature invalid).
+               Начала сегментов уже выровнены ниже; выравниваем и размеры, как делает ld64. */
+            uint64_t vs = curaddr - seg->vmaddr;
+            uint64_t fs = fileofs - seg->fileoff;
+            seg->vmsize   = (vs + SEG_PAGE_SIZE - 1) & ~(uint64_t)(SEG_PAGE_SIZE - 1);
+            seg->filesize = (fs + SEG_PAGE_SIZE - 1) & ~(uint64_t)(SEG_PAGE_SIZE - 1);
         }
 #ifdef CONFIG_NEW_MACHO
 	if (sk == sk_linkedit) {

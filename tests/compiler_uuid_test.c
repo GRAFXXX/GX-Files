@@ -58,6 +58,21 @@ int main(int argc, char **argv) {
     // тип файла должен быть MH_DYLIB (6) — dlopen грузит только dylib, не исполняемый файл
     unsigned filetype; memcpy(&filetype, d + 12, 4);
     CHECK(filetype == 6, "filetype is MH_DYLIB (got %u)", filetype);
+
+    // Сегменты (кроме __LINKEDIT) должны быть кратны 16 КБ, иначе iOS отвергает подпись
+    // (исполняемая страница вылезает за подписанный exec-сегмент → code signature invalid).
+    { unsigned ncmds2; memcpy(&ncmds2, d + 16, 4); size_t o = 32;
+      for (unsigned i = 0; i < ncmds2 && o + 8 <= (size_t)n; i++) {
+          unsigned cmd, cs; memcpy(&cmd, d + o, 4); memcpy(&cs, d + o + 4, 4);
+          if (cs < 8 || o + cs > (size_t)n) break;
+          if (cmd == 0x19 && memcmp(d + o + 8, "__LINKEDIT", 10) != 0) {
+              unsigned long long vmsz, flsz; memcpy(&vmsz, d + o + 32, 8); memcpy(&flsz, d + o + 48, 8);
+              CHECK((vmsz & 0x3FFF) == 0, "segment %.16s vmsize 0x%llx is 16K-aligned", d + o + 8, vmsz);
+              CHECK((flsz & 0x3FFF) == 0, "segment %.16s filesize 0x%llx is 16K-aligned", d + o + 8, flsz);
+          }
+          o += cs;
+      }
+    }
     // символ заголовка не должен называться _mh_execute_header (иначе анализаторы решат, что это exe)
     int has_exe_sym = 0;
     for (long i = 0; i + 18 <= n; i++) if (!memcmp(d + i, "_mh_execute_header", 18)) { has_exe_sym = 1; break; }
