@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.6.1
+- Certificate import: a clear message when iOS cannot read the .p12 format (errSecDecode, typical for OpenSSL 3 / AES-256 files) instead of a bare error code
+
 ## 4.6
 - Certificate signing: import your own developer `.p12` (and optionally a `.mobileprovision`) and the on-device compiler signs the dylibs it builds with it instead of ad-hoc — so they load without JIT on a device whose app shares the certificate's Team ID
 - New "Certificate signing" screen in the compiler menu: toggle, import/replace the `.p12` with its password, add a provisioning profile, and delete everything (certificate files and password are kept in the iOS Keychain, never in plain files)

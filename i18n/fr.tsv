@@ -1553,3 +1553,4 @@
 1561|erreur de construction de la signature
 1562|signature plus grande que l'espace réservé
 1563|pas de certificat ni de callback de signature
+1564|iOS ne peut pas lire ce format de .p12 (code %d). Cela arrive généralement avec des fichiers enregistrés par OpenSSL 3 (chiffrement AES-256). Réenregistre le .p12 dans un format compatible (3DES / SHA-1) et importe-le à nouveau.

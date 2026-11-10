@@ -1553,3 +1553,4 @@
 1561|error al construir la firma
 1562|la firma supera el espacio reservado
 1563|sin certificado ni callback de firma
+1564|iOS no puede leer este formato de .p12 (código %d). Suele pasar con archivos guardados con OpenSSL 3 (cifrado AES-256). Vuelve a guardar el .p12 en un formato compatible (3DES / SHA-1) e impórtalo de nuevo.

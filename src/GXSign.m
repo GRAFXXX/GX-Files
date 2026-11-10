@@ -54,6 +54,13 @@ static NSDictionary *_Nullable GXParseProfile(NSData *d) {
 
 #pragma mark - загрузка identity
 
+// Понятный текст ошибки SecPKCS12Import.
+static NSString *GXP12Err(OSStatus st, BOOL longPw) {
+    if (st == errSecAuthFailed) return longPw ? GXL(@"Неверный пароль сертификата") : GXL(@"Неверный пароль");
+    if (st == errSecDecode) return [NSString stringWithFormat:GXL(@"iOS не может прочитать этот формат .p12 (код %d). Обычно так бывает с файлами, сохранёнными в OpenSSL 3 (шифрование AES-256). Пересохрани .p12 в совместимом формате (3DES / SHA-1) и импортируй снова."), (int)st];
+    return [NSString stringWithFormat:GXL(@"Не удалось открыть .p12 (код %d)"), (int)st];
+}
+
 // Возвращает identity + цепочку сертификатов + team id. nil + *err при ошибке.
 static SecIdentityRef GXLoadIdentity(NSArray **certChainOut, NSString **teamOut, NSString **err) {
     NSData *p12 = [NSData dataWithContentsOfFile:GXP12Path()];
@@ -63,7 +70,7 @@ static SecIdentityRef GXLoadIdentity(NSArray **certChainOut, NSString **teamOut,
     OSStatus st = SecPKCS12Import((__bridge CFDataRef)p12, (__bridge CFDictionaryRef)@{(__bridge id)kSecImportExportPassphrase: pw}, &items);
     if (st != errSecSuccess || !items || CFArrayGetCount(items) == 0) {
         if (items) CFRelease(items);
-        *err = st == errSecAuthFailed ? GXL(@"Неверный пароль сертификата") : [NSString stringWithFormat:GXL(@"Не удалось открыть .p12 (код %d)"), (int)st];
+        *err = GXP12Err(st, YES);
         return NULL;
     }
     NSDictionary *item = (__bridge NSDictionary *)CFArrayGetValueAtIndex(items, 0);
@@ -152,7 +159,7 @@ static NSString *GXTryImport(NSData *p12, NSString *pw) {
     OSStatus st = SecPKCS12Import((__bridge CFDataRef)p12, (__bridge CFDictionaryRef)@{(__bridge id)kSecImportExportPassphrase: pw ?: @""}, &items);
     if (st != errSecSuccess || !items || CFArrayGetCount(items) == 0) {
         if (items) CFRelease(items);
-        return st == errSecAuthFailed ? GXL(@"Неверный пароль") : [NSString stringWithFormat:GXL(@"Не удалось открыть .p12 (код %d)"), (int)st];
+        return GXP12Err(st, NO);
     }
     NSDictionary *item = (__bridge NSDictionary *)CFArrayGetValueAtIndex(items, 0);
     SecIdentityRef ident = (__bridge SecIdentityRef)(item[(__bridge id)kSecImportItemIdentity]);
