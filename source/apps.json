@@ -17,15 +17,15 @@
       "category": "utilities",
       "version": "4.6.3",
       "versionDate": "2026-11-10",
-      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.6.2/GXFiles.ipa",
-      "size": 9417958,
+      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.6.3/GXFiles.ipa",
+      "size": 9422354,
       "versions": [
         {
           "version": "4.6.3",
           "buildVersion": "30",
           "date": "2026-11-10",
-          "size": 9417958,
-          "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.6.2/GXFiles.ipa",
+          "size": 9422354,
+          "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.6.3/GXFiles.ipa",
           "minOSVersion": "15.0",
           "localizedDescription": "GX Files 4.6.3"
         },
