@@ -67,6 +67,15 @@ static unsigned rd_uint(const uint8_t *v, size_t n) {           // малень�
     unsigned r = 0; for (size_t i = 0; i < n && i < 4; i++) r = (r << 8) | v[i]; return r;
 }
 
+// Похоже ли на корректный DER SEQUENCE? При неверном пароле расшифровка даёт мусор,
+// а снятие PKCS#7-паддинга не везде ловит это (CommonCrypto пропускает «правдоподобный»
+// паддинг) — поэтому отличаем неверный пароль от реального сбоя по первому TLV.
+static int der_ok(const uint8_t *d, size_t n) {
+    if (n < 2 || d[0] != 0x30) return 0;
+    D t = { d, d + n }; unsigned tag; const uint8_t *v; size_t vn;
+    return tlv(&t, &tag, &v, &vn) && tag == 0x30;
+}
+
 // пароль → BMPString (UTF-16BE) + двойной нуль-терминатор (для PKCS#12 KDF)
 static uint8_t *to_bmp(const char *pw, size_t *outlen) {
     size_t n = pw ? strlen(pw) : 0;
@@ -247,6 +256,7 @@ static int process_bag(D bag, const char *pw, bag_sink *s, int *reason) {
         if (!take(&epki, 0x04, &enc, &encn)) { *reason = GXP12_PARSE; return 0; }
         size_t ptlen = 0; uint8_t *pt = pbe_decrypt(alg, pw, enc, encn, &ptlen, reason);
         if (!pt) return 0;
+        if (!der_ok(pt, ptlen)) { free(pt); *reason = GXP12_BADPW; return 0; }  // мусор → неверный пароль
         if (!s->key) pkcs8_to_pkcs1(pt, ptlen, &s->key, &s->klen);
         free(pt);
     }
@@ -344,9 +354,10 @@ int gx_p12_parse(const uint8_t *p12, size_t n, const char *password,
             if (!tlv(&eci, &tg, &ect, &ectn) || (tg != 0x80 && tg != 0x04)) { *reason = GXP12_PARSE; goto fail; } // [0] implicit или OCTET STRING
             size_t ptlen = 0; uint8_t *pt = pbe_decrypt(alg, password, ect, ectn, &ptlen, reason);
             if (!pt) goto fail;
+            if (!der_ok(pt, ptlen)) { free(pt); *reason = GXP12_BADPW; goto fail; }  // мусор → неверный пароль
             int ok = process_safecontents(pt, ptlen, password, &sink, reason);
             free(pt);
-            if (!ok) goto fail;
+            if (!ok) { if (*reason == GXP12_PARSE) *reason = GXP12_BADPW; goto fail; }  // сбой разбора расшифрованного ≈ неверный пароль
         }
     }
 
