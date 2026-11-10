@@ -568,9 +568,12 @@ static void tcc_macho_add_destructor(TCCState *s1)
     ElfW_Rel *rel;
     uint8_t *ptr;
 
+    /* GX Files: в dylib символ заголовка должен называться __mh_dylib_header,
+       иначе анализаторы по имени __mh_execute_header считают файл исполняемым. */
     mh_execute_header = put_elf_sym(s1->symtab, -4096, 0,
 				    ELFW(ST_INFO)(STB_GLOBAL, STT_OBJECT), 0,
-				    text_section->sh_num, "__mh_execute_header");
+				    text_section->sh_num,
+				    s1->output_type == TCC_OUTPUT_DLL ? "__mh_dylib_header" : "__mh_execute_header");
     s = find_section(s1, ".fini_array");
     if (s->data_offset == 0)
         return; 

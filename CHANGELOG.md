@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.5.2
+- Compiled dylibs now export __mh_dylib_header instead of __mh_execute_header, so binary analysers correctly see them as a dylib (the Mach-O filetype was already MH_DYLIB — only the symbol name was misleading)
+- CI compiler test now also checks the filetype is MH_DYLIB and that no _mh_execute_header symbol is emitted
+
 ## 4.5.1
 - Fixed: dylibs built by the on-device compiler now include an LC_UUID load command, so they load on current iOS — previously dlopen failed with “missing LC_UUID load command”
 - CI now checks on every build that the compiler emits a valid LC_UUID and that signing keeps it

@@ -55,6 +55,14 @@ int main(int argc, char **argv) {
     fseek(r, 0, SEEK_END); long n = ftell(r); rewind(r);
     unsigned char *d = malloc(n); if (fread(d, 1, n, r) != (size_t)n) return 1; fclose(r);
 
+    // тип файла должен быть MH_DYLIB (6) — dlopen грузит только dylib, не исполняемый файл
+    unsigned filetype; memcpy(&filetype, d + 12, 4);
+    CHECK(filetype == 6, "filetype is MH_DYLIB (got %u)", filetype);
+    // символ заголовка не должен называться _mh_execute_header (иначе анализаторы решат, что это exe)
+    int has_exe_sym = 0;
+    for (long i = 0; i + 18 <= n; i++) if (!memcmp(d + i, "_mh_execute_header", 18)) { has_exe_sym = 1; break; }
+    CHECK(!has_exe_sym, "no _mh_execute_header symbol in a dylib (should be __mh_dylib_header)");
+
     unsigned usz = 0; long uo = find_lc(d, n, 0x1b /* LC_UUID */, &usz);
     CHECK(uo >= 0, "LC_UUID present in the compiled dylib");
     CHECK(usz == 24, "LC_UUID size is 24");
