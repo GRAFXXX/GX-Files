@@ -75,6 +75,39 @@ for rel, target in meta.get('links', []):
     os.symlink(target, dst)
 print('заголовков:', n)
 
+# 1b. Замыкание по #include: новые SDK подключают внутренние заголовки (например _bounds.h из
+# <_stdio.h>), которых нет в списке sdk_files.json. Докопируем недостающие из SDK по цепочке —
+# только по прямым #include/#import, чтобы не менять ветки __has_include.
+INC_RE = re.compile(r'^\s*#\s*(?:include|import)\s*[<"]([^>"]+)[>"]')
+TCC_INC = os.path.join(ROOT, 'tcc', 'res', 'include')
+def sdk_header(name):
+    cands = ['usr/include/' + name]
+    if '/' in name:
+        fw, rest = name.split('/', 1)
+        cands.append('System/Library/Frameworks/%s.framework/Headers/%s' % (fw, rest))
+    return next((c for c in cands if os.path.isfile(os.path.join(SDK, c))), None)
+inc_root = os.path.join(OUT, 'include')
+todo = [os.path.join(dp, f) for dp, _, fs in os.walk(inc_root) for f in fs]
+seen, extra = set(), []
+while todo:
+    f = todo.pop()
+    if f in seen or not os.path.isfile(f): continue
+    seen.add(f)
+    for line in open(f, encoding='latin-1'):
+        m = INC_RE.match(line)
+        if not m: continue
+        name = m.group(1)
+        dst = os.path.join(inc_root, name)
+        if os.path.lexists(dst) or os.path.exists(os.path.join(TCC_INC, name)): continue
+        src = sdk_header(name)
+        if not src: continue
+        lines = open(os.path.join(SDK, src), encoding='latin-1').read().split('\n')
+        if any(('(^' in l or '^)' in l) for l in lines): guard_blocks(lines)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        open(dst, 'w', encoding='latin-1').write('\n'.join(lines))
+        extra.append(name); todo.append(dst)
+print('доп. заголовков по #include:', len(extra), ' '.join(sorted(extra)[:20]) + (' …' if len(extra) > 20 else ''))
+
 # 2. сжатые .tbd: install-name + все экспортируемые символы
 # Системные dylib (usr/lib) и фреймворки (System/Library/Frameworks). Берём только те,
 # что реально есть в этом SDK. Для фреймворков имя .tbd = имя фреймворка.
