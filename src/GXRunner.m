@@ -51,7 +51,7 @@ NSArray<NSDictionary *> *GXCodeLanguages(void) {
           @"package main\n\nimport (\n\t\"bufio\"\n\t\"fmt\"\n\t\"os\"\n\t\"strings\"\n)\n\nfunc main() {\n\tname, _ := bufio.NewReader(os.Stdin).ReadString('\\n')\n\tname = strings.TrimSpace(name)\n\tif name == \"\" {\n\t\tname = \"{{WORLD}}\"\n\t}\n\tfmt.Printf(\"{{HELLO}}, %s!\\n\", name)\n}\n"),
         L(@"swift", @"Swift", @[@"swift"], 3, @"swiftc",
           @"let name = readLine().flatMap { $0.isEmpty ? nil : $0 } ?? \"{{WORLD}}\"\nprint(\"{{HELLO}}, \\(name)!\")\n"),
-        L(@"c", GXL(@"C (программа, онлайн gcc)"), @[], 3, @"x86-64 gcc",
+        L(@"c", GXL(@"C (программа, онлайн gcc)"), @[@"c", @"h"], 3, @"x86-64 gcc",
           @"#include <stdio.h>\n\nint main(void) {\n    char name[100] = \"{{WORLD}}\";\n    scanf(\"%99s\", name);\n    printf(\"{{HELLO}}, %s!\\n\", name);\n    return 0;\n}\n"),
         L(@"typescript", @"TypeScript", @[@"ts"], 1, nil,
           @"// TypeScript — {{NOTE_TS}}\n"
@@ -105,9 +105,27 @@ NSDictionary *GXCodeLanguageForID(NSString *lid) {
     for (NSDictionary *l in GXCodeLanguages()) if ([l[@"id"] isEqualToString:lid]) return l;
     return nil;
 }
+// Папка языка в документах («C#», «Python»…); у C-твиков своей папки нет (GX Compiler)
+NSString *_Nullable GXCodeLanguageFolder(NSDictionary *lang) {
+    NSString *lid = lang[@"id"];
+    if ([lid isEqualToString:@"tcc"]) return nil;
+    NSDictionary *m = @{@"c": @"C", @"objc": @"Objective-C"};
+    return m[lid] ?: lang[@"name"];
+}
+NSString *GXCodeLanguageDir(NSDictionary *lang) {
+    NSString *d = [GXDocsDir() stringByAppendingPathComponent:GXCodeLanguageFolder(lang) ?: @"GX Compiler"];
+    [FM() createDirectoryAtPath:d withIntermediateDirectories:YES attributes:nil error:nil];
+    return d;
+}
 NSDictionary *GXCodeLanguageForPath(NSString *path) {
     NSString *e = path.pathExtension.lowercaseString;
     if (!e.length) return nil;
+    // файл в папке языка (Documents/C/main.c) — этот язык, даже если расширение общее (.c у твиков и программ)
+    NSString *parent = path.stringByDeletingLastPathComponent.lastPathComponent;
+    for (NSDictionary *l in GXCodeLanguages()) {
+        NSString *f = GXCodeLanguageFolder(l);
+        if (f && [f isEqualToString:parent] && [l[@"ext"] containsObject:e]) return l;
+    }
     for (NSDictionary *l in GXCodeLanguages()) if ([l[@"ext"] containsObject:e]) return l;
     return nil;
 }
@@ -539,4 +557,179 @@ NSString *GXRunnerStdin(void) { return [GXDefaults() stringForKey:@"gxRunStdin"]
 }
 - (void)viewDidAppear:(BOOL)a { [super viewDidAppear:a]; [_tv becomeFirstResponder]; }
 - (void)viewWillDisappear:(BOOL)a { [super viewWillDisappear:a]; [GXDefaults() setObject:_tv.text ?: @"" forKey:@"gxRunStdin"]; }
+@end
+
+#pragma mark - Экран «Компиляторы» (выбор языка → папка → готовый файл → редактор)
+
+static NSString *LangBadge(NSString *lid) {
+    NSDictionary *m = @{@"c++": @"C++", @"csharp": @"C#", @"python": @"Py", @"java": @"Java", @"js": @"JS", @"c": @"C",
+        @"kotlin": @"Kt", @"rust": @"Rs", @"go": @"Go", @"swift": @"Swift", @"typescript": @"TS", @"lua": @"Lua",
+        @"ruby": @"Rb", @"dart": @"Dart", @"haskell": @"Hs", @"pascal": @"Pas", @"fsharp": @"F#", @"vb": @"VB",
+        @"d": @"D", @"zig": @"Zig", @"julia": @"Jl", @"perl": @"Pl", @"ocaml": @"ML", @"fortran": @"F90",
+        @"objc": @"ObjC", @"crystal": @"Cr", @"cobol": @"COB", @"ada": @"Ada", @"odin": @"Odin", @"mojo": @"🔥",
+        @"raku": @"Raku", @"tcc": @"C→"};
+    return m[lid] ?: [lid uppercaseString];
+}
+static UIColor *Hex(unsigned v) { return [UIColor colorWithRed:((v >> 16) & 255) / 255.0 green:((v >> 8) & 255) / 255.0 blue:(v & 255) / 255.0 alpha:1]; }
+static UIColor *LangColor(NSString *lid) {
+    NSDictionary *m = @{@"c++": @0x00599C, @"csharp": @0x68217A, @"python": @0x3776AB, @"java": @0xE76F00, @"js": @0xE8C410,
+        @"c": @0x5C6BC0, @"kotlin": @0x7F52FF, @"rust": @0xB7410E, @"go": @0x00ADD8, @"swift": @0xF05138,
+        @"typescript": @0x3178C6, @"lua": @0x1F2D8A, @"ruby": @0xCC342D, @"dart": @0x0175C2, @"haskell": @0x5E5086,
+        @"pascal": @0xC2860E, @"fsharp": @0x378BBA, @"vb": @0x945DB7, @"d": @0xB03931, @"zig": @0xE09117,
+        @"julia": @0x9558B2, @"perl": @0x39457E, @"ocaml": @0xEC6813, @"fortran": @0x734F96, @"objc": @0x438EFF,
+        @"crystal": @0x333333, @"cobol": @0x005CA5, @"ada": @0x1A8A5A, @"odin": @0x3882D2, @"mojo": @0xFF4C1F,
+        @"raku": @0x2B2BCF, @"tcc": @0x16A3A3};
+    NSNumber *n = m[lid];
+    return n ? Hex(n.unsignedIntValue) : [UIColor colorWithHue:(lid.hash % 360) / 360.0 saturation:0.55 brightness:0.75 alpha:1];
+}
+
+@interface GXLangCell : UICollectionViewCell
+@property (nonatomic, strong) UILabel *badge, *name, *info;
+@end
+@implementation GXLangCell
+- (instancetype)initWithFrame:(CGRect)f {
+    if ((self = [super initWithFrame:f])) {
+        self.contentView.backgroundColor = UIColor.secondarySystemGroupedBackgroundColor;
+        self.contentView.layer.cornerRadius = 16;
+        _badge = [UILabel new]; _name = [UILabel new]; _info = [UILabel new];
+        _badge.textAlignment = NSTextAlignmentCenter; _badge.textColor = UIColor.whiteColor;
+        _badge.font = [UIFont systemFontOfSize:17 weight:UIFontWeightHeavy]; _badge.adjustsFontSizeToFitWidth = YES; _badge.minimumScaleFactor = 0.5;
+        _badge.layer.cornerRadius = 12; _badge.clipsToBounds = YES;
+        _name.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold]; _name.adjustsFontSizeToFitWidth = YES; _name.minimumScaleFactor = 0.7;
+        _info.font = [UIFont systemFontOfSize:12]; _info.textColor = UIColor.secondaryLabelColor; _info.numberOfLines = 2;
+        for (UIView *v in @[_badge, _name, _info]) { v.translatesAutoresizingMaskIntoConstraints = NO; [self.contentView addSubview:v]; }
+        [NSLayoutConstraint activateConstraints:@[
+            [_badge.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:12],
+            [_badge.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:12],
+            [_badge.widthAnchor constraintEqualToConstant:46], [_badge.heightAnchor constraintEqualToConstant:46],
+            [_name.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:12],
+            [_name.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
+            [_name.topAnchor constraintEqualToAnchor:_badge.bottomAnchor constant:8],
+            [_info.leadingAnchor constraintEqualToAnchor:_name.leadingAnchor],
+            [_info.trailingAnchor constraintEqualToAnchor:_name.trailingAnchor],
+            [_info.topAnchor constraintEqualToAnchor:_name.bottomAnchor constant:2],
+        ]];
+    }
+    return self;
+}
+@end
+
+@interface GXCompilersVC () <UICollectionViewDataSource, UICollectionViewDelegate>
+@end
+@implementation GXCompilersVC {
+    UICollectionView *_cv;
+    NSArray<NSArray<NSDictionary *> *> *_sections;
+    NSArray<NSString *> *_titles;
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = GXL(@"Компиляторы");
+    self.view.backgroundColor = UIColor.systemGroupedBackgroundColor;
+    NSArray *order = @[@"c++", @"csharp", @"python", @"java", @"js", @"c", @"kotlin", @"rust", @"go", @"swift", @"typescript", @"lua",
+                       @"ruby", @"dart", @"haskell", @"pascal", @"fsharp", @"vb", @"d", @"zig", @"julia", @"perl", @"ocaml",
+                       @"fortran", @"objc", @"crystal", @"cobol", @"ada", @"odin", @"mojo", @"raku"];
+    NSMutableArray *popular = [NSMutableArray array], *more = [NSMutableArray array];
+    for (NSString *lid in order) {
+        NSDictionary *l = GXCodeLanguageForID(lid);
+        if (!l) continue;
+        [([order indexOfObject:lid] < 12 ? popular : more) addObject:l];
+    }
+    _sections = @[popular, more, @[GXCodeLanguageForID(@"tcc")]];
+    _titles = @[GXL(@"Популярные"), GXL(@"Ещё языки"), GXL(@"Твики и приложения iOS")];
+
+    UICollectionViewCompositionalLayout *lay = [[UICollectionViewCompositionalLayout alloc] initWithSectionProvider:^NSCollectionLayoutSection *(NSInteger s, id<NSCollectionLayoutEnvironment> env) {
+        CGFloat w = env.container.effectiveContentSize.width;
+        NSInteger cols = w > 700 ? 5 : (w > 500 ? 4 : 2);
+        NSCollectionLayoutItem *it = [NSCollectionLayoutItem itemWithLayoutSize:[NSCollectionLayoutSize sizeWithWidthDimension:[NSCollectionLayoutDimension fractionalWidthDimension:1.0 / cols] heightDimension:[NSCollectionLayoutDimension fractionalHeightDimension:1]]];
+        it.contentInsets = NSDirectionalEdgeInsetsMake(5, 5, 5, 5);
+        NSCollectionLayoutGroup *g = [NSCollectionLayoutGroup horizontalGroupWithLayoutSize:[NSCollectionLayoutSize sizeWithWidthDimension:[NSCollectionLayoutDimension fractionalWidthDimension:1] heightDimension:[NSCollectionLayoutDimension absoluteDimension:138]] subitems:@[it]];
+        NSCollectionLayoutSection *sec = [NSCollectionLayoutSection sectionWithGroup:g];
+        sec.contentInsets = NSDirectionalEdgeInsetsMake(4, 11, 14, 11);
+        NSCollectionLayoutBoundarySupplementaryItem *h = [NSCollectionLayoutBoundarySupplementaryItem boundarySupplementaryItemWithLayoutSize:[NSCollectionLayoutSize sizeWithWidthDimension:[NSCollectionLayoutDimension fractionalWidthDimension:1] heightDimension:[NSCollectionLayoutDimension estimatedDimension:30]] elementKind:UICollectionElementKindSectionHeader alignment:NSRectAlignmentTop];
+        sec.boundarySupplementaryItems = @[h];
+        return sec;
+    }];
+    _cv = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:lay];
+    _cv.backgroundColor = UIColor.clearColor;
+    _cv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _cv.dataSource = self; _cv.delegate = self;
+    [_cv registerClass:GXLangCell.class forCellWithReuseIdentifier:@"l"];
+    [_cv registerClass:UICollectionReusableView.class forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"h"];
+    [self.view addSubview:_cv];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"keyboard"] style:UIBarButtonItemStylePlain target:self action:@selector(editStdin)];
+}
+- (void)editStdin { [self.navigationController pushViewController:[GXStdinVC new] animated:YES]; }
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)cv { return _sections.count; }
+- (NSInteger)collectionView:(UICollectionView *)cv numberOfItemsInSection:(NSInteger)s { return _sections[s].count; }
+- (UICollectionReusableView *)collectionView:(UICollectionView *)cv viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)ip {
+    UICollectionReusableView *v = [cv dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"h" forIndexPath:ip];
+    UILabel *l = [v viewWithTag:7];
+    if (!l) {
+        l = [UILabel new]; l.tag = 7; l.font = [UIFont systemFontOfSize:20 weight:UIFontWeightBold];
+        l.translatesAutoresizingMaskIntoConstraints = NO; [v addSubview:l];
+        [NSLayoutConstraint activateConstraints:@[[l.leadingAnchor constraintEqualToAnchor:v.leadingAnchor constant:6], [l.topAnchor constraintEqualToAnchor:v.topAnchor constant:6], [l.bottomAnchor constraintEqualToAnchor:v.bottomAnchor constant:-2]]];
+    }
+    l.text = _titles[ip.section];
+    return v;
+}
+- (UICollectionViewCell *)collectionView:(UICollectionView *)cv cellForItemAtIndexPath:(NSIndexPath *)ip {
+    GXLangCell *c = [cv dequeueReusableCellWithReuseIdentifier:@"l" forIndexPath:ip];
+    NSDictionary *l = _sections[ip.section][ip.item];
+    NSString *lid = l[@"id"];
+    c.badge.text = LangBadge(lid);
+    c.badge.backgroundColor = LangColor(lid);
+    c.badge.textColor = [lid isEqualToString:@"js"] ? UIColor.blackColor : UIColor.whiteColor;
+    int k = [l[@"kind"] intValue];
+    c.name.text = k == 0 ? GXL(@"C — твики и IPA") : ([lid isEqualToString:@"c"] ? @"C" : l[@"name"]);
+    NSString *where = k == 0 ? GXL(@"на iPhone · TinyCC") : (k == 3 ? GXL(@"онлайн · Compiler Explorer") : GXL(@"офлайн · на iPhone"));
+    c.info.text = [NSString stringWithFormat:@".%@ · %@", GXCodeLanguageExt(l), where];
+    return c;
+}
+
+// Последний файл языка → самый свежий в папке → новый main.<ext> из шаблона
+- (NSString *)fileForLang:(NSDictionary *)l {
+    NSString *last = [GXDefaults() stringForKey:[@"gxLast." stringByAppendingString:l[@"id"]]];
+    if (last && [FM() fileExistsAtPath:last]) return last;
+    NSString *dir = GXCodeLanguageDir(l);
+    NSString *best = nil; NSDate *bd = nil;
+    for (NSString *f in [FM() contentsOfDirectoryAtPath:dir error:nil]) {
+        if (![l[@"ext"] containsObject:f.pathExtension.lowercaseString]) continue;
+        NSString *p = [dir stringByAppendingPathComponent:f];
+        NSDate *d = [[FM() attributesOfItemAtPath:p error:nil] fileModificationDate];
+        if (!bd || [d compare:bd] == NSOrderedDescending) { bd = d; best = p; }
+    }
+    if (best) return best;
+    NSString *p = [dir stringByAppendingPathComponent:[@"main" stringByAppendingPathExtension:GXCodeLanguageExt(l)]];
+    [GXCodeTemplate(l) writeToFile:p atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    return p;
+}
+- (void)collectionView:(UICollectionView *)cv didSelectItemAtIndexPath:(NSIndexPath *)ip {
+    [cv deselectItemAtIndexPath:ip animated:YES];
+    NSDictionary *l = _sections[ip.section][ip.item];
+    NSString *path = [l[@"kind"] intValue] == 0 ? nil : [self fileForLang:l];
+    [self.navigationController pushViewController:[[GXCompilerVC alloc] initWithPath:path] animated:YES];
+}
+- (UIContextMenuConfiguration *)collectionView:(UICollectionView *)cv contextMenuConfigurationForItemAtIndexPath:(NSIndexPath *)ip point:(CGPoint)pt {
+    NSDictionary *l = _sections[ip.section][ip.item];
+    if ([l[@"kind"] intValue] == 0) return nil;
+    __weak typeof(self) ws = self;
+    return [UIContextMenuConfiguration configurationWithIdentifier:nil previewProvider:nil actionProvider:^UIMenu *(NSArray *s) {
+        UIAction *files = [UIAction actionWithTitle:GXL(@"Все файлы") image:[UIImage systemImageNamed:@"folder"] identifier:nil handler:^(UIAction *a) {
+            [ws.navigationController pushViewController:[[GXBrowserVC alloc] initWithPath:GXCodeLanguageDir(l)] animated:YES];
+        }];
+        UIAction *nf = [UIAction actionWithTitle:GXL(@"Новый файл…") image:[UIImage systemImageNamed:@"doc.badge.plus"] identifier:nil handler:^(UIAction *a) { [ws newFileForLang:l]; }];
+        return [UIMenu menuWithChildren:@[nf, files]];
+    }];
+}
+- (void)newFileForLang:(NSDictionary *)l {
+    NSString *ext = GXCodeLanguageExt(l);
+    GXPrompt(self, [NSString stringWithFormat:GXL(@"Новый файл · %@"), l[@"name"]], [NSString stringWithFormat:GXL(@"Папка «%@» в «Моих файлах»"), GXCodeLanguageFolder(l)], [@"program" stringByAppendingPathExtension:ext], nil, GXL(@"Создать"), ^(NSString *v) {
+        NSString *n = v.length ? v : [@"program" stringByAppendingPathExtension:ext];
+        if (![l[@"ext"] containsObject:n.pathExtension.lowercaseString]) n = [n stringByAppendingPathExtension:ext];
+        NSString *p = GXUniquePath(GXCodeLanguageDir(l), n);
+        [GXCodeTemplate(l) writeToFile:p atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        [self.navigationController pushViewController:[[GXCompilerVC alloc] initWithPath:p] animated:YES];
+    });
+}
 @end

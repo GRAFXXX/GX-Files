@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.8
+- **«Compilers» screen.** A new item in the main menu: a grid of 30+ languages (C++, C#, Python, Java, JavaScript, Lua, Kotlin, Rust, Go, Swift, TypeScript…). Tap a language and GX Files creates a folder named after it in «My files» with a ready `main.<ext>` "Hello" program and opens it — just press ▶︎. Next time the same card opens your last file; long-press a card for «New file…» and «All files». Files in a language folder (e.g. `C/main.c`) are recognised as that language
+- The output console can be expanded to almost full screen and collapsed back; «Copy output» in the menu
+- **Run a dylib inside GX Files.** Tap a `.dylib` → «▶︎ Run in GX Files»: a copy is signed with your certificate (or ad-hoc when JIT is on, or loaded as is) and loaded into GX Files with `dlopen`. Its constructors run, so a menu dylib shows its menu on top of GX Files. The screen shows the dylib's `printf`/`NSLog` output, its Objective-C classes (methods, properties, ivars; view controllers and views can be opened) and its exported functions (call ones that take no arguments). Load errors come with an explanation (signature, missing CydiaSubstrate/ElleKit, wrong platform)
+- Signing an already-signed Mach-O now replaces the old signature instead of appending a second one; CI checks it
+- Translations for the new screens in all 8 languages
+
 ## 4.7
 - **Multi-language compiler.** The compiler screen now picks the language from the file extension:
   - **JavaScript** and **Lua 5.4** run right on the iPhone, offline — JavaScript through the built-in JavaScriptCore, Lua through an embedded interpreter. Both read from an «Input (stdin)» box, show errors with line numbers and stop runaway loops after 10 s

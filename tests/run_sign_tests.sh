@@ -36,6 +36,21 @@ echo 'int gx_test(int a,int b){return a+b;}' > "$TMP/t.c"
 $CC -w -Isrc tests/sign_cert_test.c src/core/gx_csign.c src/core/gx_sha256.c src/core/gx_tr.c -o "$TMP/sign"
 "$TMP/sign" "$TMP/in.dylib" "$TMP/cert.der" "$TMP/key.pem" "$TMP/signed.dylib"
 
+# повторная подпись уже подписанного файла (чужой dylib в «Запуске dylib»): старая подпись заменяется, а не копится
+"$TMP/sign" "$TMP/signed.dylib" "$TMP/cert.der" "$TMP/key.pem" "$TMP/resigned.dylib"
+python3 - "$TMP/signed.dylib" "$TMP/resigned.dylib" <<'PY'
+import sys,struct
+def sigoff(p):
+    d=open(p,'rb').read(); nc,=struct.unpack('<I',d[16:20]); off=32
+    for _ in range(nc):
+        c,s=struct.unpack('<II',d[off:off+8])
+        if c==0x1d: return struct.unpack('<I',d[off+8:off+12])[0], len(d)
+        off+=s
+a=sigoff(sys.argv[1]); b=sigoff(sys.argv[2])
+if a!=b: print("FAIL: re-sign stacked signatures", a, b); sys.exit(1)
+print("re-sign replaces old signature: ok")
+PY
+
 # подбор промежуточного Apple WWDR (цепочка leaf -> WWDR -> Apple Root)
 $CC -w -Isrc tests/wwdr_test.c src/core/gx_wwdr.c -o "$TMP/wwdr"
 "$TMP/wwdr" tests/fixtures/wwdr/*.cer

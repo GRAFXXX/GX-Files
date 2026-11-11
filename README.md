@@ -60,6 +60,8 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Objective-C classes → .h headers
 - ARM64 disassembler, approximate C pseudocode, built-in assembler
 - On-device C→arm64 compiler (TinyCC) with 95 linkable iOS frameworks and libraries, dylib injection, and signing with either ad-hoc or your own developer certificate (`.p12`) so dylibs load without JIT
+- «Compilers» screen: pick one of 30+ languages and get a ready program in its own folder — press ▶︎ and see the output
+- Run a dylib inside GX Files: menus appear on top, see its output, Objective-C classes and exported functions
 - Multi-language code runner: JavaScript, TypeScript and Lua offline on the iPhone; C++, C#, Python, Java, Kotlin, Rust, Go, Swift and 20+ more languages through Compiler Explorer
 - IPA builder: write an iOS app in C and build a signed (or unsigned) `.ipa` on the device
 - ARM64 emulator: run a function step by step in a sandbox and watch the registers

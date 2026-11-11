@@ -348,6 +348,12 @@ static uint8_t *sign_thin(const uint8_t *in, size_t len, const gx_sign_opts *o, 
         p += cs;
     }
     if (!sigcmd || !linkcmd) { snprintf(err, errlen, GXT("нет LC_CODE_SIGNATURE/__LINKEDIT (нужен dylib из этого компилятора)")); return NULL; }
+    // Уже подписанный файл (чужой dylib, повторная подпись): старую подпись отрезаем — новая встаёт на её место
+    {
+        uint32_t olddo = LE32(in + sigcmd + 8);
+        uint64_t lfo0 = LE64(in + linkcmd + 40);
+        if (olddo && olddo >= lfo0 && olddo <= len) len = olddo;
+    }
 
     // codeLimit — текущий конец файла, выровненный по 16; подпись добавляется после.
     size_t codelimit = (len + 15) & ~(size_t)15;

@@ -105,7 +105,20 @@ static GXQLSource *gxQL;
             [self openText:path from:vc readOnly:ro];
             return;
         case GXKindSQLite: [self present:[[GXSQLiteVC alloc] initWithPath:path] from:vc]; return;
-        case GXKindMachO: case GXKindELF: [self present:[[GXBinEditorVC alloc] initWithPath:path] from:vc]; return;
+        case GXKindMachO: case GXKindELF:
+            if ([path.pathExtension.lowercaseString isEqualToString:@"dylib"]) {
+                // dylib: запустить внутри GX Files или открыть в редакторе бинарника
+                UIAlertController *a = [UIAlertController alertControllerWithTitle:path.lastPathComponent message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+                [a addAction:[UIAlertAction actionWithTitle:GXL(@"▶︎ Запустить в GX Files") style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) { GXPresentNav(vc, [[GXDylibRunVC alloc] initWithPath:path], NO); }]];
+                [a addAction:[UIAlertAction actionWithTitle:GXL(@"Редактор бинарника (строки, функции, числа)") style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) { [self present:[[GXBinEditorVC alloc] initWithPath:path] from:vc]; }]];
+                [a addAction:[UIAlertAction actionWithTitle:GXL(@"Открыть как…") style:UIAlertActionStyleDefault handler:^(UIAlertAction *x) { [self openWithMenu:path from:vc sourceView:nil]; }]];
+                [a addAction:[UIAlertAction actionWithTitle:GXL(@"Отмена") style:UIAlertActionStyleCancel handler:nil]];
+                a.popoverPresentationController.sourceView = vc.view;
+                a.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(vc.view.bounds), CGRectGetMidY(vc.view.bounds), 1, 1);
+                [GXTopVC(vc) presentViewController:a animated:YES completion:nil];
+                return;
+            }
+            [self present:[[GXBinEditorVC alloc] initWithPath:path] from:vc]; return;
         case GXKindCar: [self present:[[GXCarVC alloc] initWithPath:path] from:vc]; return;
         case GXKindText: case GXKindCode: [self openText:path from:vc readOnly:ro]; return;
         case GXKindBinary: [self openWithMenu:path from:vc sourceView:nil]; return;
@@ -145,10 +158,12 @@ static GXQLSource *gxQL;
     add(GXL(@"Как базу SQLite"), ^{ [self present:[[GXSQLiteVC alloc] initWithPath:path] from:vc]; });
     add(GXL(@"Как архив"), ^{ [self present:[[GXArchiveVC alloc] initWithArchive:path] from:vc]; });
     add(GXL(@"Как APK (Android)"), ^{ [self present:[[GXApkVC alloc] initWithPath:path] from:vc]; });
-    if ([@[@"c", @"h"] containsObject:path.pathExtension.lowercaseString])
+    if ([@[@"c", @"h"] containsObject:path.pathExtension.lowercaseString] && [GXCodeLanguageForPath(path)[@"kind"] intValue] == 0)
         add(GXL(@"Скомпилировать в dylib (C → arm64)"), ^{ GXPresentNav(vc, [[GXCompilerVC alloc] initWithPath:path], YES); });
     else if (GXCodeLanguageForPath(path))
         add([NSString stringWithFormat:GXL(@"Запустить код (%@)"), GXCodeLanguageForPath(path)[@"name"]], ^{ GXPresentNav(vc, [[GXCompilerVC alloc] initWithPath:path], YES); });
+    if ([path.pathExtension.lowercaseString isEqualToString:@"dylib"])
+        add(GXL(@"▶︎ Запустить dylib в GX Files"), ^{ GXPresentNav(vc, [[GXDylibRunVC alloc] initWithPath:path], NO); });
     add(GXL(@"Редактор бинарника (строки, функции, числа)"), ^{ [self present:[[GXBinEditorVC alloc] initWithPath:path] from:vc]; });
     add(GXL(@"Сведения Mach-O"), ^{ [self present:[[GXReportVC alloc] initWithTitle:path.lastPathComponent text:GXMachOReport(path)] from:vc]; });
     add(GXL(@"Сведения ELF (.so)"), ^{ [self present:[[GXReportVC alloc] initWithTitle:path.lastPathComponent text:GXELFReport(path)] from:vc]; });

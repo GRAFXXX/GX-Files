@@ -135,6 +135,8 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
 @property (nonatomic) BOOL dirty;
 @property (nonatomic, strong) NSDictionary *lang;           // язык файла (GXRunner.m)
 @property (nonatomic, strong, nullable) GXRunJob *job;      // идущий запуск
+@property (nonatomic, strong) NSLayoutConstraint *consoleH;  // высота консоли (свернуть/развернуть)
+@property (nonatomic, strong) UIButton *expandBtn;
 @end
 
 @implementation GXCompilerVC
@@ -142,8 +144,9 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
 - (instancetype)initWithPath:(NSString *)path {
     if ((self = [super init])) {
         if (!path) {
-            NSString *last = [GXDefaults() stringForKey:@"gxCompilerLast"];
-            if (last.length && [FM() fileExistsAtPath:last] && GXCodeLanguageForPath(last)) path = last;   // последний открытый файл
+            // без файла — экран C-твиков: последний .c из GX Compiler
+            NSString *last = [GXDefaults() stringForKey:@"gxLast.tcc"] ?: [GXDefaults() stringForKey:@"gxCompilerLast"];
+            if (last.length && [FM() fileExistsAtPath:last] && [GXCodeLanguageForPath(last)[@"kind"] intValue] == 0) path = last;
         }
         if (!path) {
             path = [GXCompilerHome() stringByAppendingPathComponent:@"tweak.c"];
@@ -151,9 +154,28 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
         }
         _path = path.copy;
         _lang = GXCodeLanguageForPath(path) ?: GXCodeLanguageForID(@"tcc");
-        [GXDefaults() setObject:_path forKey:@"gxCompilerLast"];
+        [self rememberPath];
     }
     return self;
+}
+
+- (void)rememberPath {
+    [GXDefaults() setObject:_path forKey:@"gxCompilerLast"];
+    [GXDefaults() setObject:_path forKey:[@"gxLast." stringByAppendingString:_lang[@"id"] ?: @"tcc"]];
+}
+
+// Консоль: 150 pt ↔ почти весь экран (удобно смотреть вывод)
+- (void)toggleConsole {
+    [self.editor resignFirstResponder];
+    BOOL big = self.consoleH.constant > 200;
+    CGFloat full = MAX(240, self.view.safeAreaLayoutGuide.layoutFrame.size.height - 90);
+    self.consoleH.constant = big ? 150 : full;
+    [self.expandBtn setImage:[UIImage systemImageNamed:big ? @"arrow.up.left.and.arrow.down.right" : @"arrow.down.right.and.arrow.up.left"] forState:UIControlStateNormal];
+    [UIView animateWithDuration:0.25 animations:^{ [self.view layoutIfNeeded]; }];
+}
+- (void)copyOutput {
+    UIPasteboard.generalPasteboard.string = self.console.text ?: @"";
+    GXToast(self.view, GXL(@"Вывод скопирован"));
 }
 
 - (NSString *)templateText:(NSString *)name {
@@ -221,8 +243,20 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
         [_console.topAnchor constraintEqualToAnchor:_editor.bottomAnchor],
         [_console.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [_console.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [_console.heightAnchor constraintEqualToConstant:150],
+        (_consoleH = [_console.heightAnchor constraintEqualToConstant:150]),
         [_console.bottomAnchor constraintEqualToAnchor:self.view.keyboardLayoutGuide.topAnchor],
+    ]];
+    _expandBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+    [_expandBtn setImage:[UIImage systemImageNamed:@"arrow.up.left.and.arrow.down.right"] forState:UIControlStateNormal];
+    _expandBtn.backgroundColor = [UIColor.tertiarySystemBackgroundColor colorWithAlphaComponent:0.9];
+    _expandBtn.layer.cornerRadius = 14;
+    _expandBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    [_expandBtn addTarget:self action:@selector(toggleConsole) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:_expandBtn];
+    [NSLayoutConstraint activateConstraints:@[
+        [_expandBtn.topAnchor constraintEqualToAnchor:_console.topAnchor constant:6],
+        [_expandBtn.trailingAnchor constraintEqualToAnchor:_console.trailingAnchor constant:-8],
+        [_expandBtn.widthAnchor constraintEqualToConstant:28], [_expandBtn.heightAnchor constraintEqualToConstant:28],
     ]];
 }
 
@@ -290,6 +324,7 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
             [items addObject:act(GXL(@"Флаги компилятора…"), @"slider.horizontal.3", ^{ [ws editFlags]; })];
         }
     }
+    [items addObject:act(GXL(@"Копировать вывод"), @"doc.on.clipboard", ^{ [ws copyOutput]; })];
     [items addObject:act(GXL(@"Ввод (stdin)…"), @"keyboard", ^{ [ws.navigationController pushViewController:[GXStdinVC new] animated:YES]; })];
     [items addObject:act(GXL(@"Новый файл…"), @"doc.badge.plus", ^{ [ws newFile]; })];
     [items addObject:act(GXL(@"Папка с исходниками"), @"folder", ^{ [ws openFolder]; })];
@@ -397,10 +432,12 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
     BOOL tcc = [lang[@"kind"] intValue] == 0;
     NSString *ext = GXCodeLanguageExt(lang);
     NSString *def = tcc ? @"my_tweak.c" : [@"main" stringByAppendingPathExtension:ext];
-    GXPrompt(self, [NSString stringWithFormat:GXL(@"Новый файл · %@"), lang[@"name"]], GXL(@"Имя файла в папке GX Compiler"), def, nil, GXL(@"Создать"), ^(NSString *v) {
+    NSString *dir = tcc ? GXCompilerHome() : GXCodeLanguageDir(lang);
+    NSString *msg = tcc ? GXL(@"Имя файла в папке GX Compiler") : [NSString stringWithFormat:GXL(@"Папка «%@» в «Моих файлах»"), GXCodeLanguageFolder(lang)];
+    GXPrompt(self, [NSString stringWithFormat:GXL(@"Новый файл · %@"), lang[@"name"]], msg, def, nil, GXL(@"Создать"), ^(NSString *v) {
         NSString *n = v.length ? v : def;
         if (![lang[@"ext"] containsObject:n.pathExtension.lowercaseString]) n = [n stringByAppendingPathExtension:ext];
-        NSString *p = GXUniquePath(GXCompilerHome(), n);
+        NSString *p = GXUniquePath(dir, n);
         NSString *text = tcc ? [self templateText:@"01_hello"] : GXCodeTemplate(lang);
         [text writeToFile:p atomically:YES encoding:NSUTF8StringEncoding error:nil];
         [self save];
@@ -412,7 +449,7 @@ NSString *GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs
     [self.job cancel]; self.job = nil;
     self.path = p; self.title = p.lastPathComponent;
     self.lang = GXCodeLanguageForPath(p) ?: GXCodeLanguageForID(@"tcc");
-    [GXDefaults() setObject:p forKey:@"gxCompilerLast"];
+    [self rememberPath];
     self.editor.text = [NSString stringWithContentsOfFile:p encoding:NSUTF8StringEncoding error:nil] ?: @"";
     self.dirty = NO;
     self.console.textColor = UIColor.secondaryLabelColor;

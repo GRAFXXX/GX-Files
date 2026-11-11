@@ -1649,3 +1649,60 @@
 1655|limite de tempo excedido
 1656|memória insuficiente
 1657|o programa terminou com o código %d
+1658|Saída copiada
+1659|Copiar saída
+1660|Pasta «%@» em «Meus arquivos»
+1661|Compiladores
+1662|C++, C#, Python, Java, JavaScript, Lua e mais 25 linguagens — escreva e execute
+1663|não é Mach-O 64
+1664|danificada
+1665|certificado
+1666|✓ já carregada nesta sessão do GX Files
+1667|Preparando…
+1668|⚠︎ falha na assinatura com certificado: %@ — tentando como está\n
+1669|✓ assinada ad-hoc (JIT ativado)\n
+1670|⚠︎ falha na assinatura ad-hoc: %s — tentando como está\n
+1671|Certificado desligado e sem JIT — carregando como está (funciona se a dylib já estiver assinada com um certificado compatível)\n
+1672|Carregando sem reassinar\n
+1673|Erro: 
+1674|✓ carregada no GX Files — construtores executados. Se for um menu, já está na tela.
+1675|O iOS recusou a assinatura. Ative «Assinatura com certificado» (o mesmo certificado do GX Files) ou abra o GX Files com JIT.
+1676|O iOS recusou a assinatura. O certificado deve ser o mesmo do GX Files (mesmo Team ID). No LiveContainer — o certificado do LiveContainer.
+1677|A dylib precisa de CydiaSubstrate/ElleKit — é um tweak para jailbreak ou LiveContainer. Rode pela pasta de tweaks do LiveContainer.
+1678|Uma biblioteca da qual a dylib depende não foi encontrada (veja o texto acima). Coloque-a ao lado ou gere a dylib sem essa dependência.
+1679|A dylib não foi gerada para iOS arm64 (por exemplo, para macOS ou o simulador).
+1680|A dylib não tem LC_UUID — gere-a de novo no compilador atual do GX Files.
+1681|Veja o texto de erro do dyld acima. Tente também o outro botão — «como está» ou reassinando.
+1682|Execução
+1683|Saída (printf, NSLog)
+1684|Classes Objective-C · %lu
+1685|Funções exportadas · %lu
+1686|A dylib é carregada direto no GX Files: o código dela roda dentro deste app, e menus e janelas aparecem por cima. Se a dylib travar, o GX Files fecha. Só dá para descarregá-la reiniciando o GX Files. Rode apenas o que você confia.
+1687|Toque numa classe — métodos, propriedades, variáveis. Controladores (UIViewController) podem ser abertos.
+1688|Toque para chamar uma função sem argumentos. Funções com argumentos não podem ser chamadas assim — o app travaria.
+1689|Assinatura do arquivo
+1690|ativada
+1691|desativada
+1692|ativado
+1693|▶︎ Executar no GX Files
+1694|Executar como está (sem reassinar)
+1695|(vazio por enquanto)
+1696|Sem classes Objective-C
+1697|Sem funções exportadas
+1698|Executar a dylib?
+1699|O código da dylib vai rodar dentro do GX Files. Se travar, o GX Files fecha. Só dá para descarregá-la reiniciando o app.
+1700|Chamar a função sem argumentos? Se ela precisar de argumentos, o GX Files vai travar.
+1701|Chamar
+1702|Mostrar
+1703|Criar o controlador ([[classe alloc] init]) e mostrar? Se ele precisar de dados especiais, o GX Files pode travar.
+1704|Criar a view (initWithFrame:) e mostrar numa tela separada?
+1705|Abrir como…
+1706|▶︎ Executar dylib no GX Files
+1707|Populares
+1708|Mais linguagens
+1709|Tweaks e apps iOS
+1710|C — tweaks e IPA
+1711|no iPhone · TinyCC
+1712|online · Compiler Explorer
+1713|offline · no iPhone
+1714|Todos os arquivos

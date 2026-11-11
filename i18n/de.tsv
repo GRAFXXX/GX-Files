@@ -1649,3 +1649,60 @@
 1655|Zeitlimit überschritten
 1656|nicht genug Speicher
 1657|das Programm wurde mit Code %d beendet
+1658|Ausgabe kopiert
+1659|Ausgabe kopieren
+1660|Ordner «%@» in «Meine Dateien»
+1661|Compiler
+1662|C++, C#, Python, Java, JavaScript, Lua und 25 weitere Sprachen — schreiben und ausführen
+1663|kein 64-Bit-Mach-O
+1664|beschädigt
+1665|Zertifikat
+1666|✓ in dieser GX-Files-Sitzung bereits geladen
+1667|Vorbereitung…
+1668|⚠︎ Signieren mit Zertifikat fehlgeschlagen: %@ — versuche unverändert\n
+1669|✓ ad-hoc signiert (JIT ist an)\n
+1670|⚠︎ Ad-hoc-Signatur fehlgeschlagen: %s — versuche unverändert\n
+1671|Zertifikat aus und kein JIT — lade unverändert (klappt, wenn die dylib schon mit einem passenden Zertifikat signiert ist)\n
+1672|Laden ohne Neusignieren\n
+1673|Fehler: 
+1674|✓ in GX Files geladen — Konstruktoren ausgeführt. Ist es ein Menü, ist es schon auf dem Bildschirm.
+1675|iOS hat die Signatur abgelehnt. Schalte «Signieren mit Zertifikat» ein (dasselbe Zertifikat, mit dem GX Files signiert ist) oder starte GX Files mit JIT.
+1676|iOS hat die Signatur abgelehnt. Das Zertifikat muss zu dem von GX Files passen (gleiche Team-ID). In LiveContainer — das Zertifikat von LiveContainer.
+1677|Die dylib braucht CydiaSubstrate/ElleKit — ein Tweak für Jailbreak oder LiveContainer. Starte ihn über den Tweak-Ordner von LiveContainer.
+1678|Eine Bibliothek, von der die dylib abhängt, fehlt (siehe Text oben). Lege sie daneben oder baue die dylib ohne diese Abhängigkeit.
+1679|Die dylib ist nicht für iOS arm64 gebaut (z. B. für macOS oder den Simulator).
+1680|Die dylib hat kein LC_UUID — baue sie mit dem aktuellen GX-Files-Compiler neu.
+1681|Sieh dir den dyld-Fehlertext oben an. Probiere auch den anderen Knopf — «unverändert» oder mit Neusignieren.
+1682|Ausführen
+1683|Ausgabe (printf, NSLog)
+1684|Objective-C-Klassen · %lu
+1685|Exportierte Funktionen · %lu
+1686|Die dylib wird direkt in GX Files geladen: Ihr Code läuft in dieser App, Menüs und Fenster erscheinen darüber. Stürzt die dylib ab, schließt sich GX Files. Entladen geht nur per Neustart von GX Files. Führe nur aus, was du vertraust.
+1687|Tippe auf eine Klasse — Methoden, Properties, Ivars. Controller (UIViewController) lassen sich öffnen.
+1688|Tippe, um eine Funktion ohne Argumente aufzurufen. Funktionen mit Argumenten so aufzurufen geht nicht — die App stürzt ab.
+1689|Signatur der Datei
+1690|an
+1691|aus
+1692|an
+1693|▶︎ In GX Files ausführen
+1694|Unverändert ausführen (ohne Neusignieren)
+1695|(noch leer)
+1696|Keine Objective-C-Klassen
+1697|Keine exportierten Funktionen
+1698|dylib ausführen?
+1699|Der Code der dylib läuft in GX Files. Stürzt sie ab, schließt sich GX Files. Entladen geht nur per Neustart der App.
+1700|Funktion ohne Argumente aufrufen? Braucht sie Argumente, stürzt GX Files ab.
+1701|Aufrufen
+1702|Anzeigen
+1703|Controller erstellen ([[Klasse alloc] init]) und anzeigen? Braucht er besondere Daten, kann GX Files abstürzen.
+1704|View erstellen (initWithFrame:) und auf einem eigenen Bildschirm zeigen?
+1705|Öffnen als…
+1706|▶︎ dylib in GX Files ausführen
+1707|Beliebt
+1708|Weitere Sprachen
+1709|iOS-Tweaks und -Apps
+1710|C — Tweaks und IPA
+1711|auf dem iPhone · TinyCC
+1712|online · Compiler Explorer
+1713|offline · auf dem iPhone
+1714|Alle Dateien

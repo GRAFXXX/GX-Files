@@ -116,6 +116,7 @@
         else if ([act isEqualToString:@"wifi"]) [self.navigationController pushViewController:[[GXServerVC alloc] initWithRoot:GXDocsDir()] animated:YES];
         else if ([act isEqualToString:@"search"]) [self search];
         else if ([act isEqualToString:@"addfolder"]) [self pickFolderFrom:[tv cellForRowAtIndexPath:ip]];
+        else if ([act isEqualToString:@"compilers"]) [self.navigationController pushViewController:[GXCompilersVC new] animated:YES];
         else if ([act isEqualToString:@"compiler"]) [self.navigationController pushViewController:[[GXCompilerVC alloc] initWithPath:nil] animated:YES];
         else if ([act isEqualToString:@"findreplace"]) [self.navigationController pushViewController:[[GXFindVC alloc] initWithRoot:[self searchRoot]] animated:YES];
         else if ([act isEqualToString:@"signinfo"]) GXAlert(self, GXL(@"Ключ подписи APK"), GXSignerInfo());

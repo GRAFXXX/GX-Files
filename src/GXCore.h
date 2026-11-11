@@ -153,6 +153,15 @@ GXRunJob *GXRunCode(NSDictionary *lang, NSString *source, NSString *fileName, NS
 @end
 @interface GXStdinVC : UIViewController
 @end
+NSString *_Nullable GXCodeLanguageFolder(NSDictionary *lang);   // «C#», «Python»…; nil у C-твиков
+NSString *GXCodeLanguageDir(NSDictionary *lang);                // Документы/<папка языка>, создаётся
+@interface GXCompilersVC : UIViewController                     // экран «Компиляторы»
+@end
+
+#pragma mark - Запуск dylib внутри GX Files (GXDylibRun.m)
+@interface GXDylibRunVC : UITableViewController
+- (instancetype)initWithPath:(NSString *)path;
+@end
 
 #pragma mark - Сборщик IPA (GXIpaBuild.m)
 // Исполняемый файл приложения встроенным TinyCC (без подписи)

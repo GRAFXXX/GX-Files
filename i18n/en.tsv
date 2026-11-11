@@ -1649,3 +1649,60 @@
 1655|time limit exceeded
 1656|out of memory
 1657|the program exited with code %d
+1658|Output copied
+1659|Copy output
+1660|Folder «%@» in «My files»
+1661|Compilers
+1662|C++, C#, Python, Java, JavaScript, Lua and 25 more languages — write and run
+1663|not a 64-bit Mach-O
+1664|damaged
+1665|certificate
+1666|✓ already loaded in this GX Files session
+1667|Preparing…
+1668|⚠︎ certificate signing failed: %@ — trying as is\n
+1669|✓ signed ad-hoc (JIT is on)\n
+1670|⚠︎ ad-hoc signing failed: %s — trying as is\n
+1671|Certificate signing is off and there is no JIT — loading as is (works if the dylib is already signed with a matching certificate)\n
+1672|Loading without re-signing\n
+1673|Error: 
+1674|✓ loaded into GX Files — constructors ran. If it's a menu, it's already on screen.
+1675|iOS rejected the signature. Turn on «Certificate signing» (the same certificate GX Files is signed with) or launch GX Files with JIT.
+1676|iOS rejected the signature. The certificate must match the one GX Files is signed with (same Team ID). In LiveContainer — LiveContainer's certificate.
+1677|The dylib needs CydiaSubstrate/ElleKit — it's a tweak for jailbreak or LiveContainer. Run it through LiveContainer's tweaks folder.
+1678|A library the dylib depends on wasn't found (see the text above). Put it next to it or build the dylib without that dependency.
+1679|The dylib isn't built for iOS arm64 (e.g. for macOS or the simulator).
+1680|The dylib has no LC_UUID — rebuild it with the current GX Files compiler.
+1681|Check the dyld error text above. Also try the other button — «as is» or with re-signing.
+1682|Run
+1683|Output (printf, NSLog)
+1684|Objective-C classes · %lu
+1685|Exported functions · %lu
+1686|The dylib is loaded right into GX Files: its code runs inside this app, and menus and windows appear on top of it. If the dylib crashes, GX Files closes. A loaded dylib can only be unloaded by restarting GX Files. Only run what you trust.
+1687|Tap a class to see methods, properties and ivars. Controllers (UIViewController) can be opened.
+1688|Tap to call a function with no arguments. Functions that take arguments can't be called this way — the app would crash.
+1689|File signature
+1690|on
+1691|off
+1692|on
+1693|▶︎ Run in GX Files
+1694|Run as is (without re-signing)
+1695|(empty so far)
+1696|No Objective-C classes
+1697|No exported functions
+1698|Run the dylib?
+1699|The dylib's code will run inside GX Files. If it crashes, GX Files closes. It can only be unloaded by restarting the app.
+1700|Call the function with no arguments? If it needs arguments, GX Files will crash.
+1701|Call
+1702|Show
+1703|Create the controller ([[class alloc] init]) and show it? If it needs special data, GX Files may crash.
+1704|Create the view (initWithFrame:) and show it on a separate screen?
+1705|Open as…
+1706|▶︎ Run dylib in GX Files
+1707|Popular
+1708|More languages
+1709|iOS tweaks and apps
+1710|C — tweaks and IPA
+1711|on iPhone · TinyCC
+1712|online · Compiler Explorer
+1713|offline · on iPhone
+1714|All files
