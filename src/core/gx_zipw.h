@@ -11,6 +11,7 @@ typedef struct {
     const void *src_data;  // либо из памяти
     size_t src_len;
     int del;               // удалить запись
+    unsigned mode;         // права unix для новой записи (напр. 0755 для исполняемого файла); 0 — 0644
 } gxzw_op;
 
 enum { GXZW_ALIGN_NONE = 0, GXZW_ALIGN_APK = 1 };

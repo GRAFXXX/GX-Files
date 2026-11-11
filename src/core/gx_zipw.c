@@ -223,7 +223,7 @@ int gxzw_rewrite(const char *in_path, const char *out_path, const gxzw_op *ops, 
         int dir = r.nlen && nm[r.nlen - 1] == '/';
         r.method = dir || prefer_stored(nm) ? 0 : 8;
         r.ver_made = 3 << 8 | 20;
-        r.ext_attr = (uint32_t)(dir ? (040755u << 16) | 0x10u : (0100644u << 16));
+        r.ext_attr = (uint32_t)(dir ? (040755u << 16) | 0x10u : ((0100000u | (ops[i].mode ? ops[i].mode & 07777u : 0644u)) << 16));
         r.dostime = dos_now();
         int fd = ops[i].src_path && !dir ? open(ops[i].src_path, O_RDONLY) : -1;
         if (ops[i].src_path && !dir && fd < 0) { snprintf(err, errlen, GXT("не открыть %s"), ops[i].src_path); ok = 0; free(r.name); break; }

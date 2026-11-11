@@ -147,6 +147,8 @@ static GXQLSource *gxQL;
     add(GXL(@"Как APK (Android)"), ^{ [self present:[[GXApkVC alloc] initWithPath:path] from:vc]; });
     if ([@[@"c", @"h"] containsObject:path.pathExtension.lowercaseString])
         add(GXL(@"Скомпилировать в dylib (C → arm64)"), ^{ GXPresentNav(vc, [[GXCompilerVC alloc] initWithPath:path], YES); });
+    else if (GXCodeLanguageForPath(path))
+        add([NSString stringWithFormat:GXL(@"Запустить код (%@)"), GXCodeLanguageForPath(path)[@"name"]], ^{ GXPresentNav(vc, [[GXCompilerVC alloc] initWithPath:path], YES); });
     add(GXL(@"Редактор бинарника (строки, функции, числа)"), ^{ [self present:[[GXBinEditorVC alloc] initWithPath:path] from:vc]; });
     add(GXL(@"Сведения Mach-O"), ^{ [self present:[[GXReportVC alloc] initWithTitle:path.lastPathComponent text:GXMachOReport(path)] from:vc]; });
     add(GXL(@"Сведения ELF (.so)"), ^{ [self present:[[GXReportVC alloc] initWithTitle:path.lastPathComponent text:GXELFReport(path)] from:vc]; });

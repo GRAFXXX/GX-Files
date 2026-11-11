@@ -1556,3 +1556,96 @@
 1564|O iOS não consegue ler este formato de .p12 (código %d). Isso costuma acontecer com arquivos salvos pelo OpenSSL 3 (criptografia AES-256). Salve o .p12 novamente em um formato compatível (3DES / SHA-1) e importe de novo.
 
 1565|Não foi possível analisar o .p12
+
+1566|Toque ▶︎ para executar. %@ roda direto no iPhone (JavaScriptCore), sem internet.\nEntrada para readline() — no menu «Entrada (stdin)».\n
+1567|Toque ▶︎ para executar. Lua 5.4 roda direto no iPhone, sem internet.\nEntrada para io.read() — no menu «Entrada (stdin)».\n
+1568|Toque ▶︎ para compilar e executar %@.\nO código roda no servidor do Compiler Explorer (godbolt.org) — precisa de internet. Entrada — menu «Entrada (stdin)», compilador — menu «Compilador».\n
+1569|App «Olá» (contador)
+1570|Minijogo «Pegue a bolinha»
+1571|App «Nota»
+1572|Modelos de app (IPA)
+1573|Gerar IPA…
+1574|Executar como programa (online, gcc)
+1575|Modelo «Olá»
+1576|Compilador…
+1577|Flags do compilador…
+1578|Entrada (stdin)…
+1579|Licença do Lua (MIT)
+1580|Sem função main()
+1581|Um IPA precisa de código de app com main(), e isto parece um tweak. Inserir um modelo de app?
+1582|Inserir
+1583|Flags do compilador
+1584|Por exemplo -O2 -std=c++20 -Wall. Vazio — padrão.
+1585|Interpretador embutido — Lua 5.4 (https://www.lua.org), licença MIT.\n\n
+1586|Compilando e executando no servidor…\n
+1587|Executando…\n
+1588|Parado\n
+1589|Escolha uma linguagem
+1590|C (app → IPA)
+1591|Novo app
+1592| · offline
+1593|Novo arquivo · %@
+1594|Nome do arquivo na pasta GX Compiler
+1595|Compilando o app…\n
+1596|Sem assinatura — instale o IPA com Feather, SideStore ou AltStore, eles assinam com o seu certificado.\n
+1597|Gerar IPA
+1598|Ícone
+1599|Assinatura
+1600|Código-fonte: %@. Deve ser código de app com main() — modelos: menu do compilador → «Modelos de app».
+1601|Sem imagem própria, o ícone é desenhado sozinho — um degradê e a primeira letra do nome.
+1602|Nenhum certificado carregado. Adicione um .p12 e um .mobileprovision em «Assinatura com certificado» — ou gere sem assinatura e instale com Feather/SideStore/AltStore.
+1603|Para assinar um app também é preciso um perfil de provisionamento (.mobileprovision) — adicione em «Assinatura com certificado». Sem assinatura, o IPA pode ser instalado com Feather/SideStore/AltStore.
+1604|Perfil «%@»: App ID %@.%@
+1605|, dispositivos: %@
+1606|, válido até %@
+1607|. Um IPA assinado só é instalado nos dispositivos deste perfil.
+1608|Substituir imagem…
+1609|Escolher imagem…
+1610|Redefinir (ícone automático)
+1611|Assinar com meu certificado
+1612|Gerando IPA…
+1613|Erro ao gerar
+1614|IPA pronto
+1615|Compartilhar / abrir em…
+1616|Executar código (%@)
+1617|C (tweak → dylib)
+1618|C (programa, gcc online)
+1619|Objective-C (online)
+1620|Olá
+1621|mundo
+1622|roda direto no iPhone, sem internet
+1623|uma linha da «Entrada» (stdin)
+1624|Ordenado:
+1625|os tipos são removidos e o código roda como JavaScript direto no iPhone
+1626|O Compiler Explorer não respondeu
+1627|Sem conexão com o Compiler Explorer: %@\nC++, C#, Python e outras linguagens precisam de internet. JavaScript e Lua funcionam offline.\n
+1628|Erro do Compiler Explorer: %@\n
+1629|Erro de compilação:\n
+1630|⏱ Tempo de execução excedido no servidor\n
+1631|— código de saída %ld · %@ ms
+1632|Erro (linha %@): %@\n
+1633|⏱ Parado: mais de %.0f s\n
+1634|— %@ · %.0f ms · JavaScriptCore (no dispositivo)\n
+1635|pronto
+1636|— %@ · %.0f ms · %s (no dispositivo)\n
+1637|Compilador de %@
+1638|Carregando lista…
+1639|Sem conexão: %@
+1640|O código é compilado e executado no servidor do Compiler Explorer (godbolt.org) e o resultado volta para cá. Precisa de internet.
+1641|Auto — estável mais recente
+1642|Entrada (stdin)
+1643|O programa recebe este texto como entrada padrão: cin, input(), Console.ReadLine(), io.read(), readline() etc. Cada linha é uma entrada separada.
+1644|Assinar um app exige um perfil de provisionamento (.mobileprovision) — adicione em «Assinatura com certificado».
+1645|O perfil de provisionamento expirou
+1646|O perfil foi emitido para %@ — usando este Bundle ID\n
+1647|O perfil só permite %@ — Bundle ID: %@\n
+1648|Não foi possível gravar embedded.mobileprovision
+1649|O app não tem Info.plist
+1650|Não foi possível gravar CodeResources
+1651|⚠︎ O Team ID do certificado (%s) não corresponde ao perfil (%@) — o iOS não instala esse app\n
+1652|O app não tem executável
+1653|✓ app assinado: %@ (team %@, %d certificado(s))\n
+1654|parado
+1655|limite de tempo excedido
+1656|memória insuficiente
+1657|o programa terminou com o código %d

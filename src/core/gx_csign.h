@@ -17,6 +17,12 @@ typedef struct {
     int ncerts;
     const uint8_t *entitlements;    // XML энтайтлментов или NULL (для dylib обычно NULL)
     size_t entitlements_len;
+    const uint8_t *der_entitlements;   // те же энтайтлменты в DER (iOS 15+), без заголовка блоба; или NULL
+    size_t der_entitlements_len;
+    const uint8_t *info_hash;       // SHA-256 Info.plist (32 байта) — для главного бинарника приложения; или NULL
+    const uint8_t *res_hash;        // SHA-256 _CodeSignature/CodeResources (32 байта); или NULL
+    int is_exec;                    // главный исполняемый файл (MH_EXECUTE): execSegFlags MAIN_BINARY
+    int allow_unsigned;             // get-task-allow = true (development-профиль): execSegFlags ALLOW_UNSIGNED
     size_t sig_size;                // размер RSA-подписи в байтах (= размер ключа, напр. 256 для RSA-2048)
     gx_rsa_sign_fn sign;
     void *sign_ctx;

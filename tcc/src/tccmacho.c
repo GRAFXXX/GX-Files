@@ -1829,10 +1829,20 @@ static void collect_sections(TCCState *s1, struct macho *mo, const char *filenam
                были кратны странице 16 КБ — иначе исполняемая страница вылезает за
                подписанный exec-сегмент и ядро отвергает подпись (code signature invalid).
                Начала сегментов уже выровнены ниже; выравниваем и размеры, как делает ld64. */
+#ifdef GX_IOS
             uint64_t vs = curaddr - seg->vmaddr;
             uint64_t fs = fileofs - seg->fileoff;
+            if (vs == 0) {                     /* пустой сегмент (нет данных) — страница нулей, а не 0 байт
+                                                  на одном адресе со следующим сегментом */
+                vs = SEG_PAGE_SIZE;
+                curaddr = seg->vmaddr + SEG_PAGE_SIZE;
+            }
             seg->vmsize   = (vs + SEG_PAGE_SIZE - 1) & ~(uint64_t)(SEG_PAGE_SIZE - 1);
             seg->filesize = (fs + SEG_PAGE_SIZE - 1) & ~(uint64_t)(SEG_PAGE_SIZE - 1);
+#else
+            seg->vmsize = curaddr - seg->vmaddr;
+            seg->filesize = fileofs - seg->fileoff;
+#endif
         }
 #ifdef CONFIG_NEW_MACHO
 	if (sk == sk_linkedit) {

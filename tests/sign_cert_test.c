@@ -2,6 +2,7 @@
 // CodeDirectory (хеши страниц, флаги, Team ID) и извлечь CMS для openssl-проверки.
 // RSA-подпись в тесте делает openssl CLI (на устройстве — SecKeyCreateSignature).
 #include "core/gx_csign.h"
+#include "core/gx_sha256.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +30,16 @@ int main(int ac, char **av) {
     gx_sign_opts o = {0};
     o.ident = "com.test.tweak"; o.teamid = "TEAMID1234"; o.certs = certs; o.cert_lens = clens; o.ncerts = 1;
     o.sig_size = 256; o.sign = sign_cb; o.sign_ctx = av[3];
+    // режим «приложение»: av[5]=ent.xml av[6]=ent.der av[7]=info.plist av[8]=CodeResources
+    size_t el = 0, dl2 = 0, il = 0, rl = 0; unsigned char ih[32], rh[32];
+    if (ac > 8) {
+        unsigned char *ent = rd(av[5], &el), *der = rd(av[6], &dl2), *info = rd(av[7], &il), *res = rd(av[8], &rl);
+        CHECK(ent && der && info && res, "read app inputs");
+        gx_sha256_buf(info, il, ih); gx_sha256_buf(res, rl, rh);
+        o.ident = "com.gxfiles.test"; o.is_exec = 1; o.allow_unsigned = 1;
+        o.entitlements = ent; o.entitlements_len = el; o.der_entitlements = der; o.der_entitlements_len = dl2;
+        o.info_hash = ih; o.res_hash = rh;
+    }
     char err[256] = {0}; size_t ol = 0;
     unsigned char *out = gx_sign_macho(dy, dl, &o, &ol, err, sizeof err);
     CHECK(out != NULL, "gx_sign_macho: %s", err);

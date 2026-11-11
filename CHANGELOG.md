@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.7
+- **Multi-language compiler.** The compiler screen now picks the language from the file extension:
+  - **JavaScript** and **Lua 5.4** run right on the iPhone, offline — JavaScript through the built-in JavaScriptCore, Lua through an embedded interpreter. Both read from an «Input (stdin)» box, show errors with line numbers and stop runaway loops after 10 s
+  - **TypeScript** also runs offline: type annotations are stripped and the code runs as JavaScript
+  - **C++, C#, Python, Java, Kotlin, Rust, Go, Swift, Ruby, Dart, Haskell, Pascal, F#, VB, D, Zig, Julia, Perl, OCaml, Fortran, COBOL, Ada, Crystal, Odin, Mojo, Raku and plain C programs** compile and run on the Compiler Explorer server (godbolt.org) — native compilers for these languages don't fit on iOS, and iOS won't run freshly generated code without JIT. The latest stable compiler is picked automatically; you can choose another one and set compiler flags
+  - «New file…» asks for the language and starts from a ready "Hello" template in the UI language; the ▶︎ button turns into ■ to stop a run
+- **IPA builder.** Write an app in C (UIKit through the Objective-C runtime, like the tweaks) and build a real `.ipa` right on the iPhone: «Build IPA…» compiles an iOS executable, generates `Info.plist` and icons (your picture or an automatic one), and packs `Payload/App.app`. Three app templates included: a counter, a "catch the dot" mini-game and an auto-saving note
+- **App signing with your certificate.** The IPA can be signed with your `.p12` + `.mobileprovision`: entitlements from the profile (XML and the DER form iOS 15+ requires), `embedded.mobileprovision`, the `_CodeSignature/CodeResources` resource seal and the main-binary exec-segment flag. Or build it unsigned and install with Feather, SideStore or AltStore
+- On-device compiler: an empty segment is now a zero-filled page instead of a zero-size segment sharing its address with the next one (ld64 behaviour); zip packing keeps the executable bit of files
+- CI: Lua runner tests, compiling every app template to a valid iOS executable, and a full check of app signatures (special slots, entitlements blobs, exec-segment flags, CMS)
+
 ## 4.6.4
 - Fixed the real reason compiled dylibs were rejected at load ("code signature invalid"): the on-device compiler wrote segment sizes unaligned (e.g. `__TEXT` vmsize `0x1170`), while iOS/arm64 requires every segment except `__LINKEDIT` to be a multiple of the 16 KB page. An unaligned `__TEXT` maps as a full executable page that extends past the signed exec-segment, so the kernel rejects the signature — regardless of who signed it. Segment vm/file sizes are now rounded up to 16 KB, matching ld64
 - CI compiler test now checks every non-`__LINKEDIT` segment is 16 KB-aligned

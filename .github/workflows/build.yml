@@ -48,6 +48,9 @@ jobs:
       - name: Test .p12 parser (OpenSSL 3 / legacy formats)
         run: bash tests/run_p12_tests.sh
 
+      - name: Test Lua and app templates (IPA builder)
+        run: SDK="$(xcrun --sdk iphoneos --show-sdk-path)" bash tests/run_app_tests.sh
+
       - name: Build
         run: SDK="$(xcrun --sdk iphoneos --show-sdk-path)" bash build.sh
 

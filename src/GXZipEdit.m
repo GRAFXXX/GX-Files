@@ -71,8 +71,11 @@ NSString *GXZipCreateFromFolder(NSString *folder, NSString *dest, BOOL apkAlign)
         return ra != rb ? (ra < rb ? NSOrderedAscending : NSOrderedDescending) : [a compare:b];
     }];
     for (NSUInteger i = 0; i < order.count; i++) {
+        NSString *full = [folder stringByAppendingPathComponent:order[i]];
         c[i].name = [order[i] UTF8String];
-        c[i].src_path = [[folder stringByAppendingPathComponent:order[i]] fileSystemRepresentation];
+        c[i].src_path = full.fileSystemRepresentation;
+        NSUInteger perm = [[FM() attributesOfItemAtPath:full error:nil] filePosixPermissions];
+        c[i].mode = (perm & 0111) ? 0755 : 0644;   // исполняемые файлы (бинарник приложения) — с битом x
     }
     char err[256] = "";
     int ok = gxzw_rewrite(empty.fileSystemRepresentation, dest.fileSystemRepresentation, c, order.count, apkAlign ? GXZW_ALIGN_APK : GXZW_ALIGN_NONE, err, sizeof err, NULL, NULL, NULL);

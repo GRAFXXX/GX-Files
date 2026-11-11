@@ -130,6 +130,43 @@ UIImage *_Nullable GXTextureImage(NSString *path, NSString *_Nullable *_Nullable
 @end
 NSString *_Nullable GXCompileDylib(NSString *src, NSString *out, NSArray<NSString *> *libs, NSMutableString *log);
 
+#pragma mark - Многоязычный запуск кода (GXRunner.m)
+// Язык — словарь: id, name, ext (массив расширений), kind (0 TinyCC, 1 JavaScript, 2 Lua, 3 онлайн), pref, tpl
+NSArray<NSDictionary *> *GXCodeLanguages(void);
+NSDictionary *_Nullable GXCodeLanguageForID(NSString *lid);
+NSDictionary *_Nullable GXCodeLanguageForPath(NSString *path);
+NSString *GXCodeLanguageExt(NSDictionary *lang);
+NSString *GXCodeTemplate(NSDictionary *lang);   // шаблон «Привет» на языке интерфейса
+NSString *GXRunnerStdin(void);
+NSString *GXCEArgs(NSString *ce);
+void GXCESetArgs(NSString *ce, NSString *_Nullable args);
+@interface GXRunJob : NSObject
+- (void)cancel;
+- (BOOL)cancelled;
+- (volatile int *)cancelFlag;
+@end
+// Запустить код; done вызывается на главном потоке (не вызывается, если задачу остановили)
+GXRunJob *GXRunCode(NSDictionary *lang, NSString *source, NSString *fileName, NSString *stdinText,
+                    void (^done)(NSAttributedString *output, BOOL ok));
+@interface GXCEPickerVC : UITableViewController
+- (instancetype)initWithLanguage:(NSDictionary *)lang;
+@end
+@interface GXStdinVC : UIViewController
+@end
+
+#pragma mark - Сборщик IPA (GXIpaBuild.m)
+// Исполняемый файл приложения встроенным TinyCC (без подписи)
+NSString *_Nullable GXCompileExecutable(NSString *src, NSString *out, NSArray<NSString *> *libs, NSMutableString *log);
+// opts: name, bundle, version, sign (NSNumber), icon (UIImage). Вызывать не на главном потоке.
+NSString *_Nullable GXBuildIPA(NSString *src, NSDictionary *opts, NSArray<NSString *> *libs, NSMutableString *log, NSString *_Nullable *_Nullable outPath);
+NSString *_Nullable GXSignAppBundle(NSString *appDir, NSString *bundleID, NSString *_Nullable *_Nullable usedID, NSMutableString *log);
+NSDictionary *_Nullable GXSignProfileSummary(void);
+BOOL GXSignCanSignApps(void);
+NSData *GXEntitlementsDER(NSDictionary *ent);
+@interface GXIpaBuildVC : UITableViewController
+- (instancetype)initWithSource:(NSString *)src libs:(NSArray<NSString *> *)libs;
+@end
+
 #pragma mark - Открытие
 
 @interface GXOpener : NSObject

@@ -5,6 +5,7 @@
 #import "core/gx_p12.h"
 #import "core/gx_wwdr.h"
 #import <Security/Security.h>
+#import <CommonCrypto/CommonDigest.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #pragma mark - Хранилище
@@ -202,6 +203,208 @@ NSString *_Nullable GXSignFileWithCert(NSString *path, NSString *ident, NSMutabl
     NSData *sd = [NSData dataWithBytesNoCopy:out length:ol freeWhenDone:YES];
     if (![sd writeToFile:path atomically:YES]) return GXL(@"Не удалось записать подписанный файл");
     if (log) [log appendFormat:GXL(@"✓ подписано сертификатом (team %@, %d сертификат(а) в цепочке)\n"), team.length ? team : @"?", nc];
+    return nil;
+}
+
+#pragma mark - подпись приложения (.app → IPA)
+
+static NSData *SHA1Of(NSData *d) { uint8_t h[CC_SHA1_DIGEST_LENGTH]; CC_SHA1(d.bytes, (CC_LONG)d.length, h); return [NSData dataWithBytes:h length:sizeof h]; }
+static NSData *SHA256Of(NSData *d) { uint8_t h[CC_SHA256_DIGEST_LENGTH]; CC_SHA256(d.bytes, (CC_LONG)d.length, h); return [NSData dataWithBytes:h length:sizeof h]; }
+
+// --- DER-энтайтлменты (формат CoreEntitlements, обязателен с iOS 15) ---
+static void DerLen(NSMutableData *m, NSUInteger n) {
+    if (n < 128) { uint8_t b = (uint8_t)n; [m appendBytes:&b length:1]; return; }
+    uint8_t tmp[8]; int k = 0;
+    while (n) { tmp[k++] = (uint8_t)(n & 0xFF); n >>= 8; }
+    uint8_t h = (uint8_t)(0x80 | k); [m appendBytes:&h length:1];
+    while (k) { uint8_t b = tmp[--k]; [m appendBytes:&b length:1]; }
+}
+static void DerTLV(NSMutableData *m, uint8_t tag, NSData *body) {
+    [m appendBytes:&tag length:1]; DerLen(m, body.length); [m appendData:body];
+}
+static NSData *DerValue(id v) {
+    NSMutableData *m = [NSMutableData data];
+    if ([v isKindOfClass:NSString.class]) {
+        DerTLV(m, 0x0C, [v dataUsingEncoding:NSUTF8StringEncoding]);
+    } else if ([v isKindOfClass:NSNumber.class] && CFGetTypeID((__bridge CFTypeRef)v) == CFBooleanGetTypeID()) {
+        uint8_t b = [v boolValue] ? 0xFF : 0x00;
+        DerTLV(m, 0x01, [NSData dataWithBytes:&b length:1]);
+    } else if ([v isKindOfClass:NSNumber.class]) {
+        long long x = [v longLongValue];
+        uint8_t buf[9]; int n = 0;
+        for (int i = 7; i >= 0; i--) buf[n++] = (uint8_t)((unsigned long long)x >> (i * 8));
+        int st = 0;   // минимальное дополнение до двух
+        while (st < 7 && ((buf[st] == 0x00 && !(buf[st + 1] & 0x80)) || (buf[st] == 0xFF && (buf[st + 1] & 0x80)))) st++;
+        DerTLV(m, 0x02, [NSData dataWithBytes:buf + st length:(NSUInteger)(8 - st)]);
+    } else if ([v isKindOfClass:NSArray.class]) {
+        NSMutableData *body = [NSMutableData data];
+        for (id x in v) { NSData *e = DerValue(x); if (e) [body appendData:e]; }
+        DerTLV(m, 0x30, body);
+    } else if ([v isKindOfClass:NSDictionary.class]) {
+        // ключи по возрастанию байтов UTF-8 (как std::sort в codesign/zsign)
+        NSArray *keys = [[v allKeys] sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
+            NSData *x = [a dataUsingEncoding:NSUTF8StringEncoding], *y = [b dataUsingEncoding:NSUTF8StringEncoding];
+            int c = memcmp(x.bytes, y.bytes, MIN(x.length, y.length));
+            if (c) return c < 0 ? NSOrderedAscending : NSOrderedDescending;
+            return x.length == y.length ? NSOrderedSame : (x.length < y.length ? NSOrderedAscending : NSOrderedDescending);
+        }];
+        NSMutableData *body = [NSMutableData data];
+        for (NSString *k in keys) {
+            NSData *val = DerValue(v[k]);
+            if (!val) continue;   // данные/даты/дробные — CoreEntitlements их не поддерживает
+            NSMutableData *entry = [NSMutableData data];
+            DerTLV(entry, 0x0C, [k dataUsingEncoding:NSUTF8StringEncoding]);
+            [entry appendData:val];
+            DerTLV(body, 0x30, entry);
+        }
+        DerTLV(m, 0xB0, body);
+    } else return nil;
+    return m;
+}
+NSData *GXEntitlementsDER(NSDictionary *ent) {
+    NSMutableData *body = [NSMutableData data];
+    const uint8_t ver[3] = {0x02, 0x01, 0x01};
+    [body appendBytes:ver length:3];
+    [body appendData:DerValue(ent ?: @{})];
+    NSMutableData *m = [NSMutableData data];
+    DerTLV(m, 0x70, body);
+    return m;
+}
+
+// --- печать ресурсов _CodeSignature/CodeResources ---
+static NSDictionary *GXCodeResources(NSString *appDir, NSString *exe) {
+    NSMutableDictionary *files = [NSMutableDictionary dictionary], *files2 = [NSMutableDictionary dictionary];
+    for (NSString *rel in [FM() enumeratorAtPath:appDir]) {
+        NSString *full = [appDir stringByAppendingPathComponent:rel];
+        BOOL dir = NO;
+        if (![FM() fileExistsAtPath:full isDirectory:&dir] || dir) continue;
+        if ([rel isEqualToString:exe] || [rel isEqualToString:@"_CodeSignature/CodeResources"]) continue;
+        NSData *d = [NSData dataWithContentsOfFile:full];
+        if (!d) continue;
+        NSData *h1 = SHA1Of(d), *h2 = SHA256Of(d);
+        BOOL lproj = [rel rangeOfString:@".lproj/"].location != NSNotFound;
+        if ([rel hasSuffix:@".lproj/locversion.plist"]) continue;
+        files[rel] = lproj ? @{@"hash": h1, @"optional": @YES} : h1;
+        if ([rel isEqualToString:@"Info.plist"] || [rel isEqualToString:@"PkgInfo"] || [rel.lastPathComponent isEqualToString:@".DS_Store"]) continue;
+        NSMutableDictionary *e = [@{@"hash": h1, @"hash2": h2} mutableCopy];
+        if (lproj) e[@"optional"] = @YES;
+        files2[rel] = e;
+    }
+    NSDictionary *rules = @{
+        @"^.*": @YES,
+        @"^.*\\.lproj/": @{@"optional": @YES, @"weight": @1000.0},
+        @"^.*\\.lproj/locversion.plist$": @{@"omit": @YES, @"weight": @1100.0},
+        @"^Base\\.lproj/": @{@"weight": @1010.0},
+        @"^version.plist$": @YES,
+    };
+    NSDictionary *rules2 = @{
+        @"^.*": @YES,
+        @".*\\.dSYM($|/)": @{@"weight": @11.0},
+        @"^(.*/)?\\.DS_Store$": @{@"omit": @YES, @"weight": @2000.0},
+        @"^.*\\.lproj/": @{@"optional": @YES, @"weight": @1000.0},
+        @"^.*\\.lproj/locversion.plist$": @{@"omit": @YES, @"weight": @1100.0},
+        @"^Base\\.lproj/": @{@"weight": @1010.0},
+        @"^Info\\.plist$": @{@"omit": @YES, @"weight": @20.0},
+        @"^PkgInfo$": @{@"omit": @YES, @"weight": @20.0},
+        @"^embedded\\.provisionprofile$": @{@"weight": @20.0},
+        @"^version\\.plist$": @{@"weight": @20.0},
+    };
+    return @{@"files": files, @"files2": files2, @"rules": rules, @"rules2": rules2};
+}
+
+// Сведения о сохранённом provisioning-профиле (для экрана сборки IPA) или nil
+NSDictionary *_Nullable GXSignProfileSummary(void) {
+    NSDictionary *p = GXParseProfile([NSData dataWithContentsOfFile:GXProfPath()]);
+    if (!p) return nil;
+    NSString *team = [p[@"TeamIdentifier"] isKindOfClass:NSArray.class] ? [p[@"TeamIdentifier"] firstObject] : nil;
+    NSString *appid = [p[@"Entitlements"] isKindOfClass:NSDictionary.class] ? p[@"Entitlements"][@"application-identifier"] : nil;
+    NSString *pattern = (appid.length > team.length + 1 && [appid hasPrefix:[team stringByAppendingString:@"."]]) ? [appid substringFromIndex:team.length + 1] : (appid ?: @"*");
+    NSMutableDictionary *r = [@{@"pattern": pattern, @"team": team ?: @"", @"name": p[@"Name"] ?: @""} mutableCopy];
+    if ([p[@"ExpirationDate"] isKindOfClass:NSDate.class]) r[@"expires"] = p[@"ExpirationDate"];
+    if ([p[@"ProvisionedDevices"] isKindOfClass:NSArray.class]) r[@"devices"] = @([p[@"ProvisionedDevices"] count]);
+    return r;
+}
+BOOL GXSignCanSignApps(void) { return GXSignHasIdentity() && GXSignProfileSummary() != nil; }
+
+// Подписать собранный .app: embedded.mobileprovision, энтайтлменты из профиля, CodeResources и сам бинарник.
+// bundleID — желаемый; если профиль выдан на конкретный ID, используется он (*usedID).
+NSString *_Nullable GXSignAppBundle(NSString *appDir, NSString *bundleID, NSString *_Nullable *_Nullable usedID, NSMutableString *log) {
+    NSData *profData = [NSData dataWithContentsOfFile:GXProfPath()];
+    NSDictionary *prof = GXParseProfile(profData);
+    if (!prof) return GXL(@"Для подписи приложения нужен provisioning-профиль (.mobileprovision) — добавь его в «Подпись сертификатом».");
+    if ([prof[@"ExpirationDate"] isKindOfClass:NSDate.class] && [prof[@"ExpirationDate"] timeIntervalSinceNow] < 0)
+        return GXL(@"Срок действия provisioning-профиля истёк");
+    NSMutableDictionary *ent = [prof[@"Entitlements"] isKindOfClass:NSDictionary.class] ? [prof[@"Entitlements"] mutableCopy] : [NSMutableDictionary dictionary];
+    NSString *team = [prof[@"TeamIdentifier"] isKindOfClass:NSArray.class] ? [prof[@"TeamIdentifier"] firstObject] : nil;
+    NSString *appid = ent[@"application-identifier"] ?: @"";
+    if (!team.length) team = [appid componentsSeparatedByString:@"."].firstObject;
+    NSString *pattern = appid.length > team.length + 1 ? [appid substringFromIndex:team.length + 1] : @"*";
+
+    // Bundle ID должен подходить под App ID профиля
+    NSString *bid = bundleID;
+    if (![pattern containsString:@"*"]) {
+        if (![bid isEqualToString:pattern]) [log appendFormat:GXL(@"Профиль выдан на %@ — использую этот Bundle ID\n"), pattern];
+        bid = pattern;
+    } else if (![pattern isEqualToString:@"*"]) {
+        NSString *prefix = [pattern substringToIndex:pattern.length - 1];          // «com.x.» из «com.x.*»
+        if (![bid hasPrefix:prefix]) {
+            bid = [prefix stringByAppendingString:[bundleID componentsSeparatedByString:@"."].lastObject];
+            [log appendFormat:GXL(@"Профиль разрешает только %@ — Bundle ID: %@\n"), pattern, bid];
+        }
+    }
+    ent[@"application-identifier"] = [NSString stringWithFormat:@"%@.%@", team, bid];
+    BOOL allowUnsigned = [ent[@"get-task-allow"] boolValue];
+
+    // 1. профиль внутрь .app
+    if (![profData writeToFile:[appDir stringByAppendingPathComponent:@"embedded.mobileprovision"] atomically:YES])
+        return GXL(@"Не удалось записать embedded.mobileprovision");
+    // 2. Bundle ID в Info.plist
+    NSString *infoPath = [appDir stringByAppendingPathComponent:@"Info.plist"];
+    NSMutableDictionary *info = [[NSDictionary dictionaryWithContentsOfFile:infoPath] mutableCopy];
+    if (!info) return GXL(@"В приложении нет Info.plist");
+    info[@"CFBundleIdentifier"] = bid;
+    NSData *infoData = [NSPropertyListSerialization dataWithPropertyList:info format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+    [infoData writeToFile:infoPath atomically:YES];
+    NSString *exe = info[@"CFBundleExecutable"];
+    NSString *exePath = [appDir stringByAppendingPathComponent:exe];
+    // 3. CodeResources
+    NSString *csDir = [appDir stringByAppendingPathComponent:@"_CodeSignature"];
+    [FM() createDirectoryAtPath:csDir withIntermediateDirectories:YES attributes:nil error:nil];
+    NSData *res = [NSPropertyListSerialization dataWithPropertyList:GXCodeResources(appDir, exe) format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+    if (![res writeToFile:[csDir stringByAppendingPathComponent:@"CodeResources"] atomically:YES]) return GXL(@"Не удалось записать CodeResources");
+    NSData *infoHash = SHA256Of(infoData), *resHash = SHA256Of(res);
+    // 4. энтайтлменты
+    NSData *entXML = [NSPropertyListSerialization dataWithPropertyList:ent format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+    NSData *entDER = GXEntitlementsDER(ent);
+    // 5. подпись бинарника
+    SecKeyRef key = NULL; NSMutableArray<NSData *> *ders = nil; NSString *resolved = nil, *err = nil;
+    if (!GXLoadSigner(&key, &ders, &resolved, &err)) return err;
+    GXCompleteChain(ders);
+    char tm[64] = {0};
+    if (ders.count && gx_cert_fields(ders[0].bytes, ders[0].length, tm, sizeof tm, NULL, 0, NULL) && tm[0] && strcmp(tm, team.UTF8String ?: "") != 0)
+        [log appendFormat:GXL(@"⚠︎ Team ID сертификата (%s) не совпадает с профилем (%@) — iOS не установит такое приложение\n"), tm, team];
+    NSData *file = [NSData dataWithContentsOfFile:exePath];
+    if (!file) { CFRelease(key); return GXL(@"Нет исполняемого файла приложения"); }
+    const uint8_t *certs[16]; size_t clens[16]; int nc = (int)MIN(ders.count, (NSUInteger)16);
+    for (int i = 0; i < nc; i++) { certs[i] = ders[i].bytes; clens[i] = ders[i].length; }
+    gxsctx cbctx = { key, nil };
+    gx_sign_opts o = {0};
+    o.ident = bid.UTF8String; o.teamid = team.UTF8String ?: "";
+    o.certs = certs; o.cert_lens = clens; o.ncerts = nc;
+    o.entitlements = entXML.bytes; o.entitlements_len = entXML.length;
+    o.der_entitlements = entDER.bytes; o.der_entitlements_len = entDER.length;
+    o.info_hash = infoHash.bytes; o.res_hash = resHash.bytes;
+    o.is_exec = 1; o.allow_unsigned = allowUnsigned;
+    o.sig_size = SecKeyGetBlockSize(key); o.sign = gx_rsa_cb; o.sign_ctx = &cbctx;
+    char e[256] = {0}; size_t ol = 0;
+    uint8_t *out = gx_sign_macho(file.bytes, file.length, &o, &ol, e, sizeof e);
+    CFRelease(key);
+    if (!out) return cbctx.err ?: [NSString stringWithFormat:@"%s", e];
+    NSData *sd = [NSData dataWithBytesNoCopy:out length:ol freeWhenDone:YES];
+    if (![sd writeToFile:exePath atomically:YES]) return GXL(@"Не удалось записать подписанный файл");
+    [FM() setAttributes:@{NSFilePosixPermissions: @0755} ofItemAtPath:exePath error:nil];
+    if (usedID) *usedID = bid;
+    [log appendFormat:GXL(@"✓ приложение подписано: %@ (team %@, %d сертификат(а))\n"), bid, team, nc];
     return nil;
 }
 

@@ -254,12 +254,16 @@ static uint8_t *build_cms(const uint8_t *cd, size_t cdlen, const gx_sign_opts *o
 static void make_requirements(uint8_t out[12]) { WB32(out, 0xFADE0C01); WB32(out + 4, 12); WB32(out + 8, 0); }
 
 // Построить CodeDirectory. Возвращает malloc-буфер и длину.
+// special[i] — хеш спецслота -(i+1): -1 Info.plist, -2 Requirements, -3 CodeResources,
+// -4 (нет), -5 Entitlements, -6 (нет), -7 DER Entitlements. NULL — пустой слот (нули).
+// Хвост пустых слотов отбрасывается, как это делает codesign/zsign.
 static uint8_t *make_cd(const uint8_t *file, uint32_t codelimit, const char *ident, const char *teamid,
-                        const uint8_t *reqhash /*32, slot -2*/, int have_req,
+                        const uint8_t *const special[7],
                         uint64_t execBase, uint64_t execLimit, uint64_t execFlags, size_t *outlen) {
     uint32_t nslots = (codelimit + 4095) / 4096;
     size_t idl = strlen(ident) + 1, tml = teamid && *teamid ? strlen(teamid) + 1 : 0;
-    int nspecial = have_req ? 2 : 0;                 // слоты -1 (Info.plist=0) и -2 (Requirements)
+    int nspecial = 0;
+    for (int i = 0; i < 7; i++) if (special[i]) nspecial = i + 1;
     size_t identOffset = 88;
     size_t teamOffset = tml ? identOffset + idl : 0;
     size_t after = identOffset + idl + tml;
@@ -276,14 +280,11 @@ static uint8_t *make_cd(const uint8_t *file, uint32_t codelimit, const char *ide
     // («code signature invalid»), т.к. исполняемый регион вне подписанного exec-сегмента.
     WB64(cd + 64, execBase);                           // execSegBase  (fileoff __TEXT)
     WB64(cd + 72, execLimit);                          // execSegLimit (filesize __TEXT)
-    WB64(cd + 80, execFlags);                          // execSegFlags (0 для dylib; main-binary не ставим)
+    WB64(cd + 80, execFlags);                          // execSegFlags: 0 для dylib, MAIN_BINARY для приложения
     memcpy(cd + identOffset, ident, idl);
     if (tml) memcpy(cd + teamOffset, teamid, tml);
-    if (have_req) {
-        // slot -1 = Info.plist (нет → нули), slot -2 = Requirements
-        memcpy(cd + hashOffset - 2 * 32, reqhash, 32);   // slot -2
-        // slot -1 остаётся нулевым
-    }
+    for (int i = 0; i < nspecial; i++)
+        if (special[i]) memcpy(cd + hashOffset - (size_t)(i + 1) * 32, special[i], 32);   // слот -(i+1)
     uint8_t *hs = cd + hashOffset;
     for (uint32_t i = 0; i < nslots; i++) {
         uint32_t a = i * 4096, l = codelimit - a < 4096 ? codelimit - a : 4096;
@@ -293,13 +294,15 @@ static uint8_t *make_cd(const uint8_t *file, uint32_t codelimit, const char *ide
     return cd;
 }
 
-// Собрать полный SuperBlob подписи.
+// Собрать полный SuperBlob подписи: CodeDirectory, Requirements, Entitlements (XML, слот 5),
+// DER Entitlements (слот 7) и CMS в BlobWrapper (слот 0x10000). Блобы ent/der — уже с заголовком.
 static uint8_t *make_superblob(const uint8_t *cd, size_t cdlen, const uint8_t *req, size_t reqlen,
+                               const uint8_t *ent, size_t entlen, const uint8_t *der, size_t derlen,
                                const uint8_t *cms, size_t cmslen, size_t *outlen) {
-    int nblobs = 1 + (req ? 1 : 0) + (cms ? 1 : 0);
+    int nblobs = 1 + (req ? 1 : 0) + (ent ? 1 : 0) + (der ? 1 : 0) + (cms ? 1 : 0);
     size_t hdr = 12 + (size_t)nblobs * 8;
     size_t cms_wrapped = cms ? cmslen + 8 : 0;                                   // CMS внутри BlobWrapper (magic + len)
-    size_t total = hdr + cdlen + (req ? reqlen : 0) + cms_wrapped;
+    size_t total = hdr + cdlen + (req ? reqlen : 0) + (ent ? entlen : 0) + (der ? derlen : 0) + cms_wrapped;
     uint8_t *sb = calloc(1, total);
     if (!sb) return NULL;
     WB32(sb, 0xFADE0CC0); WB32(sb + 4, (uint32_t)total); WB32(sb + 8, (uint32_t)nblobs);
@@ -307,6 +310,8 @@ static uint8_t *make_superblob(const uint8_t *cd, size_t cdlen, const uint8_t *r
     WB32(sb + idx, 0); WB32(sb + idx + 4, (uint32_t)cur); idx += 8;              // slot 0: CodeDirectory
     memcpy(sb + cur, cd, cdlen); cur += cdlen;
     if (req) { WB32(sb + idx, 2); WB32(sb + idx + 4, (uint32_t)cur); idx += 8; memcpy(sb + cur, req, reqlen); cur += reqlen; }   // slot 2: Requirements
+    if (ent) { WB32(sb + idx, 5); WB32(sb + idx + 4, (uint32_t)cur); idx += 8; memcpy(sb + cur, ent, entlen); cur += entlen; }   // slot 5: Entitlements
+    if (der) { WB32(sb + idx, 7); WB32(sb + idx + 4, (uint32_t)cur); idx += 8; memcpy(sb + cur, der, derlen); cur += derlen; }   // slot 7: DER Entitlements
     if (cms) {                                                                   // slot 0x10000: CMS в BlobWrapper
         WB32(sb + idx, 0x10000); WB32(sb + idx + 4, (uint32_t)cur); idx += 8;
         WB32(sb + cur, 0xFADE0B01); WB32(sb + cur + 4, (uint32_t)cms_wrapped);
@@ -314,6 +319,15 @@ static uint8_t *make_superblob(const uint8_t *cd, size_t cdlen, const uint8_t *r
     }
     *outlen = total;
     return sb;
+}
+
+// Блоб с заголовком magic+len вокруг данных
+static uint8_t *wrap_blob(uint32_t magic, const uint8_t *data, size_t n, size_t *outlen) {
+    uint8_t *b = malloc(n + 8);
+    if (!b) return NULL;
+    WB32(b, magic); WB32(b + 4, (uint32_t)(n + 8)); memcpy(b + 8, data, n);
+    *outlen = n + 8;
+    return b;
 }
 
 // ---------- встраивание в тонкий Mach-O ----------
@@ -340,10 +354,11 @@ static uint8_t *sign_thin(const uint8_t *in, size_t len, const gx_sign_opts *o, 
     uint32_t nslots = (uint32_t)((codelimit + 4095) / 4096);
 
     // Резервируем место под подпись: оцениваем сверху и дополняем нулями.
-    size_t cdlen_est = 88 + strlen(o->ident) + 1 + (o->teamid && *o->teamid ? strlen(o->teamid) + 1 : 0) + 2 * 32 + (size_t)nslots * 32;
+    size_t cdlen_est = 88 + strlen(o->ident) + 1 + (o->teamid && *o->teamid ? strlen(o->teamid) + 1 : 0) + 7 * 32 + (size_t)nslots * 32;
+    size_t ent_est = (o->entitlements ? o->entitlements_len + 8 + 8 : 0) + (o->der_entitlements ? o->der_entitlements_len + 8 + 8 : 0);
     size_t certs_total = 0; for (int i = 0; i < o->ncerts; i++) certs_total += o->cert_lens[i];
     size_t cms_est = certs_total + o->sig_size + 2048;        // с запасом на ASN.1
-    size_t reserve = 12 + 3 * 8 + cdlen_est + 12 + cms_est;
+    size_t reserve = 12 + 5 * 8 + cdlen_est + 12 + ent_est + cms_est;
     reserve = (reserve + 15) & ~(size_t)15;
 
     // Готовим файл: удлиняем до codelimit, фиксируем LC_CODE_SIGNATURE и __LINKEDIT, затем хешируем.
@@ -363,21 +378,31 @@ static uint8_t *sign_thin(const uint8_t *in, size_t len, const gx_sign_opts *o, 
     uint8_t req[12]; make_requirements(req);
     uint8_t reqhash[32]; gx_sha256_buf(req, 12, reqhash);
 
+    // Энтайтлменты (только у главного бинарника приложения)
+    size_t entlen = 0, derlen = 0;
+    uint8_t *ent = o->entitlements ? wrap_blob(0xFADE7171, o->entitlements, o->entitlements_len, &entlen) : NULL;
+    uint8_t *der = o->der_entitlements ? wrap_blob(0xFADE7172, o->der_entitlements, o->der_entitlements_len, &derlen) : NULL;
+    uint8_t enthash[32], derhash[32];
+    if (ent) gx_sha256_buf(ent, entlen, enthash);
+    if (der) gx_sha256_buf(der, derlen, derhash);
+    const uint8_t *special[7] = { o->info_hash, reqhash, o->res_hash, NULL, ent ? enthash : NULL, NULL, der ? derhash : NULL };
+    uint64_t execFlags = o->is_exec ? (0x1 /*CS_EXECSEG_MAIN_BINARY*/ | (o->allow_unsigned ? 0x10 /*CS_EXECSEG_ALLOW_UNSIGNED*/ : 0)) : 0;
+
     // CodeDirectory (хеши страниц уже по финальным командам загрузки)
     size_t cdlen = 0;
-    uint8_t *cd = make_cd(f, (uint32_t)codelimit, o->ident, o->teamid ? o->teamid : "", reqhash, 1,
-                          textoff, textsize, 0 /*execSegFlags: dylib, не main-binary*/, &cdlen);
-    if (!cd) { free(f); snprintf(err, errlen, GXT("ошибка CodeDirectory")); return NULL; }
+    uint8_t *cd = make_cd(f, (uint32_t)codelimit, o->ident, o->teamid ? o->teamid : "", special,
+                          textoff, textsize, execFlags, &cdlen);
+    if (!cd) { free(ent); free(der); free(f); snprintf(err, errlen, GXT("ошибка CodeDirectory")); return NULL; }
 
     // CMS
     size_t cmslen = 0;
     uint8_t *cms = build_cms(cd, cdlen, o, &cmslen);
-    if (!cms) { free(cd); free(f); snprintf(err, errlen, GXT("ошибка подписи/CMS (сертификат или ключ)")); return NULL; }
+    if (!cms) { free(cd); free(ent); free(der); free(f); snprintf(err, errlen, GXT("ошибка подписи/CMS (сертификат или ключ)")); return NULL; }
 
     // SuperBlob
     size_t sblen = 0;
-    uint8_t *sb = make_superblob(cd, cdlen, req, 12, cms, cmslen, &sblen);
-    free(cd); free(cms);
+    uint8_t *sb = make_superblob(cd, cdlen, req, 12, ent, entlen, der, derlen, cms, cmslen, &sblen);
+    free(cd); free(cms); free(ent); free(der);
     if (!sb) { free(f); snprintf(err, errlen, GXT("ошибка сборки подписи")); return NULL; }
     if (sblen > reserve) { free(sb); free(f); snprintf(err, errlen, GXT("подпись больше зарезервированного места")); return NULL; }
 

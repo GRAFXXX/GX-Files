@@ -1556,3 +1556,96 @@
 1564|iOS kann dieses .p12-Format nicht lesen (Code %d). Das passiert meist bei Dateien, die mit OpenSSL 3 gespeichert wurden (AES-256-Verschlüsselung). Speichere die .p12 in einem kompatiblen Format (3DES / SHA-1) neu und importiere sie erneut.
 
 1565|.p12 konnte nicht gelesen werden
+
+1566|Tippe ▶︎ zum Ausführen. %@ läuft direkt auf dem iPhone (JavaScriptCore), kein Internet nötig.\nEingabe für readline() — im Menü «Eingabe (stdin)».\n
+1567|Tippe ▶︎ zum Ausführen. Lua 5.4 läuft direkt auf dem iPhone, kein Internet nötig.\nEingabe für io.read() — im Menü «Eingabe (stdin)».\n
+1568|Tippe ▶︎ zum Kompilieren und Ausführen von %@.\nDer Code läuft auf dem Compiler-Explorer-Server (godbolt.org) — Internet nötig. Eingabe — im Menü «Eingabe (stdin)», Compiler — im Menü «Compiler».\n
+1569|App „Hallo“ (Zähler)
+1570|Minispiel „Fang den Punkt“
+1571|App „Notiz“
+1572|App-Vorlagen (IPA)
+1573|IPA erstellen…
+1574|Als Programm ausführen (online, gcc)
+1575|Vorlage „Hallo“
+1576|Compiler…
+1577|Compiler-Flags…
+1578|Eingabe (stdin)…
+1579|Lua-Lizenz (MIT)
+1580|Keine main()-Funktion
+1581|Für eine IPA wird App-Code mit main() benötigt, das hier sieht nach einem Tweak aus. App-Vorlage einsetzen?
+1582|Einsetzen
+1583|Compiler-Flags
+1584|Zum Beispiel -O2 -std=c++20 -Wall. Leer — Standard.
+1585|Eingebauter Interpreter — Lua 5.4 (https://www.lua.org), MIT-Lizenz.\n\n
+1586|Kompilieren und Ausführen auf dem Server…\n
+1587|Wird ausgeführt…\n
+1588|Gestoppt\n
+1589|Sprache wählen
+1590|C (App → IPA)
+1591|Neue App
+1592| · offline
+1593|Neue Datei · %@
+1594|Dateiname im Ordner GX Compiler
+1595|App wird kompiliert…\n
+1596|Ohne Signatur — installiere die IPA mit Feather, SideStore oder AltStore, sie signieren sie mit deinem Zertifikat.\n
+1597|IPA erstellen
+1598|Symbol
+1599|Signatur
+1600|Quelltext: %@. Es muss App-Code mit main() sein — Vorlagen: Compiler-Menü → «App-Vorlagen».
+1601|Ohne eigenes Bild wird das Symbol automatisch gezeichnet — Verlauf und Anfangsbuchstabe des Namens.
+1602|Kein Zertifikat geladen. Füge .p12 und .mobileprovision unter «Signieren mit Zertifikat» hinzu — oder erstelle ohne Signatur und installiere mit Feather/SideStore/AltStore.
+1603|Zum Signieren einer App braucht es zusätzlich ein Provisioning-Profil (.mobileprovision) — füge es unter «Signieren mit Zertifikat» hinzu. Ohne Signatur lässt sich die IPA mit Feather/SideStore/AltStore installieren.
+1604|Profil «%@»: App-ID %@.%@
+1605|, Geräte: %@
+1606|, gültig bis %@
+1607|. Eine signierte IPA lässt sich nur auf Geräten aus diesem Profil installieren.
+1608|Bild ersetzen…
+1609|Bild wählen…
+1610|Zurücksetzen (Auto-Symbol)
+1611|Mit meinem Zertifikat signieren
+1612|IPA wird erstellt…
+1613|Build-Fehler
+1614|IPA ist fertig
+1615|Teilen / öffnen in…
+1616|Code ausführen (%@)
+1617|C (Tweak → dylib)
+1618|C (Programm, online gcc)
+1619|Objective-C (online)
+1620|Hallo
+1621|Welt
+1622|läuft direkt auf dem iPhone, ohne Internet
+1623|eine Zeile aus «Eingabe» (stdin)
+1624|Sortiert:
+1625|Typen werden entfernt, der Code läuft als JavaScript direkt auf dem iPhone
+1626|Compiler Explorer hat nicht geantwortet
+1627|Keine Verbindung zu Compiler Explorer: %@\nC++, C#, Python und andere Sprachen brauchen Internet. JavaScript und Lua laufen offline.\n
+1628|Compiler-Explorer-Fehler: %@\n
+1629|Kompilierfehler:\n
+1630|⏱ Zeitlimit auf dem Server überschritten\n
+1631|— Exit-Code %ld · %@ ms
+1632|Fehler (Zeile %@): %@\n
+1633|⏱ Gestoppt: länger als %.0f s\n
+1634|— %@ · %.0f ms · JavaScriptCore (auf dem Gerät)\n
+1635|fertig
+1636|— %@ · %.0f ms · %s (auf dem Gerät)\n
+1637|%@-Compiler
+1638|Liste wird geladen…
+1639|Keine Verbindung: %@
+1640|Der Code wird auf dem Compiler-Explorer-Server (godbolt.org) kompiliert und ausgeführt, das Ergebnis kommt hierher zurück. Internet nötig.
+1641|Auto — neueste stabile
+1642|Eingabe (stdin)
+1643|Das Programm erhält diesen Text als Standardeingabe: cin, input(), Console.ReadLine(), io.read(), readline() usw. Jede Zeile ist eine eigene Eingabe.
+1644|Zum Signieren einer App wird ein Provisioning-Profil (.mobileprovision) benötigt — füge es unter «Signieren mit Zertifikat» hinzu.
+1645|Das Provisioning-Profil ist abgelaufen
+1646|Das Profil ist für %@ ausgestellt — diese Bundle-ID wird verwendet\n
+1647|Das Profil erlaubt nur %@ — Bundle-ID: %@\n
+1648|embedded.mobileprovision konnte nicht geschrieben werden
+1649|Die App hat keine Info.plist
+1650|CodeResources konnte nicht geschrieben werden
+1651|⚠︎ Team-ID des Zertifikats (%s) passt nicht zum Profil (%@) — iOS installiert so eine App nicht\n
+1652|Die App hat keine ausführbare Datei
+1653|✓ App signiert: %@ (Team %@, %d Zertifikat(e))\n
+1654|gestoppt
+1655|Zeitlimit überschritten
+1656|nicht genug Speicher
+1657|das Programm wurde mit Code %d beendet

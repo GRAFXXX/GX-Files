@@ -60,6 +60,8 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Objective-C classes → .h headers
 - ARM64 disassembler, approximate C pseudocode, built-in assembler
 - On-device C→arm64 compiler (TinyCC) with 95 linkable iOS frameworks and libraries, dylib injection, and signing with either ad-hoc or your own developer certificate (`.p12`) so dylibs load without JIT
+- Multi-language code runner: JavaScript, TypeScript and Lua offline on the iPhone; C++, C#, Python, Java, Kotlin, Rust, Go, Swift and 20+ more languages through Compiler Explorer
+- IPA builder: write an iOS app in C and build a signed (or unsigned) `.ipa` on the device
 - ARM64 emulator: run a function step by step in a sandbox and watch the registers
 - Pseudocode structured into if/else/while, not just goto
 - Security audit (SAST): flags strcpy/sprintf/system, MD5/SHA-1, disabled TLS checks
@@ -67,6 +69,10 @@ https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/source/apps.json
 - Ad-hoc re-signing after edits
 
 **On-device compiler** — [TinyCC](https://github.com/TinyCC/tinycc) with iOS SDK headers and the `gxkit.h` helper: write C, get an arm64 dylib. Import your own developer `.p12` and the compiler signs with your certificate (CodeDirectory + CMS, RSA via the Keychain) instead of ad-hoc, so the result loads without JIT on a device that shares the certificate's Team ID.
+
+**Code runner** — the compiler screen picks the language from the file extension. JavaScript (JavaScriptCore), TypeScript (types stripped) and Lua 5.4 (embedded interpreter) run offline on the device. C++, C#, Python, Java, Kotlin, Rust, Go, Swift, Ruby, Dart, Haskell and other languages compile and run on [Compiler Explorer](https://godbolt.org) — iOS has no room for those toolchains and won't execute freshly generated code without JIT. Program input goes into an «Input (stdin)» box.
+
+**IPA builder** — write an app in C (UIKit through the Objective-C runtime) and press «Build IPA…»: GX Files compiles an iOS executable, adds `Info.plist` and icons, and packs a `.ipa`. With your `.p12` and `.mobileprovision` it signs the app (entitlements in XML and DER, resource seal, embedded profile); without them, install the unsigned IPA through Feather, SideStore or AltStore.
 
 **8 languages** — English, Русский, Українська, Беларуская, Deutsch, Français, Español, Português (Brasil).
 
@@ -98,7 +104,8 @@ Every push is built by GitHub Actions; a `v*` tag publishes a release and update
 ```
 src/            UI (Objective-C)
 src/core/       C core: Mach-O/ELF, ARM64, zip, APK signing, images
-tcc/            TinyCC and on-device compiler resources
+tcc/            TinyCC and on-device compiler resources (incl. app templates)
+lua/            Lua 5.4 interpreter (offline Lua runner)
 i18n/           UI translations
 assets/         icons, banner
 source/         source for Feather / SideStore / AltStore
@@ -115,4 +122,4 @@ The binary editor and compiler are meant for studying, debugging and modifying *
 
 ## License
 
-[GNU GPL v3](LICENSE). Bundled TinyCC is LGPL 2.1 — see [THIRD_PARTY.md](THIRD_PARTY.md).
+[GNU GPL v3](LICENSE). Bundled TinyCC is LGPL 2.1 and Lua is MIT — see [THIRD_PARTY.md](THIRD_PARTY.md).

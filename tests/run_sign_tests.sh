@@ -22,7 +22,7 @@ cat > "$TMP/drv.c" <<'DRV'
 #include "libtcc.h"
 #include <stdio.h>
 int main(int ac,char**av){TCCState*s=tcc_new();tcc_set_lib_path(s,av[1]);
- tcc_set_options(s,"-nostdinc -nostdlib -install_name @rpath/t.dylib");tcc_set_output_type(s,TCC_OUTPUT_DLL);
+ int exe=ac>4;tcc_set_options(s,exe?"-nostdinc -nostdlib":"-nostdinc -nostdlib -install_name @rpath/t.dylib");tcc_set_output_type(s,exe?TCC_OUTPUT_EXE:TCC_OUTPUT_DLL);
  char p[600];snprintf(p,sizeof p,"%s/include",av[1]);tcc_add_sysinclude_path(s,p);
  snprintf(p,sizeof p,"%s/sdk/include",av[1]);tcc_add_sysinclude_path(s,p);
  if(tcc_add_file(s,av[2])<0)return 1;snprintf(p,sizeof p,"%s/sdk/lib/libSystem.tbd",av[1]);
@@ -81,3 +81,78 @@ if "Verification successful" not in (r.stderr+r.stdout): print("FAIL: openssl ve
 print("openssl CMS verify + CodeDirectory:", "ok" if fails==0 else "FAILED")
 sys.exit(1 if fails else 0)
 PY
+
+# ---------- подпись приложения (исполняемый файл + энтайтлменты + Info.plist + CodeResources) ----------
+printf '#include <stdio.h>\nint main(void){ printf("hi\\n"); return 0; }\n' > "$TMP/app.c"
+"$TMP/tcc" tcc/res "$TMP/app.c" "$TMP/app.bin" exe
+python3 - "$TMP" <<'PY2'
+import sys,plistlib,os
+T=sys.argv[1]
+ent={"application-identifier":"TEAMID1234.com.gxfiles.test","com.apple.developer.team-identifier":"TEAMID1234",
+     "get-task-allow":True,"keychain-access-groups":["TEAMID1234.*"]}
+open(T+"/ent.xml","wb").write(plistlib.dumps(ent))
+def L(n):
+    if n<128: return bytes([n])
+    b=n.to_bytes((n.bit_length()+7)//8,'big'); return bytes([0x80|len(b)])+b
+def tlv(t,b): return bytes([t])+L(len(b))+b
+def val(v):
+    if isinstance(v,bool): return tlv(1,b'\xff' if v else b'\x00')
+    if isinstance(v,str): return tlv(0x0c,v.encode())
+    if isinstance(v,list): return tlv(0x30,b''.join(val(x) for x in v))
+    if isinstance(v,dict):
+        ks=sorted(v,key=lambda k:k.encode())
+        return tlv(0xb0,b''.join(tlv(0x30,tlv(0x0c,k.encode())+val(v[k])) for k in ks))
+open(T+"/ent.der","wb").write(tlv(0x70,b'\x02\x01\x01'+val(ent)))
+open(T+"/Info.plist","wb").write(plistlib.dumps({"CFBundleExecutable":"app","CFBundleIdentifier":"com.gxfiles.test"}))
+open(T+"/CodeResources","wb").write(plistlib.dumps({"files":{},"files2":{}}))
+PY2
+"$TMP/sign" "$TMP/app.bin" "$TMP/cert.der" "$TMP/key.pem" "$TMP/app.signed" "$TMP/ent.xml" "$TMP/ent.der" "$TMP/Info.plist" "$TMP/CodeResources"
+python3 - "$TMP" <<'PY3'
+import sys,struct,hashlib,subprocess
+T=sys.argv[1]; d=open(T+"/app.signed",'rb').read(); fails=0
+def bad(m):
+    global fails; fails+=1; print("FAIL:",m)
+ft,=struct.unpack('<I',d[12:16]); flags,=struct.unpack('<I',d[24:28])
+if ft!=2: bad("filetype %d != MH_EXECUTE"%ft)
+if not flags&0x200000: bad("нет MH_PIE")
+nc,=struct.unpack('<I',d[16:20]); off=32; so=0; tsz=0; lc=set()
+for _ in range(nc):
+    c,s=struct.unpack('<II',d[off:off+8]); lc.add(c)
+    if c==0x1d: so,=struct.unpack('<I',d[off+8:off+12])
+    if c==0x19 and d[off+8:off+14]==b'__TEXT': tsz,=struct.unpack('<Q',d[off+32:off+40])
+    off+=s
+for need,name in ((0x80000028,"LC_MAIN"),(0xe,"LC_LOAD_DYLINKER"),(0x32,"LC_BUILD_VERSION"),(0x1b,"LC_UUID")):
+    if need not in lc: bad("нет "+name)
+cnt,=struct.unpack('>I',d[so+8:so+12]); blobs={}
+for i in range(cnt):
+    t,o=struct.unpack('>II',d[so+12+i*8:so+20+i*8]); blobs[t]=so+o
+for t,m in ((0,0xfade0c02),(2,0xfade0c01),(5,0xfade7171),(7,0xfade7172),(0x10000,0xfade0b01)):
+    if t not in blobs: bad("нет блоба 0x%x"%t); continue
+    mg,=struct.unpack('>I',d[blobs[t]:blobs[t]+4])
+    if mg!=m: bad("магия блоба 0x%x = 0x%x"%(t,mg))
+cd=blobs[0]; length,=struct.unpack('>I',d[cd+4:cd+8]); hashOff,=struct.unpack('>I',d[cd+16:cd+20])
+nsp,=struct.unpack('>I',d[cd+24:cd+28]); ncode,=struct.unpack('>I',d[cd+28:cd+32]); climit,=struct.unpack('>I',d[cd+32:cd+36])
+eb,el,ef=struct.unpack('>QQQ',d[cd+64:cd+88])
+if nsp!=7: bad("спецслотов %d != 7"%nsp)
+if ef!=0x11: bad("execSegFlags 0x%x != 0x11 (MAIN_BINARY|ALLOW_UNSIGNED)"%ef)
+if el!=tsz: bad("execSegLimit 0x%x != __TEXT 0x%x"%(el,tsz))
+slot=lambda k: d[cd+hashOff-k*32:cd+hashOff-(k-1)*32]
+blob=lambda t: d[blobs[t]:blobs[t]+struct.unpack('>I',d[blobs[t]+4:blobs[t]+8])[0]]
+sha=lambda b: hashlib.sha256(b).digest()
+if slot(1)!=sha(open(T+"/Info.plist",'rb').read()): bad("слот -1 ≠ SHA256(Info.plist)")
+if slot(2)!=sha(blob(2)): bad("слот -2 ≠ Requirements")
+if slot(3)!=sha(open(T+"/CodeResources",'rb').read()): bad("слот -3 ≠ SHA256(CodeResources)")
+if slot(5)!=sha(blob(5)): bad("слот -5 ≠ Entitlements")
+if slot(7)!=sha(blob(7)): bad("слот -7 ≠ DER Entitlements")
+if slot(4)!=b'\0'*32 or slot(6)!=b'\0'*32: bad("слоты -4/-6 не пустые")
+if blob(5)[8:]!=open(T+"/ent.xml",'rb').read(): bad("XML энтайтлменты не совпадают")
+if blob(7)[8:]!=open(T+"/ent.der",'rb').read(): bad("DER энтайтлменты не совпадают")
+for i in range(ncode):
+    if sha(d[i*4096:min(i*4096+4096,climit)])!=d[cd+hashOff+i*32:cd+hashOff+(i+1)*32]: bad("страница %d"%i)
+cw=blobs[0x10000]; wl,=struct.unpack('>I',d[cw+4:cw+8])
+open(T+'/app.cms','wb').write(d[cw+8:cw+wl]); open(T+'/app.cd','wb').write(d[cd:cd+length])
+r=subprocess.run(["openssl","smime","-verify","-inform","DER","-in",T+'/app.cms',"-content",T+'/app.cd',"-noverify","-no_check_time","-out","/dev/null"],capture_output=True,text=True)
+if "Verification successful" not in r.stderr+r.stdout: bad("openssl CMS: "+r.stderr.strip()[:200])
+print("app signature (exe + entitlements + Info.plist + CodeResources):", "ok" if not fails else "FAILED")
+sys.exit(1 if fails else 0)
+PY3

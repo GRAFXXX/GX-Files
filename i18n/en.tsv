@@ -1556,3 +1556,96 @@
 1564|iOS can't read this .p12 format (code %d). This usually happens with files saved by OpenSSL 3 (AES-256 encryption). Re-save the .p12 in a compatible format (3DES / SHA-1) and import it again.
 
 1565|Couldn't parse the .p12
+
+1566|Tap ▶︎ to run. %@ runs right on the iPhone (JavaScriptCore), no internet needed.\nInput for readline() — in the «Input (stdin)» menu.\n
+1567|Tap ▶︎ to run. Lua 5.4 runs right on the iPhone, no internet needed.\nInput for io.read() — in the «Input (stdin)» menu.\n
+1568|Tap ▶︎ to compile and run %@.\nThe code runs on the Compiler Explorer server (godbolt.org) — internet required. Input — in the «Input (stdin)» menu, compiler — in the «Compiler» menu.\n
+1569|“Hello” app (counter)
+1570|Mini-game “Catch the dot”
+1571|“Note” app
+1572|App templates (IPA)
+1573|Build IPA…
+1574|Run as a program (online, gcc)
+1575|“Hello” template
+1576|Compiler…
+1577|Compiler flags…
+1578|Input (stdin)…
+1579|Lua license (MIT)
+1580|No main() function
+1581|An IPA needs app code with main(), and this looks like a tweak. Insert an app template?
+1582|Insert
+1583|Compiler flags
+1584|For example -O2 -std=c++20 -Wall. Empty — default.
+1585|Built-in interpreter — Lua 5.4 (https://www.lua.org), MIT license.\n\n
+1586|Compiling and running on the server…\n
+1587|Running…\n
+1588|Stopped\n
+1589|Choose a language
+1590|C (app → IPA)
+1591|New app
+1592| · offline
+1593|New file · %@
+1594|File name in the GX Compiler folder
+1595|Compiling the app…\n
+1596|Unsigned — install the IPA with Feather, SideStore or AltStore, they will sign it with your certificate.\n
+1597|Build IPA
+1598|Icon
+1599|Signing
+1600|Source: %@. It must be app code with main() — templates: compiler menu → «App templates».
+1601|Without your own picture the icon is drawn automatically — a gradient and the first letter of the name.
+1602|Certificate not loaded. Add a .p12 and .mobileprovision in «Certificate signing» — or build unsigned and install with Feather/SideStore/AltStore.
+1603|App signing also needs a provisioning profile (.mobileprovision) — add it in «Certificate signing». Unsigned IPAs can be installed with Feather/SideStore/AltStore.
+1604|Profile «%@»: App ID %@.%@
+1605|, devices: %@
+1606|, valid until %@
+1607|. A signed IPA installs only on devices from this profile.
+1608|Replace picture…
+1609|Choose picture…
+1610|Reset (auto icon)
+1611|Sign with my certificate
+1612|Building IPA…
+1613|Build error
+1614|IPA is ready
+1615|Share / open in…
+1616|Run code (%@)
+1617|C (tweak → dylib)
+1618|C (program, online gcc)
+1619|Objective-C (online)
+1620|Hello
+1621|world
+1622|runs right on the iPhone, no internet needed
+1623|a line from «Input» (stdin)
+1624|Sorted:
+1625|types are stripped, the code runs as JavaScript right on the iPhone
+1626|Compiler Explorer did not respond
+1627|No connection to Compiler Explorer: %@\nC++, C#, Python and other languages need internet. JavaScript and Lua work offline.\n
+1628|Compiler Explorer error: %@\n
+1629|Compilation error:\n
+1630|⏱ Execution time limit exceeded on the server\n
+1631|— exit code %ld · %@ ms
+1632|Error (line %@): %@\n
+1633|⏱ Stopped: longer than %.0f s\n
+1634|— %@ · %.0f ms · JavaScriptCore (on device)\n
+1635|done
+1636|— %@ · %.0f ms · %s (on device)\n
+1637|%@ compiler
+1638|Loading list…
+1639|No connection: %@
+1640|The code is compiled and run on the Compiler Explorer server (godbolt.org), the result comes back here. Internet required.
+1641|Auto — latest stable
+1642|Input (stdin)
+1643|The program receives this text as standard input: cin, input(), Console.ReadLine(), io.read(), readline(), etc. Each line is a separate input.
+1644|App signing needs a provisioning profile (.mobileprovision) — add it in «Certificate signing».
+1645|The provisioning profile has expired
+1646|The profile is issued for %@ — using this Bundle ID\n
+1647|The profile only allows %@ — Bundle ID: %@\n
+1648|Couldn't write embedded.mobileprovision
+1649|The app has no Info.plist
+1650|Couldn't write CodeResources
+1651|⚠︎ Certificate Team ID (%s) doesn't match the profile (%@) — iOS won't install such an app\n
+1652|The app has no executable
+1653|✓ app signed: %@ (team %@, %d certificate(s))\n
+1654|stopped
+1655|time limit exceeded
+1656|out of memory
+1657|the program exited with code %d

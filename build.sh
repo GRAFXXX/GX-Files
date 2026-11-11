@@ -38,13 +38,14 @@ for f in src/*.m; do "$CLANG" $CF -fobjc-arc -fmodules -c "$f" -o build/obj/$(ba
 
 "$CLANG" -target arm64-apple-ios15.0 -isysroot "$SDK" $LDFLAGS_EXTRA -Wl,-adhoc_codesign -Wl,-dead_strip \
   -framework UIKit -framework Foundation -framework CoreGraphics -framework QuickLook -framework QuickLookThumbnailing \
-  -framework UniformTypeIdentifiers -framework Security -framework PhotosUI -framework ImageIO -framework CoreText \
+  -framework UniformTypeIdentifiers -framework Security -framework PhotosUI -framework ImageIO -framework CoreText -framework JavaScriptCore \
   -lz -lsqlite3 -larchive -lobjc -lc++ \
   build/obj/*.o -o "$APP/GXFiles"
 
 cp Info.plist "$APP/Info.plist"
 python3 tools/i18n/build.py "$APP/lang"
 mkdir -p "$APP/tcc" && cp -R tcc/res/include tcc/res/sdk tcc/res/gx tcc/res/LICENSE-TinyCC.txt "$APP/tcc/"
+cp lua/LICENSE "$APP/LICENSE-Lua.txt"
 python3 make_icon.py "$APP"
 mv "$APP/icon512.png" build/icon512.png
 # На macOS (Xcode) — каталог иконок: светлая, тёмная и тонированная (iOS 18+). Без actool остаются PNG
