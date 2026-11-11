@@ -15,11 +15,20 @@
       "iconURL": "https://raw.githubusercontent.com/GRAFXXX/GX-Files/main/assets/icon/dark.png",
       "tintColor": "#6B4BFF",
       "category": "utilities",
-      "version": "4.7",
+      "version": "4.8",
       "versionDate": "2026-11-11",
-      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.7/GXFiles.ipa",
-      "size": 9742098,
+      "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.8/GXFiles.ipa",
+      "size": 9782223,
       "versions": [
+        {
+          "version": "4.8",
+          "buildVersion": "33",
+          "date": "2026-11-11",
+          "size": 9782223,
+          "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.8/GXFiles.ipa",
+          "minOSVersion": "15.0",
+          "localizedDescription": "GX Files 4.8"
+        },
         {
           "version": "4.7",
           "buildVersion": "32",
@@ -100,15 +109,6 @@
           "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.4/GXFiles.ipa",
           "minOSVersion": "15.0",
           "localizedDescription": "GX Files 4.4"
-        },
-        {
-          "version": "4.3",
-          "buildVersion": "22",
-          "date": "2026-11-05",
-          "size": 8056032,
-          "downloadURL": "https://github.com/GRAFXXX/GX-Files/releases/download/v4.3/GXFiles.ipa",
-          "minOSVersion": "15.0",
-          "localizedDescription": "GX Files 4.3"
         }
       ]
     }
